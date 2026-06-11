@@ -1,0 +1,9 @@
+{
+  "mcp": {
+    "engram": {
+      "type": "local",
+      "command": ["engram", "mcp"],
+      "enabled": true
+    }
+  }
+}
