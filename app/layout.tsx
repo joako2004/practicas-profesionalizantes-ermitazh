@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Cabañas Ermitazh",
-  description: "Sistema de Gestión de Reservas",
+  description:
+    "Descanso y naturaleza en nuestras cabañas — el escape perfecto en la provincia de Buenos Aires.",
 };
 
 export default function RootLayout({
@@ -24,10 +25,13 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="es"
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <meta name="color-scheme" content="light" />
+      <body className="min-h-dvh flex flex-col antialiased selection:bg-toasted-brown/20">
+        {children}
+      </body>
     </html>
   );
 }
