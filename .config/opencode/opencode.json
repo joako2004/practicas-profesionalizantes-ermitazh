@@ -4,6 +4,11 @@
       "type": "local",
       "command": ["engram", "mcp"],
       "enabled": true
+    },
+    "supabase": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-remote", "https://mcp.supabase.com/mcp"],
+      "enabled": true
     }
   }
 }
