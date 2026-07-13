@@ -6,3 +6,104 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum EstadoReserva {
+  PENDIENTE
+  CONFIRMADA
+  RECHAZADA
+  CANCELADA
+}
+
+enum TipoDia {
+  TODOS
+  SEMANA
+  FIN_DE_SEMANA
+}
+
+enum EstadoConsulta {
+  PENDIENTE
+  RESPONDIDA
+}
+
+model Propiedad {
+  id          String   @id @default(cuid())
+  nombre      String
+  descripcion String
+  capacidad   Int
+  // Precio base por noche. Se usa como fallback cuando no hay un rango
+  // en Precio que cubra las fechas solicitadas.
+  precioBase  Decimal  @db.Decimal(10, 2)
+  fotos       String[]
+  servicios   String[]
+  activa      Boolean  @default(true)
+  creadaEn    DateTime @default(now()) @map("creada_en")
+  actualizadaEn DateTime @updatedAt @map("actualizada_en")
+
+  reservas Reserva[]
+  precios  Precio[]
+
+  @@map("propiedades")
+}
+
+model Reserva {
+  id              String         @id @default(cuid())
+  propiedadId     String         @map("propiedad_id")
+  huespedNombre   String         @map("huesped_nombre")
+  huespedTelefono String         @map("huesped_telefono")
+  personas        Int
+  fechaIngreso    DateTime       @map("fecha_ingreso") @db.Date
+  fechaSalida     DateTime       @map("fecha_salida") @db.Date
+  estado          EstadoReserva  @default(PENDIENTE)
+  precioTotalEstadia Decimal?     @map("precio_total_estadia") @db.Decimal(10, 2)
+  diasEstadia     Int            @map("dias_estadia")
+  sena            Decimal?       @db.Decimal(10, 2)
+  formaPago       String?        @map("forma_pago")
+  notas           String?
+  creadaEn        DateTime       @default(now()) @map("creada_en")
+  actualizadaEn   DateTime       @updatedAt @map("actualizada_en")
+
+  propiedad Propiedad @relation(fields: [propiedadId], references: [id])
+  resena    Resena?
+
+  @@map("reservas")
+}
+
+model Precio {
+  id             String   @id @default(cuid())
+  propiedadId    String   @map("propiedad_id")
+  nombre         String
+  fechaInicio    DateTime @map("fecha_inicio") @db.Date
+  fechaFin       DateTime @map("fecha_fin") @db.Date
+  precioPorNoche Decimal  @map("precio_por_noche") @db.Decimal(10, 2)
+  tipoDia        TipoDia  @default(TODOS) @map("tipo_dia")
+  activo         Boolean  @default(true)
+
+  propiedad Propiedad @relation(fields: [propiedadId], references: [id], onDelete: Cascade)
+
+  @@map("precios")
+}
+
+model Consulta {
+  id       String         @id @default(cuid())
+  nombre   String
+  email    String?
+  mensaje  String
+  estado   EstadoConsulta @default(PENDIENTE)
+  creadaEn DateTime       @default(now()) @map("creada_en")
+
+  @@map("consultas")
+}
+
+model Resena {
+  id         String   @id @default(cuid())
+  reservaId  String   @unique @map("reserva_id")
+  autor      String
+  texto      String
+  puntuacion Int
+  publicada  Boolean  @default(false)
+  creadaEn   DateTime @default(now()) @map("creada_en")
+
+  reserva Reserva @relation(fields: [reservaId], references: [id])
+
+  @@map("resenas")
+}
