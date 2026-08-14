@@ -1,0 +1,16 @@
+# .github/workflows/keep-supabase-alive.yml
+name: Keep Supabase Alive
+on:
+  schedule:
+    - cron: '0 12 */5 * *'  # cada 5 días
+  workflow_dispatch:  # para poder correrlo manual también
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/propiedades?select=id&limit=1" \
+          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
