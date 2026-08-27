@@ -1,3 +1,244 @@
+/* ==========================================================================
+   CABAÑAS VALLE GRANDE — DESIGN TOKENS
+   San Rafael, Mendoza · sitio de reservas de cabañas
+
+   Este archivo reemplaza a app/globals.css.
+   Cada variable tiene un comentario explicando QUÉ ES y DÓNDE SE USA,
+   para que cualquier persona (o modelo de IA) que lea este archivo
+   entienda el propósito de cada color sin tener que inferirlo del código.
+
+   Estilo general: sobrio, tipo Helvetica/SF, poco maximalista, cálido
+   pero no infantil. Paleta desaturada (chroma bajo) inspirada en el
+   paisaje de montaña de Valle Grande: piedra, tierra, vegetación seca,
+   madera. Nada de colores puros o "chillones".
+   ========================================================================== */
+
+/* ------------------------------------------------------------------------
+   1. PALETA BASE
+   Colores "crudos" de la marca. No se usan directamente en los
+   componentes — de acá se derivan los tokens semánticos de la
+   sección 2. Mantenerlos acá permite cambiar el fondo/acento/etc.
+   en un solo lugar sin tocar el resto del sistema.
+   ------------------------------------------------------------------------ */
+
+/* CAMBIO: reemplaza a --color-champagne-pink.
+   Valor definitivo provisto por el equipo de diseño: marrón cálido
+   con el mismo hue que --color-desert-sand (≈60-61), pero más oscuro
+   y saturado (L 0.78 vs L 0.92 del original) — se lee como marrón
+   tierra real, no como rosado.
+   Contraste verificado: texto dark-pine sobre este fondo = 7.2:1
+   (supera el mínimo AA de 4.5:1 con margen).
+   ⚠️ IMPORTANTE: al bajar la luminosidad del fondo, --color-accent
+   (toasted-brown) sobre este fondo queda en 2.48:1 — insuficiente
+   incluso para texto grande (mínimo AA large = 3:1). Ver nota en
+   --color-accent más abajo: usarlo solo sobre --color-surface. */
+ --color-clay-cream: oklch(0.7834 0.0461 60.89);
+
+ --color-desert-sand: oklch(0.78 0.05 60);   /* arena/piedra clara de montaña */
+ --color-sage: oklch(0.67 0.04 110);          /* vegetación seca de altura */
+ --color-toasted-brown: oklch(0.55 0.07 55);  /* madera tostada, cuero */
+ --color-dark-pine: oklch(0.28 0.04 150);     /* verde-negro de pino, reemplza al negro puro */
+
+ /* ------------------------------------------------------------------------
+   2. TOKENS SEMÁNTICOS — USO GENERAL
+   Estos son los que se usan en los componentes (bg-*, text-*, border-*).
+   Cada uno tiene UN rol fijo: no reutilizar --color-accent como fondo
+   de página, ni --color-bg como color de texto, etc.
+   ------------------------------------------------------------------------ */
+
+/* Fondo general de la página (body, secciones). Reemplaza a
+   var(--color-champagne-pink) por var(--color-clay-cream). */
+ --color-bg: var(--color-clay-cream);
+
+/* Fondo de "superficie elevada": cards, modales, inputs, nav.
+   Más claro que --color-bg para generar jerarquía visual sutil
+   sin necesidad de sombras fuertes. */
+ --color-surface: oklch(0.97 0.01 60);
+
+/* Color de texto principal en TODA la UI. Nunca usar #000 puro:
+   dark-pine da la misma legibilidad con más carácter de marca.
+   Contraste sobre --color-bg: 10.92:1. Sobre --color-surface: 13.16:1. */
+ --color-ink: var(--color-dark-pine);
+
+/* Color de acento: CTAs principales, precios, links activos, logo.
+   ⚠️ Contraste de --color-accent sobre --color-bg (clay-cream nuevo) es
+   apenas 2.48:1 — INSUFICIENTE incluso para texto grande (mínimo AA
+   large text = 3:1). NO usar toasted-brown como color de texto directo
+   sobre el fondo de página. Usarlo como texto solo sobre --color-surface
+   (fondo claro de cards/inputs, contraste ahí = 4.54:1, válido).
+   Sobre --color-bg, toasted-brown se puede usar en RELLENOS SOLIDOS de
+   botones (con texto claro encima), íconos grandes, o bordes — no como
+   color de texto plano. */
+ --color-accent: var(--color-toasted-brown);
+
+/* Texto secundario / metadata (fechas, subtítulos, descripciones cortas). */
+ --color-muted: var(--color-sage);
+
+/* Superficies decorativas cálidas: fondos de imagen placeholder,
+   gradientes de hero, hover sutil de cards. No usar para texto. */
+ --color-warm: var(--color-desert-sand);
+
+/* Bordes y separadores sutiles (cards, inputs, tablas, dividers).
+   Independiente de --color-warm para que un borde nunca "compita"
+   visualmente con un fondo decorativo del mismo tono. */
+ --color-border: oklch(0.85 0.02 50);
+
+/* ------------------------------------------------------------------------
+   3. COLORES DE ACCIÓN (SEMÁNTICOS POR FUNCIÓN)
+   Usar EXCLUSIVAMENTE para el propósito indicado. No usar "success"
+   como decoración ni "danger" para textos que no sean de advertencia/
+   eliminación — así el usuario aprende rápido el código de color.
+   Todos desaturados a propósito para no romper la sobriedad de la
+   paleta base (nada de verde/rojo/amarillo puro tipo semáforo).
+   ------------------------------------------------------------------------ */
+
+/* SUCCESS — confirmar, guardar, reservar, disponibilidad OK.
+   Verde con el mismo hue que dark-pine (150) para que se sienta
+   parte de la misma familia cromática, no un verde "importado". */
+ --color-success: oklch(0.55 0.09 150);        /* botón/ícono de acción positiva */
+ --color-success-bg: oklch(0.94 0.025 150);    /* fondo de badge/chip/toast */
+ --color-success-border: oklch(0.80 0.05 150); /* borde de badge/chip */
+
+/* DANGER — eliminar, cancelar, sin disponibilidad, error de formulario.
+   Terracota rosado (hue 30) en vez de rojo puro: combina con
+   toasted-brown en vez de contrastar de forma agresiva. */
+ --color-danger: oklch(0.52 0.11 30);
+ --color-danger-bg: oklch(0.94 0.03 30);
+ --color-danger-border: oklch(0.80 0.06 30);
+
+/* WARNING — pendiente de confirmación, últimas fechas, atención suave.
+   Mostaza tenue (hue 85), nunca amarillo saturado. */
+ --color-warning: oklch(0.72 0.09 85);
+ --color-warning-bg: oklch(0.94 0.03 85);
+ --color-warning-border: oklch(0.83 0.06 85);
+
+/* ------------------------------------------------------------------------
+   4. RADIOS — escala única para toda la UI
+   No usar valores sueltos (ej. rounded-[14px]) en componentes.
+   Elegir siempre uno de estos cuatro para mantener consistencia visual.
+   ------------------------------------------------------------------------ */
+ --radius-sm: 8px;    /* badges, chips, botones chicos, inputs */
+ --radius-md: 12px;   /* botones normales, campos de formulario */
+ --radius-lg: 20px;   /* cards, modales */
+ --radius-xl: 32px;   /* contenedores grandes, imágenes hero */
+
+/* ------------------------------------------------------------------------
+   5. ESPACIADO — escala base (opcional, usar con Tailwind spacing scale
+   si ya cubre estos valores; se incluye por si se necesitan como CSS var
+   en componentes fuera de Tailwind, ej. dentro de SVGs o canvas).
+   ------------------------------------------------------------------------ */
+ --space-xs: 8px;
+ --space-sm: 16px;
+ --space-md: 24px;
+ --space-lg: 40px;
+ --space-xl: 64px;
+*/
+
+/* ==========================================================================
+   6. FOTOS DE FONDO — HERO Y CARDS DE CABAÑAS
+   El pedido es usar una foto real de las cabañas de fondo en el home,
+   y una imagen de presentación por cada cabaña en su card. Las fotos
+   bajan el contraste del texto que va encima, así que SIEMPRE usar un
+   overlay (degradé oscuro) entre la imagen y el texto — nunca poner
+   texto blanco/oscuro directo sobre una foto sin overlay.
+   ========================================================================== */
+
+/* Hero de home: foto de fondo con overlay oscuro para que el texto
+   (blanco o --color-surface) tenga contraste suficiente (mínimo 4.5:1).
+   El degradé es más oscuro abajo (donde suele ir el texto) y más
+   transparente arriba, para no "tapar" la foto por completo. */
+.hero-photo {
+ position: relative;
+ background-size: cover;
+ background-position: center;
+}
+.hero-photo::before {
+ content: "";
+ position: absolute;
+ inset: 0;
+ background: linear-gradient(
+   180deg,
+   rgba(20, 24, 14, 0.25) 0%,
+   rgba(20, 24, 14, 0.55) 70%,
+   rgba(20, 24, 14, 0.70) 100%
+ );
+ border-radius: inherit;
+}
+.hero-photo > * {
+ position: relative; /* asegura que el contenido quede sobre el overlay */
+ z-index: 1;
+}
+
+/* Imagen de presentación de cada cabaña dentro de su card.
+   Overlay más liviano porque el texto (nombre, precio) suele ir
+   DEBAJO de la imagen, sobre --color-surface, no encima de la foto.
+   Si en algún diseño se pone texto encima de la imagen de card
+   (ej. un badge de "Disponible"), usar .card-photo-overlay en ese badge. */
+.card-photo {
+ background-size: cover;
+ background-position: center;
+ aspect-ratio: 4 / 3; /* consistente en todas las cards, evita saltos de layout */
+}
+.card-photo-overlay {
+ background: linear-gradient(180deg, rgba(20,24,14,0.05) 0%, rgba(20,24,14,0.45) 100%);
+}
+
+/* ==========================================================================
+   7. CONSIDERACIONES DE UI/UX — MODERNA Y USABLE
+   Reglas de aplicación del sistema, no tokens. Dejarlas documentadas
+   acá para que el criterio de diseño no se pierda al escalar el proyecto.
+   ========================================================================== */
+
+/*
+  a) CONTRASTE
+   - Texto de párrafo/body: siempre --color-ink sobre --color-bg (7.2:1)
+     o --color-surface (13.2:1) — ambos superan el mínimo AA de 4.5:1.
+   - Texto sobre foto: siempre con overlay (.hero-photo / .card-photo-overlay),
+     nunca directo.
+   - --color-accent (toasted-brown) como texto: SOLO sobre --color-surface
+     (4.54:1, válido). Sobre --color-bg el contraste es 2.48:1 — no
+     alcanza ni para texto grande. Ahí usarlo solo como relleno sólido
+     de botón (con texto claro/surface encima) o como borde/ícono.
+
+  b) ESTADOS INTERACTIVOS
+   - Todo elemento clickeable (botón, card, link) necesita 3 estados
+     visualmente distintos: normal, hover, active/pressed.
+     Sugerido: hover = mismo color + 6-8% más oscuro u opacidad 0.92;
+     active = 12% más oscuro.
+   - Focus visible obligatorio para accesibilidad de teclado:
+     outline con --color-accent, 2px, offset 2px. No remover el
+     outline por defecto sin reemplazarlo.
+   - Botones/acciones deshabilitadas: opacity 0.4 + cursor not-allowed,
+     nunca borrar el color (el usuario debe entender que la acción
+     existe pero no está disponible ahora, ej. "Reservar" sin stock).
+
+  c) CONSISTENCIA
+   - Usar siempre los 4 valores de --radius-*, nunca un valor suelto.
+   - Un mismo componente (ej. "card") debe tener el mismo radio en
+     todo el sitio. Cards = --radius-lg, botones = --radius-md,
+     badges = --radius-sm.
+   - Tamaño mínimo de área táctil para botones/links en mobile: 44x44px,
+     aunque el contenido visual sea más chico (usar padding).
+
+  d) IMÁGENES
+   - Aspect ratio fijo por tipo de imagen (4:3 para cards de cabaña,
+     21:9 o similar para el hero) para que el layout no salte mientras
+     cargan las fotos.
+   - Usar next/image con placeholder="blur" para evitar el salto de
+     layout (CLS) y dar sensación de carga premium.
+
+  e) JERARQUÍA TIPOGRÁFICA
+   - Máximo 3 tamaños de fuente por vista (título, subtítulo, body).
+   - Peso 700 para títulos, 500-600 para subtítulos/labels, 400 para
+     texto de body. Evitar 800/900 (se aleja de la sobriedad tipo SF/Helvetica).
+   - Letter-spacing levemente negativo (-0.3 a -1px) en títulos grandes
+     para el look "moderno" tipo SF Pro Display.
+
+  f) DENSIDAD
+   - Preferir espacio en blanco generoso (usar --space-lg/--space-xl
+     entre secciones) antes que agregar más elementos visuales.
+   La sobriedad del proyecto depende más del espaciado que del color.
+*/
 @import "tailwindcss";
 
 @theme inline {
@@ -7,12 +248,36 @@
   --color-toasted-brown: oklch(0.55 0.07 55);
   --color-dark-pine: oklch(0.28 0.04 150);
 
-  --color-bg: var(--color-champagne-pink);
+  --color-bg: var(--color-clay-cream);
   --color-surface: oklch(0.97 0.01 60);
   --color-ink: var(--color-dark-pine);
   --color-accent: var(--color-toasted-brown);
   --color-muted: var(--color-sage);
   --color-warm: var(--color-desert-sand);
+  --color-border: oklch(0.85 0.02 50);
+
+  --color-success: oklch(0.55 0.09 150);
+  --color-success-bg: oklch(0.94 0.025 150);
+  --color-success-border: oklch(0.80 0.05 150);
+
+  --color-danger: oklch(0.52 0.11 30);
+  --color-danger-bg: oklch(0.94 0.03 30);
+  --color-danger-border: oklch(0.80 0.06 30);
+
+  --color-warning: oklch(0.72 0.09 85);
+  --color-warning-bg: oklch(0.94 0.03 85);
+  --color-warning-border: oklch(0.83 0.06 85);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
+
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
