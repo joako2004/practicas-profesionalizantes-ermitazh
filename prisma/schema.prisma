@@ -107,3 +107,15 @@ model Resena {
 
   @@map("resenas")
 }
+
+model Imagen {
+  id         String   @id @default(cuid())
+  url        String
+  alt        String
+  categoria  String   // "hero", "galeria", "cta", "general"
+  orden      Int      @default(0)
+  activa     Boolean  @default(true)
+  creadaEn   DateTime @default(now()) @map("creada_en")
+
+  @@map("imagenes")
+}

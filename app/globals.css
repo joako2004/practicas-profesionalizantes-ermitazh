@@ -26,20 +26,13 @@
    con el mismo hue que --color-desert-sand (≈60-61), pero más oscuro
    y saturado (L 0.78 vs L 0.92 del original) — se lee como marrón
    tierra real, no como rosado.
-   Contraste verificado: texto dark-pine sobre este fondo = 7.2:1
-   (supera el mínimo AA de 4.5:1 con margen).
-   ⚠️ IMPORTANTE: al bajar la luminosidad del fondo, --color-accent
-   (toasted-brown) sobre este fondo queda en 2.48:1 — insuficiente
-   incluso para texto grande (mínimo AA large = 3:1). Ver nota en
-   --color-accent más abajo: usarlo solo sobre --color-surface. */
- --color-clay-cream: oklch(0.7834 0.0461 60.89);
+   Contraste verificado: texto dark-pine sobre este fondo = 9.6:1
+   (supera el mínimo AA de 4.5:1 con margen amplio).
+   --color-accent (toasted-brown) sobre este fondo da 3.31:1 — alcanza
+   para texto grande/negrita (mínimo AA large = 3:1) pero NO para texto
+   de párrafo chico (necesita 4.5:1). Ver nota en --color-accent más abajo. */
 
- --color-desert-sand: oklch(0.78 0.05 60);   /* arena/piedra clara de montaña */
- --color-sage: oklch(0.67 0.04 110);          /* vegetación seca de altura */
- --color-toasted-brown: oklch(0.55 0.07 55);  /* madera tostada, cuero */
- --color-dark-pine: oklch(0.28 0.04 150);     /* verde-negro de pino, reemplza al negro puro */
-
- /* ------------------------------------------------------------------------
+/* ------------------------------------------------------------------------
    2. TOKENS SEMÁNTICOS — USO GENERAL
    Estos son los que se usan en los componentes (bg-*, text-*, border-*).
    Cada uno tiene UN rol fijo: no reutilizar --color-accent como fondo
@@ -48,40 +41,29 @@
 
 /* Fondo general de la página (body, secciones). Reemplaza a
    var(--color-champagne-pink) por var(--color-clay-cream). */
- --color-bg: var(--color-clay-cream);
 
 /* Fondo de "superficie elevada": cards, modales, inputs, nav.
    Más claro que --color-bg para generar jerarquía visual sutil
    sin necesidad de sombras fuertes. */
- --color-surface: oklch(0.97 0.01 60);
 
 /* Color de texto principal en TODA la UI. Nunca usar #000 puro:
    dark-pine da la misma legibilidad con más carácter de marca.
    Contraste sobre --color-bg: 10.92:1. Sobre --color-surface: 13.16:1. */
- --color-ink: var(--color-dark-pine);
 
 /* Color de acento: CTAs principales, precios, links activos, logo.
-   ⚠️ Contraste de --color-accent sobre --color-bg (clay-cream nuevo) es
-   apenas 2.48:1 — INSUFICIENTE incluso para texto grande (mínimo AA
-   large text = 3:1). NO usar toasted-brown como color de texto directo
-   sobre el fondo de página. Usarlo como texto solo sobre --color-surface
-   (fondo claro de cards/inputs, contraste ahí = 4.54:1, válido).
-   Sobre --color-bg, toasted-brown se puede usar en RELLENOS SOLIDOS de
-   botones (con texto claro encima), íconos grandes, o bordes — no como
-   color de texto plano. */
- --color-accent: var(--color-toasted-brown);
+   Contraste de --color-accent sobre --color-bg es 3.31:1 — válido para
+   texto GRANDE o negrita (≥18px, o ≥14px bold), mínimo AA large = 3:1.
+   Para texto de párrafo chico, seguir usando --color-surface como fondo
+   (contraste ahí = 4.54:1, cumple el mínimo de 4.5:1 para texto normal). */
 
 /* Texto secundario / metadata (fechas, subtítulos, descripciones cortas). */
- --color-muted: var(--color-sage);
 
 /* Superficies decorativas cálidas: fondos de imagen placeholder,
    gradientes de hero, hover sutil de cards. No usar para texto. */
- --color-warm: var(--color-desert-sand);
 
 /* Bordes y separadores sutiles (cards, inputs, tablas, dividers).
    Independiente de --color-warm para que un borde nunca "compita"
    visualmente con un fondo decorativo del mismo tono. */
- --color-border: oklch(0.85 0.02 50);
 
 /* ------------------------------------------------------------------------
    3. COLORES DE ACCIÓN (SEMÁNTICOS POR FUNCIÓN)
@@ -95,44 +77,25 @@
 /* SUCCESS — confirmar, guardar, reservar, disponibilidad OK.
    Verde con el mismo hue que dark-pine (150) para que se sienta
    parte de la misma familia cromática, no un verde "importado". */
- --color-success: oklch(0.55 0.09 150);        /* botón/ícono de acción positiva */
- --color-success-bg: oklch(0.94 0.025 150);    /* fondo de badge/chip/toast */
- --color-success-border: oklch(0.80 0.05 150); /* borde de badge/chip */
 
 /* DANGER — eliminar, cancelar, sin disponibilidad, error de formulario.
    Terracota rosado (hue 30) en vez de rojo puro: combina con
    toasted-brown en vez de contrastar de forma agresiva. */
- --color-danger: oklch(0.52 0.11 30);
- --color-danger-bg: oklch(0.94 0.03 30);
- --color-danger-border: oklch(0.80 0.06 30);
 
 /* WARNING — pendiente de confirmación, últimas fechas, atención suave.
    Mostaza tenue (hue 85), nunca amarillo saturado. */
- --color-warning: oklch(0.72 0.09 85);
- --color-warning-bg: oklch(0.94 0.03 85);
- --color-warning-border: oklch(0.83 0.06 85);
 
 /* ------------------------------------------------------------------------
    4. RADIOS — escala única para toda la UI
    No usar valores sueltos (ej. rounded-[14px]) en componentes.
    Elegir siempre uno de estos cuatro para mantener consistencia visual.
    ------------------------------------------------------------------------ */
- --radius-sm: 8px;    /* badges, chips, botones chicos, inputs */
- --radius-md: 12px;   /* botones normales, campos de formulario */
- --radius-lg: 20px;   /* cards, modales */
- --radius-xl: 32px;   /* contenedores grandes, imágenes hero */
 
 /* ------------------------------------------------------------------------
    5. ESPACIADO — escala base (opcional, usar con Tailwind spacing scale
    si ya cubre estos valores; se incluye por si se necesitan como CSS var
    en componentes fuera de Tailwind, ej. dentro de SVGs o canvas).
    ------------------------------------------------------------------------ */
- --space-xs: 8px;
- --space-sm: 16px;
- --space-md: 24px;
- --space-lg: 40px;
- --space-xl: 64px;
-*/
 
 /* ==========================================================================
    6. FOTOS DE FONDO — HERO Y CARDS DE CABAÑAS
@@ -191,14 +154,13 @@
 
 /*
   a) CONTRASTE
-   - Texto de párrafo/body: siempre --color-ink sobre --color-bg (7.2:1)
+   - Texto de párrafo/body: siempre --color-ink sobre --color-bg (9.6:1)
      o --color-surface (13.2:1) — ambos superan el mínimo AA de 4.5:1.
    - Texto sobre foto: siempre con overlay (.hero-photo / .card-photo-overlay),
      nunca directo.
-   - --color-accent (toasted-brown) como texto: SOLO sobre --color-surface
-     (4.54:1, válido). Sobre --color-bg el contraste es 2.48:1 — no
-     alcanza ni para texto grande. Ahí usarlo solo como relleno sólido
-     de botón (con texto claro/surface encima) o como borde/ícono.
+   - --color-accent (toasted-brown) como texto: sobre --color-bg (3.31:1)
+     solo en texto grande/negrita. Sobre --color-surface (4.54:1) también
+     sirve para texto de párrafo chico.
 
   b) ESTADOS INTERACTIVOS
    - Todo elemento clickeable (botón, card, link) necesita 3 estados
@@ -239,55 +201,73 @@
      entre secciones) antes que agregar más elementos visuales.
    La sobriedad del proyecto depende más del espaciado que del color.
 */
+
 @import "tailwindcss";
 
 @theme inline {
-  --color-champagne-pink: oklch(0.92 0.025 60);
+  /* -----------------------------------------------------------------------
+     1. PALETA BASE — Colores crudos de la marca
+     ----------------------------------------------------------------------- */
+  --color-clay-cream: oklch(0.7715 0.0362 69.44);
   --color-desert-sand: oklch(0.78 0.05 60);
   --color-sage: oklch(0.67 0.04 110);
   --color-toasted-brown: oklch(0.55 0.07 55);
   --color-dark-pine: oklch(0.28 0.04 150);
 
+  /* -----------------------------------------------------------------------
+     2. TOKENS SEMÁNTICOS — Roles fijos en la UI
+     ----------------------------------------------------------------------- */
   --color-bg: var(--color-clay-cream);
   --color-surface: oklch(0.97 0.01 60);
   --color-ink: var(--color-dark-pine);
   --color-accent: var(--color-toasted-brown);
   --color-muted: var(--color-sage);
+  --color-muted-dark: oklch(0.469 0.04 110);
   --color-warm: var(--color-desert-sand);
   --color-border: oklch(0.85 0.02 50);
 
+  /* -----------------------------------------------------------------------
+     3. COLORES DE ACCIÓN — Semánticos por función
+     ----------------------------------------------------------------------- */
   --color-success: oklch(0.55 0.09 150);
   --color-success-bg: oklch(0.94 0.025 150);
   --color-success-border: oklch(0.80 0.05 150);
-
   --color-danger: oklch(0.52 0.11 30);
   --color-danger-bg: oklch(0.94 0.03 30);
   --color-danger-border: oklch(0.80 0.06 30);
-
   --color-warning: oklch(0.72 0.09 85);
   --color-warning-bg: oklch(0.94 0.03 85);
   --color-warning-border: oklch(0.83 0.06 85);
 
+  /* -----------------------------------------------------------------------
+     4. RADIOS — Escala única para toda la UI
+     ----------------------------------------------------------------------- */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
   --radius-xl: 32px;
 
+  /* -----------------------------------------------------------------------
+     5. ESPACIADO — Escala base
+     ----------------------------------------------------------------------- */
   --space-xs: 8px;
   --space-sm: 16px;
   --space-md: 24px;
   --space-lg: 40px;
   --space-xl: 64px;
 
+  /* -----------------------------------------------------------------------
+     6. TIPOGRAFÍA Y ANIMACIONES
+     ----------------------------------------------------------------------- */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-expo: cubic-bezier(0.77, 0, 0.175, 1);
-
-  --radius-btn: 0.5rem;
-  --radius-card: 0.75rem;
 }
+
+/* ==========================================================================
+   7. ESTILOS GLOBALES — Selección de body
+   ========================================================================== */
 
 body {
   background-color: var(--color-bg);
