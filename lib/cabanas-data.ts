@@ -1,9 +1,16 @@
-import { PrismaClient } from "@prisma/client";
+export interface CabanaData {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  capacidad: number;
+  precioBase: number;
+  fotos: string[];
+  servicios: string[];
+}
 
-const prisma = new PrismaClient();
-
-const propiedades = [
+export const CABANAS: CabanaData[] = [
   {
+    id: "cabana-1",
     nombre: "Cabaña 1",
     descripcion:
       "Cabaña grande para hasta 6 personas, 2 plantas, 2 dormitorios, 2 baños y terraza con vista al parque y la montaña.",
@@ -28,6 +35,7 @@ const propiedades = [
     ],
   },
   {
+    id: "cabana-2",
     nombre: "Cabaña 2",
     descripcion:
       "Cabaña grande para hasta 6 personas, 2 plantas, 2 dormitorios, 2 baños y terraza con vista al parque y la montaña.",
@@ -52,6 +60,7 @@ const propiedades = [
     ],
   },
   {
+    id: "cabana-3",
     nombre: "Cabaña 3",
     descripcion:
       "Cabaña mediana para hasta 5 personas, 2 ambientes en estilo boho con machimbre blanco decorado con madera y fibras naturales.",
@@ -75,6 +84,7 @@ const propiedades = [
     ],
   },
   {
+    id: "cabana-4",
     nombre: "Cabaña 4",
     descripcion:
       "Cabaña mediana para hasta 5 personas, 2 ambientes en estilo boho con machimbre blanco decorado con madera y fibras naturales.",
@@ -98,6 +108,7 @@ const propiedades = [
     ],
   },
   {
+    id: "cabana-5",
     nombre: "Cabaña 5",
     descripcion:
       "Monoambiente amplio para hasta 3 personas. Barra desayunadora de hierro y madera.",
@@ -122,6 +133,7 @@ const propiedades = [
     ],
   },
   {
+    id: "cabana-6",
     nombre: "Cabaña 6",
     descripcion:
       "Monoambiente amplio para hasta 2 personas. Barra desayunadora de hierro y madera.",
@@ -146,6 +158,7 @@ const propiedades = [
     ],
   },
   {
+    id: "cabana-7",
     nombre: "Cabaña 7",
     descripcion:
       "Cabaña mediana para hasta 5 personas, 3 ambientes en estilo industrial. Una planta.",
@@ -169,6 +182,7 @@ const propiedades = [
     ],
   },
   {
+    id: "cabana-8",
     nombre: "Cabaña 8",
     descripcion:
       "Cabaña familiar para hasta 6 personas, 3 ambientes, 2 baños. Frente a la piscina y la fuente de los peces.",
@@ -194,37 +208,3 @@ const propiedades = [
     ],
   },
 ];
-
-async function main() {
-  const existing = await prisma.propiedad.count();
-  if (existing > 0) {
-    console.log(`⚠️  Ya existen ${existing} propiedades. Seed omitido.`);
-    return;
-  }
-
-  console.log("🌱 Creando propiedades...");
-  const creadas = await Promise.all(
-    propiedades.map((p) =>
-      prisma.propiedad.create({
-        data: {
-          nombre: p.nombre,
-          descripcion: p.descripcion,
-          capacidad: p.capacidad,
-          precioBase: p.precioBase,
-          fotos: p.fotos,
-          servicios: p.servicios,
-        },
-      })
-    )
-  );
-  console.log(`   ✓ ${creadas.length} propiedades`);
-
-  console.log("\n✅ Seed completado exitosamente");
-}
-
-main()
-  .catch((e) => {
-    console.error("❌ Error en seed:", e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
