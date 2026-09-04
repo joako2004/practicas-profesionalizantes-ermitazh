@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { buildReservaWhatsApp } from "@/lib/config";
+import { generateSlug } from "@/lib/cabanas-data";
 
 interface CabinCardProps {
   id: string;
@@ -33,6 +34,7 @@ export default function CabinCard({
 
   const categoria = getCategoria(capacidad);
   const precioFormateado = `$${precioBase.toLocaleString("es-AR")}`;
+  const slug = generateSlug(nombre);
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-[var(--radius-lg)] bg-white shadow-sm ring-1 ring-[var(--color-border)] transition-all hover:shadow-md">
@@ -86,7 +88,7 @@ export default function CabinCard({
           </span>
           <div className="flex items-center gap-2">
             <Link
-              href={`/cabanas/${id}`}
+              href={`/propiedades/${slug}`}
               className="whitespace-nowrap rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2 text-xs font-medium text-[var(--color-ink)]/70 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
             >
               Ver más
