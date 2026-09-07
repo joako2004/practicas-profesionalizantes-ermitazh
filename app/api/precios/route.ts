@@ -1,7 +1,9 @@
-import { type Prisma } from "@prisma/client";
+import { TramoNoches, type Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+
+const TRAMOS_VALIDOS = Object.values(TramoNoches);
 
 function validarFechas(fechaInicio: Date, fechaFin: Date): boolean {
   return fechaInicio < fechaFin;
@@ -47,11 +49,29 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { propiedadId, nombre, fechaInicio, fechaFin, precioPorNoche, tipoDia, activo } = body;
+    const { propiedadId, nombre, fechaInicio, fechaFin, precioPorNoche, tramoNoches, cantidadPersonas, tipoDia, activo } = body;
 
     if (!propiedadId || !nombre || !fechaInicio || !fechaFin || precioPorNoche === undefined) {
       return NextResponse.json(
         { error: "Faltan campos obligatorios: propiedadId, nombre, fechaInicio, fechaFin, precioPorNoche." },
+        { status: 400 }
+      );
+    }
+
+    if (!TRAMOS_VALIDOS.includes(tramoNoches)) {
+      return NextResponse.json(
+        { error: `El campo tramoNoches es obligatorio y debe ser uno de: ${TRAMOS_VALIDOS.join(", ")}.` },
+        { status: 400 }
+      );
+    }
+
+    if (
+      typeof cantidadPersonas !== "number" ||
+      !Number.isInteger(cantidadPersonas) ||
+      cantidadPersonas <= 0
+    ) {
+      return NextResponse.json(
+        { error: "El campo cantidadPersonas es obligatorio y debe ser un entero mayor a 0." },
         { status: 400 }
       );
     }
@@ -90,6 +110,8 @@ export async function POST(request: NextRequest) {
         nombre,
         fechaInicio: inicio,
         fechaFin: fin,
+        tramoNoches,
+        cantidadPersonas,
         precioPorNoche,
         tipoDia: tipoDia || "TODOS",
         activo: activo !== undefined ? activo : true,

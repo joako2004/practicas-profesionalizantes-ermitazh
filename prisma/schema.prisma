@@ -14,6 +14,12 @@ enum EstadoReserva {
   CANCELADA
 }
 
+enum TramoNoches {
+  UNA_NOCHE
+  DE_DOS_A_SEIS
+  SIETE_O_MAS
+}
+
 enum TipoDia {
   TODOS
   SEMANA
@@ -25,13 +31,29 @@ enum EstadoConsulta {
   RESPONDIDA
 }
 
+model Complejo {
+  id          String   @id @default(cuid())
+  nombre      String
+  slogan      String
+  descripcion String
+  capacidad   Int
+  fotos       String[]
+  servicios   String[]
+  serviciosCompartidos String[]
+  politicas   String[]
+  precioBase  Decimal  @db.Decimal(10, 2)
+
+  @@map("complejos")
+}
+
 model Propiedad {
   id          String   @id @default(cuid())
   nombre      String
   descripcion String
   capacidad   Int
-  // Precio base por noche. Se usa como fallback cuando no hay un rango
-  // en Precio que cubra las fechas solicitadas.
+  // Precio "desde $X" para listados. Se calcula dinámicamente como el
+  // precioPorNoche mínimo entre las filas activas de Precio de esta propiedad.
+  // Se mantiene en la tabla por conveniencia de consulta.
   precioBase  Decimal  @db.Decimal(10, 2)
   fotos       String[]
   servicios   String[]
@@ -74,8 +96,15 @@ model Precio {
   nombre         String
   fechaInicio    DateTime @map("fecha_inicio") @db.Date
   fechaFin       DateTime @map("fecha_fin") @db.Date
+  tramoNoches    TramoNoches @map("tramo_noches")
+  // Matching por "mínimo >=": buscar la fila con cantidadPersonas más chico
+  // que sea >= personas solicitadas. Para cabañas de precio único, poner en 1.
+  // Para cabañas con tarifa diferenciada, poner valores reales (4, 5, 6, etc.).
+  cantidadPersonas Int  @map("cantidad_personas")
   precioPorNoche Decimal  @map("precio_por_noche") @db.Decimal(10, 2)
   tipoDia        TipoDia  @default(TODOS) @map("tipo_dia")
+  // Temporada: baja o alta
+  estanciaTemporada String @map("estancia_temporada")
   activo         Boolean  @default(true)
 
   propiedad Propiedad @relation(fields: [propiedadId], references: [id], onDelete: Cascade)

@@ -1,6 +1,9 @@
+import { TramoNoches } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+
+const TRAMOS_VALIDOS = Object.values(TramoNoches);
 
 function validarFechas(fechaInicio: Date, fechaFin: Date): boolean {
   return fechaInicio < fechaFin;
@@ -61,7 +64,7 @@ export async function PATCH(
       );
     }
 
-    const { propiedadId, nombre, fechaInicio, fechaFin, precioPorNoche, tipoDia, activo } = body;
+    const { propiedadId, nombre, fechaInicio, fechaFin, precioPorNoche, tramoNoches, cantidadPersonas, tipoDia, activo } = body;
 
     let inicio = existingPrecio.fechaInicio;
     let fin = existingPrecio.fechaFin;
@@ -106,6 +109,25 @@ export async function PATCH(
       }
     }
 
+    if (tramoNoches !== undefined && !TRAMOS_VALIDOS.includes(tramoNoches)) {
+      return NextResponse.json(
+        { error: `El campo tramoNoches debe ser uno de: ${TRAMOS_VALIDOS.join(", ")}.` },
+        { status: 400 }
+      );
+    }
+
+    if (
+      cantidadPersonas !== undefined &&
+      (typeof cantidadPersonas !== "number" ||
+        !Number.isInteger(cantidadPersonas) ||
+        cantidadPersonas <= 0)
+    ) {
+      return NextResponse.json(
+        { error: "El campo cantidadPersonas debe ser un entero mayor a 0." },
+        { status: 400 }
+      );
+    }
+
     const precio = await prisma.precio.update({
       where: { id },
       data: {
@@ -114,6 +136,8 @@ export async function PATCH(
         ...(fechaInicio !== undefined && { fechaInicio: inicio }),
         ...(fechaFin !== undefined && { fechaFin: fin }),
         ...(precioPorNoche !== undefined && { precioPorNoche }),
+        ...(tramoNoches !== undefined && { tramoNoches }),
+        ...(cantidadPersonas !== undefined && { cantidadPersonas }),
         ...(tipoDia !== undefined && { tipoDia }),
         ...(activo !== undefined && { activo }),
       },
