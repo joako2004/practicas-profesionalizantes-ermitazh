@@ -265,6 +265,34 @@
   --ease-in-out-expo: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
+/* Animaciones personalizadas */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 150ms var(--ease-out-expo) forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 200ms var(--ease-out-expo) forwards;
+}
+
+.animate-slide-down {
+  animation: slide-down 200ms var(--ease-out-expo) forwards;
+}
+
 /* ==========================================================================
    7. ESTILOS GLOBALES — Selección de body
    ========================================================================== */
