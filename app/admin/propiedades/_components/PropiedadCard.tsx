@@ -23,6 +23,7 @@ const ATRIBUTOS_EDITABLES: Array<{
   { key: "nombre", label: "Nombre", type: "text", editable: true },
   { key: "descripcion", label: "Descripción", type: "text", editable: true },
   { key: "capacidad", label: "Capacidad", type: "number", editable: true },
+  { key: "orden", label: "Orden", type: "number", editable: true },
   { key: "precioBase", label: "Precio Base", type: "decimal", editable: true },
   { key: "servicios", label: "Servicios", type: "array", editable: true },
   { key: "activa", label: "Activa", type: "boolean", editable: true },

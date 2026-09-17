@@ -3,7 +3,7 @@ import PropiedadCard from "./_components/PropiedadCard";
 
 export default async function PropiedadesPage() {
   const propiedades = await prisma.propiedad.findMany({
-    orderBy: { creadaEn: "desc" },
+    orderBy: { orden: "asc" },
   });
 
   return (

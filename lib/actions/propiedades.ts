@@ -57,6 +57,14 @@ export async function updatePropiedadAtributo(
         dataToUpdate.capacidad = num;
         break;
       }
+      case "orden": {
+        const num = typeof valor === "number" ? valor : parseInt(String(valor), 10);
+        if (!Number.isInteger(num) || num < 0) {
+          return { success: false, error: "El orden debe ser un número entero mayor o igual a 0" };
+        }
+        dataToUpdate.orden = num;
+        break;
+      }
       case "precioBase": {
         const num = typeof valor === "number" ? valor : parseFloat(String(valor));
         if (isNaN(num) || num < 0) {
@@ -91,6 +99,7 @@ export async function updatePropiedadAtributo(
     });
 
     revalidatePath("/admin/propiedades");
+    revalidatePath("/");
 
     return {
       success: true,

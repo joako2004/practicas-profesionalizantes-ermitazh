@@ -64,7 +64,7 @@ async function getTestimonios() {
 async function getPropiedades() {
   const propiedades = await prisma.propiedad.findMany({
     where: { activa: true },
-    orderBy: { capacidad: "asc" },
+    orderBy: { orden: "asc" },
     select: {
       id: true,
       nombre: true,
