@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import HeroCarousel from "@/components/public/HeroCarousel";
 import SearchCard from "@/components/public/SearchCard";
 import WelcomeSection from "@/components/public/WelcomeSection";
@@ -8,6 +9,17 @@ import GallerySection from "@/components/public/GallerySection";
 import TestimonialsSection from "@/components/public/TestimonialsSection";
 import CtaSection from "@/components/public/CtaSection";
 import { SERVICIOS_GENERALES } from "@/lib/config";
+
+export type PropiedadParaHome = Prisma.PropiedadGetPayload<{
+  select: {
+    id: true;
+    nombre: true;
+    descripcion: true;
+    capacidad: true;
+    precioBase: true;
+    fotos: true;
+  };
+}>;
 
 async function getHeroImages() {
   const imagenes = await prisma.imagen.findMany({
@@ -49,21 +61,43 @@ async function getTestimonios() {
   return resenas;
 }
 
+async function getPropiedades() {
+  const propiedades = await prisma.propiedad.findMany({
+    where: { activa: true },
+    orderBy: { capacidad: "asc" },
+    select: {
+      id: true,
+      nombre: true,
+      descripcion: true,
+      capacidad: true,
+      precioBase: true,
+      fotos: true,
+    },
+  });
+  return propiedades;
+}
+
 export default async function HomePage() {
-  const [heroImages, galleryImages, ctaImage, testimonios] =
+  const [heroImages, galleryImages, ctaImage, testimonios, propiedades] =
     await Promise.all([
       getHeroImages(),
       getGalleryImages(),
       getCtaImage(),
       getTestimonios(),
+      getPropiedades(),
     ]);
+
+  const propiedadesSerializadas = propiedades.map((p) => ({
+    ...p,
+    precioBase: p.precioBase.toNumber(),
+  }));
 
   return (
     <>
       <HeroCarousel imagenes={heroImages} />
       <SearchCard />
       <WelcomeSection />
-      <CabinsSection />
+      <CabinsSection propiedades={propiedadesSerializadas} />
       <ServicesSection servicios={SERVICIOS_GENERALES} />
       <GallerySection imagenes={galleryImages} />
       <TestimonialsSection testimonios={testimonios} />
