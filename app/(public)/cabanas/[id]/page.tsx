@@ -103,7 +103,7 @@ export default async function CabanaDetallePage({
           )}
         </div>
 
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <aside className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
           <PriceCalculator
             propiedadId={propiedad.id}
             nombre={propiedad.nombre}
