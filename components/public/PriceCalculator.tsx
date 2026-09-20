@@ -78,7 +78,7 @@ export default function PriceCalculator({
           <input
             type="date"
             value={ingreso}
-            min={new Date().toISOString().split("T")[0]}
+            min={new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 10)}
             onChange={(e) => {
               setIngreso(e.target.value);
               if (e.target.value && salida && e.target.value >= salida) setSalida("");
@@ -93,7 +93,7 @@ export default function PriceCalculator({
           <input
             type="date"
             value={salida}
-            min={ingreso || new Date().toISOString().split("T")[0]}
+            min={ingreso || new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 10)}
             onChange={(e) => setSalida(e.target.value)}
             className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-ink)] outline-none transition-colors focus:border-[var(--color-accent)]"
           />
