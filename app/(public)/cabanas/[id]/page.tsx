@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { buildReservaWhatsApp } from "@/lib/config";
+import AccordionGallery from "@/components/public/AccordionGallery";
+import PriceCalculator from "@/components/public/PriceCalculator";
 
-const precioFormatter = new Intl.NumberFormat("es-AR", {
+const precioFmt = new Intl.NumberFormat("es-AR", {
   style: "currency",
   currency: "ARS",
   maximumFractionDigits: 0,
@@ -38,7 +39,6 @@ export default async function CabanaDetallePage({
   }
 
   const precioBase = propiedad.precioBase.toNumber();
-  const tieneFotos = propiedad.fotos.length > 0;
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12 md:py-16">
@@ -49,88 +49,67 @@ export default async function CabanaDetallePage({
         ← Volver a cabañas
       </Link>
 
-      <div className="mb-8">
+      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-4">
         <h1 className="text-3xl font-semibold tracking-tight text-[var(--color-ink)] md:text-4xl">
           {propiedad.nombre}
         </h1>
-        <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-[var(--color-ink)]/60">
-          <span>
-            Hasta {propiedad.capacidad}{" "}
-            {propiedad.capacidad === 1 ? "huésped" : "huéspedes"}
+        <span className="text-lg font-semibold text-[var(--color-accent)]">
+          Desde {precioFmt.format(precioBase)}
+          <span className="text-sm font-normal text-[var(--color-ink)]/50">
+            {" "}/ noche
           </span>
-          <span className="text-lg font-semibold text-[var(--color-accent)]">
-            Desde {precioFormatter.format(precioBase)}
-            <span className="text-sm font-normal text-[var(--color-ink)]/50">
-              {" "}/ noche
-            </span>
-          </span>
-        </div>
+        </span>
       </div>
 
-      {tieneFotos ? (
-        <div className="mb-10 grid gap-4 sm:grid-cols-2">
-          {propiedad.fotos.map((url, i) => (
-            <div
-              key={i}
-              className={`card-photo relative overflow-hidden rounded-[var(--radius-lg)] ${
-                i === 0 ? "sm:col-span-2" : ""
-              }`}
-            >
-              <img
-                src={url}
-                alt={`Foto ${i + 1} de ${propiedad.nombre}`}
-                className="h-full w-full object-cover"
-              />
-              <div className="card-photo-overlay absolute inset-0" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="mb-10 aspect-video rounded-[var(--radius-lg)] bg-[var(--color-warm)]/30" />
-      )}
+      <AccordionGallery fotos={propiedad.fotos} nombre={propiedad.nombre} />
 
-      <div className="mb-10">
-        <h2 className="mb-3 text-lg font-semibold text-[var(--color-ink)]">
-          Sobre esta cabaña
-        </h2>
-        <p className="text-base leading-relaxed text-[var(--color-ink)]/70">
-          {propiedad.descripcion}
-        </p>
-      </div>
-
-      {propiedad.servicios.length > 0 && (
-        <div className="mb-10">
-          <h2 className="mb-3 text-lg font-semibold text-[var(--color-ink)]">
-            Servicios
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {propiedad.servicios.map((servicio) => (
-              <span
-                key={servicio}
-                className="rounded-[var(--radius-sm)] bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-ink)]/70"
-              >
-                {servicio}
-              </span>
-            ))}
+      <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
+        <div className="min-w-0 space-y-8">
+          <div>
+            <h2 className="mb-2 text-lg font-semibold text-[var(--color-ink)]">
+              Sobre esta cabaña
+            </h2>
+            <p className="text-base leading-relaxed text-[var(--color-ink)]/70">
+              {propiedad.descripcion}
+            </p>
           </div>
-        </div>
-      )}
 
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6">
-        <h2 className="mb-2 text-lg font-semibold text-[var(--color-ink)]">
-          Reservar
-        </h2>
-        <p className="mb-4 text-sm text-[var(--color-ink)]/60">
-          Consultá disponibilidad y precios por WhatsApp.
-        </p>
-        <a
-          href={buildReservaWhatsApp(propiedad.nombre)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-accent)] px-5 py-3 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/90 active:scale-[0.97]"
-        >
-          Reservar por WhatsApp
-        </a>
+          <div>
+            <h2 className="mb-2 text-lg font-semibold text-[var(--color-ink)]">
+              Capacidad
+            </h2>
+            <p className="text-sm text-[var(--color-ink)]/70">
+              Hasta {propiedad.capacidad}{" "}
+              {propiedad.capacidad === 1 ? "huésped" : "huéspedes"}
+            </p>
+          </div>
+
+          {propiedad.servicios.length > 0 && (
+            <div>
+              <h2 className="mb-2 text-lg font-semibold text-[var(--color-ink)]">
+                Servicios
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {propiedad.servicios.map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-[var(--radius-sm)] bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-ink)]/70"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <PriceCalculator
+            propiedadId={propiedad.id}
+            nombre={propiedad.nombre}
+            capacidad={propiedad.capacidad}
+          />
+        </aside>
       </div>
     </section>
   );
