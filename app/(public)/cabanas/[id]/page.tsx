@@ -44,12 +44,12 @@ export default async function CabanaDetallePage({
     <section className="mx-auto max-w-5xl px-6 py-12 md:py-16">
       <Link
         href="/#cabanas"
-        className="mb-8 inline-flex items-center gap-1.5 text-sm text-[var(--color-ink)]/60 transition-colors hover:text-[var(--color-ink)]"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--color-ink)]/60 transition-colors hover:text-[var(--color-ink)]"
       >
         ← Volver a cabañas
       </Link>
 
-      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-4">
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-4">
         <h1 className="text-3xl font-semibold tracking-tight text-[var(--color-ink)] md:text-4xl">
           {propiedad.nombre}
         </h1>
@@ -63,53 +63,51 @@ export default async function CabanaDetallePage({
 
       <CabinGallery fotos={propiedad.fotos} nombre={propiedad.nombre} />
 
-      <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
-        <div className="min-w-0 space-y-8">
-          <div>
-            <h2 className="mb-2 text-lg font-semibold text-[var(--color-ink)]">
-              Sobre esta cabaña
-            </h2>
-            <p className="text-base leading-relaxed text-[var(--color-ink)]/70">
-              {propiedad.descripcion}
-            </p>
-          </div>
+      <div className="mx-auto max-w-xl mb-12">
+        <PriceCalculator
+          propiedadId={propiedad.id}
+          nombre={propiedad.nombre}
+          capacidad={propiedad.capacidad}
+        />
+      </div>
 
-          <div>
-            <h2 className="mb-2 text-lg font-semibold text-[var(--color-ink)]">
-              Capacidad
-            </h2>
-            <p className="text-sm text-[var(--color-ink)]/70">
-              Hasta {propiedad.capacidad}{" "}
-              {propiedad.capacidad === 1 ? "huésped" : "huéspedes"}
-            </p>
-          </div>
-
-          {propiedad.servicios.length > 0 && (
-            <div>
-              <h2 className="mb-2 text-lg font-semibold text-[var(--color-ink)]">
-                Servicios
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {propiedad.servicios.map((s) => (
-                  <span
-                    key={s}
-                    className="rounded-[var(--radius-sm)] bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-ink)]/70"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+      <div className="space-y-6">
+        <div>
+          <h2 className="mb-1.5 text-lg font-semibold text-[var(--color-ink)]">
+            Sobre esta cabaña
+          </h2>
+          <p className="text-sm leading-relaxed text-[var(--color-ink)]/70">
+            {propiedad.descripcion}
+          </p>
         </div>
 
-        <aside className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
-          <PriceCalculator
-            propiedadId={propiedad.id}
-            nombre={propiedad.nombre}
-            capacidad={propiedad.capacidad}
-          />
-        </aside>
+        <div>
+          <h2 className="mb-1.5 text-lg font-semibold text-[var(--color-ink)]">
+            Capacidad
+          </h2>
+          <p className="text-sm text-[var(--color-ink)]/70">
+            Hasta {propiedad.capacidad}{" "}
+            {propiedad.capacidad === 1 ? "huésped" : "huéspedes"}
+          </p>
+        </div>
+
+        {propiedad.servicios.length > 0 && (
+          <div>
+            <h2 className="mb-1.5 text-lg font-semibold text-[var(--color-ink)]">
+              Servicios
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {propiedad.servicios.map((s) => (
+                <span
+                  key={s}
+                  className="rounded-[var(--radius-sm)] bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-ink)]/70"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
