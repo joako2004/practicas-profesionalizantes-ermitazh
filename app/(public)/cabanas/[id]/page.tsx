@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import AccordionGallery from "@/components/public/AccordionGallery";
+import CabinGallery from "@/components/public/CabinGallery";
 import PriceCalculator from "@/components/public/PriceCalculator";
 
 const precioFmt = new Intl.NumberFormat("es-AR", {
@@ -61,7 +61,7 @@ export default async function CabanaDetallePage({
         </span>
       </div>
 
-      <AccordionGallery fotos={propiedad.fotos} nombre={propiedad.nombre} />
+      <CabinGallery fotos={propiedad.fotos} nombre={propiedad.nombre} />
 
       <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-8">
