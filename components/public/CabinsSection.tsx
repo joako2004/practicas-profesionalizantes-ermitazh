@@ -1,9 +1,11 @@
 import CabinCard from "./CabinCard";
-import { CABANAS } from "@/lib/cabanas-data";
+import type { PropiedadParaHome } from "@/app/(public)/page";
 
-export default function CabinsSection() {
-  const ordenadas = [...CABANAS].sort((a, b) => a.capacidad - b.capacidad);
+interface CabinsSectionProps {
+  propiedades: (Omit<PropiedadParaHome, "precioBase"> & { precioBase: number })[];
+}
 
+export default function CabinsSection({ propiedades }: CabinsSectionProps) {
   return (
     <section id="cabanas" className="bg-[var(--color-surface)] py-16 md:py-20">
       <div className="mx-auto max-w-7xl overflow-hidden px-6">
@@ -21,8 +23,8 @@ export default function CabinsSection() {
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {ordenadas.map((cabana) => (
-            <CabinCard key={cabana.id} {...cabana} />
+          {propiedades.map((propiedad) => (
+            <CabinCard key={propiedad.id} {...propiedad} />
           ))}
         </div>
       </div>

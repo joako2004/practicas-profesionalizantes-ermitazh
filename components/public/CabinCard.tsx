@@ -8,14 +8,13 @@ interface CabinCardProps {
   capacidad: number;
   precioBase: number;
   fotos: string[];
-  servicios: string[];
 }
 
-function getCategoria(capacidad: number): string {
-  if (capacidad <= 2) return "Personal";
-  if (capacidad <= 4) return "Standard";
-  return "Familiar";
-}
+const precioFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  maximumFractionDigits: 0,
+});
 
 export default function CabinCard({
   id,
@@ -24,29 +23,23 @@ export default function CabinCard({
   capacidad,
   precioBase,
   fotos,
-  servicios,
 }: CabinCardProps) {
-  const fotoPrincipal =
-    fotos.length > 0
-      ? fotos[0]
-      : "https://picsum.photos/seed/cabana-default/800/600";
-
-  const categoria = getCategoria(capacidad);
-  const precioFormateado = `$${precioBase.toLocaleString("es-AR")}`;
+  const tieneFotos = fotos.length > 0;
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-[var(--radius-lg)] bg-white shadow-sm ring-1 ring-[var(--color-border)] transition-all hover:shadow-md">
       <div className="card-photo relative overflow-hidden">
-        <img
-          src={fotoPrincipal}
-          alt={nombre}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {tieneFotos ? (
+          <img
+            src={fotos[0]}
+            alt={`Foto de ${nombre}`}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="h-full w-full bg-[var(--color-warm)]/30" />
+        )}
         <div className="card-photo-overlay absolute inset-0" />
-        <div className="absolute top-3 left-3 flex gap-2">
-          <span className="rounded-[var(--radius-sm)] bg-white/90 px-2.5 py-1 text-xs font-medium text-[var(--color-ink)]">
-            {categoria}
-          </span>
+        <div className="absolute top-3 left-3">
           <span className="rounded-[var(--radius-sm)] bg-white/90 px-2.5 py-1 text-xs font-medium text-[var(--color-ink)]">
             {capacidad} {capacidad === 1 ? "huésped" : "huéspedes"}
           </span>
@@ -61,25 +54,9 @@ export default function CabinCard({
           {descripcion}
         </p>
 
-        <div className="mt-4 flex flex-wrap gap-1.5">
-          {servicios.slice(0, 3).map((s) => (
-            <span
-              key={s}
-              className="rounded-[var(--radius-sm)] bg-[var(--color-bg)] px-2 py-0.5 text-xs text-[var(--color-ink)]/60"
-            >
-              {s}
-            </span>
-          ))}
-          {servicios.length > 3 && (
-            <span className="rounded-[var(--radius-sm)] bg-[var(--color-bg)] px-2 py-0.5 text-xs text-[var(--color-ink)]/60">
-              +{servicios.length - 3}
-            </span>
-          )}
-        </div>
-          
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
           <span className="text-lg font-semibold text-[var(--color-accent)] whitespace-nowrap">
-            {precioFormateado}
+            Desde {precioFormatter.format(precioBase)}
             <span className="text-sm font-normal text-[var(--color-ink)]/50">
               {" "}/ noche
             </span>
