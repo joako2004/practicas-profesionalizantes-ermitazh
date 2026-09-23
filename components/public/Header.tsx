@@ -21,27 +21,37 @@ export default function Header() {
         </Link>
 
         <div className="hidden md:flex items-center gap-3 text-sm font-medium text-[var(--color-ink)]/70">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-2 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <Link
+          {NAV_LINKS.map((link) =>
+            link.href.startsWith("#") ? (
+              <a
+                key={link.href}
+                href={link.href}
+                className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-2 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-2 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
+              >
+                {link.label}
+              </Link>
+            )
+          )}
+          <a
             href="#contacto"
             className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-5 py-2 text-sm font-medium text-[var(--color-ink)]/70 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
           >
             Contacto
-          </Link>
-          <Link
+          </a>
+          <a
             href="#buscador"
             className="rounded-[var(--radius-md)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-5 py-2 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/80 hover:border-[var(--color-accent)]/80 active:scale-[0.97]"
           >
             Reservar
-          </Link>
+          </a>
         </div>
       </nav>
     </header>
