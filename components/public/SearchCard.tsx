@@ -42,7 +42,7 @@ export default function SearchCard() {
   }
 
   return (
-    <div id="buscador" className="relative z-20 mx-auto max-w-5xl px-6 -mt-16 scroll-mt-24">
+    <div id="buscador" className="relative z-20 mx-auto max-w-5xl px-6 -mt-16 scroll-mt-16">
       <form
         onSubmit={handleSubmit}
         className="rounded-[var(--radius-lg)] bg-white shadow-lg ring-1 ring-[var(--color-border)] p-6 md:p-8"
