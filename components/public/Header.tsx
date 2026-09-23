@@ -4,6 +4,7 @@ import { COMPLEJO } from "@/lib/config";
 const NAV_LINKS = [
   { label: "Inicio", href: "/" },
   { label: "Cabañas", href: "#cabanas" },
+  { label: "Galería", href: "/galeria" },
   { label: "Nuestro Complejo", href: "#bienvenidos" },
   { label: "Ubicación", href: "#ubicacion" },
 ];
