@@ -1,7 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { COMPLEJO } from "@/lib/config";
+
+const SUPABASE_BUCKET = "https://coehmfszuwczfxfpumub.supabase.co/storage/v1/object/public/propiedades-fotos/exteriores_pileta_juegos";
+
+const FALLBACK_IMAGENES = [
+  { url: `${SUPABASE_BUCKET}/144.jpeg`, alt: "Cabañas Ermitazh —PILETA Y JUEGOS" },
+  { url: `${SUPABASE_BUCKET}/175.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+  { url: `${SUPABASE_BUCKET}/169.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+  { url: `${SUPABASE_BUCKET}/167.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+  { url: `${SUPABASE_BUCKET}/165.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+  { url: `${SUPABASE_BUCKET}/163.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+  { url: `${SUPABASE_BUCKET}/161.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+];
+
+const INTERVALO_MS = 4000;
 
 interface HeroCarouselProps {
   imagenes: { url: string; alt: string }[];
@@ -11,15 +25,24 @@ export default function HeroCarousel({ imagenes }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const imagenesValidas =
-    imagenes.length > 0
-      ? imagenes
-      : [{ url: "https://picsum.photos/seed/ermitazh-hero/1920/1200", alt: "Cabañas Ermitazh" }];
+    imagenes.length > 0 ? imagenes : FALLBACK_IMAGENES;
 
-  function goTo(index: number) {
-    if (index < 0) setCurrentIndex(imagenesValidas.length - 1);
-    else if (index >= imagenesValidas.length) setCurrentIndex(0);
-    else setCurrentIndex(index);
-  }
+  const goTo = useCallback(
+    (index: number) => {
+      if (index < 0) setCurrentIndex(imagenesValidas.length - 1);
+      else if (index >= imagenesValidas.length) setCurrentIndex(0);
+      else setCurrentIndex(index);
+    },
+    [imagenesValidas.length]
+  );
+
+  useEffect(() => {
+    if (imagenes.length > 0) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % imagenesValidas.length);
+    }, INTERVALO_MS);
+    return () => clearInterval(timer);
+  }, [imagenes.length, imagenesValidas.length]);
 
   return (
     <section className="relative min-h-[100dvh] flex items-end pt-32 pb-16 md:pb-24 overflow-hidden">
