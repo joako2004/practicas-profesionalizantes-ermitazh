@@ -55,6 +55,7 @@ model Propiedad {
   // precioPorNoche mínimo entre las filas activas de Precio de esta propiedad.
   // Se mantiene en la tabla por conveniencia de consulta.
   precioBase  Decimal  @db.Decimal(10, 2)
+  promoSemanal Decimal  @db.Decimal(10, 2) @default(0)
   fotos       String[]
   servicios   String[]
   activa      Boolean  @default(true)

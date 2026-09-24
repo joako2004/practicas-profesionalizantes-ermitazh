@@ -13,7 +13,8 @@ export async function calcularPrecio(
   propiedadId: string,
   fechaIngreso: string,
   fechaSalida: string,
-  personas: number
+  personas: number,
+  promoSemanal: number = 0
 ): Promise<{ precioPorNoche: number; totalEstadia: number; noches: number } | { error: string }> {
   try {
     const [ingresoAno, ingresoMes, ingresoDia] = fechaIngreso.split("-").map(Number);
@@ -42,16 +43,29 @@ export async function calcularPrecio(
     if (precios.length === 0) {
       const propiedad = await prisma.propiedad.findUnique({
         where: { id: propiedadId },
-        select: { precioBase: true },
+        select: { precioBase: true, promoSemanal: true },
       });
       const base = propiedad?.precioBase.toNumber() ?? 0;
-      return { precioPorNoche: base, totalEstadia: base * noches, noches };
+      const promo = propiedad?.promoSemanal?.toNumber() ?? 0;
+      const precioPorNoche = base;
+      const totalSinDescuento = base * noches;
+      // Aplicar promo solo para 7+ noches y si promo > 0
+      const totalEstadia = (tramo === "SIETE_O_MAS" && promo > 0)
+        ? totalSinDescuento * (1 - promo / 100)
+        : totalSinDescuento;
+      return { precioPorNoche, totalEstadia, noches };
     }
 
     const precioMatch = precios.find((p) => personas <= p.cantidadPersonas) ?? precios[precios.length - 1];
     const precioPorNoche = precioMatch.precioPorNoche.toNumber();
 
-    return { precioPorNoche, totalEstadia: precioPorNoche * noches, noches };
+    // Aplicar promo solo para 7+ noches y si promo > 0
+    const totalSinDescuento = precioPorNoche * noches;
+    const totalEstadia = (tramo === "SIETE_O_MAS" && promoSemanal > 0)
+      ? totalSinDescuento * (1 - promoSemanal / 100)
+      : totalSinDescuento;
+
+    return { precioPorNoche, totalEstadia, noches };
   } catch {
     return { error: "Error al calcular el precio" };
   }

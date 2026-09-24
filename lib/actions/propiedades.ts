@@ -89,6 +89,14 @@ export async function updatePropiedadAtributo(
         dataToUpdate.activa = valor;
         break;
       }
+      case "promoSemanal": {
+        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
+        if (!Number.isFinite(num) || num < 0) {
+          return { success: false, error: "La promo semanal debe ser un número mayor o igual a 0" };
+        }
+        dataToUpdate.promoSemanal = Math.round(num * 100) / 100;
+        break;
+      }
       default:
         return { success: false, error: `Campo no editable: ${campo}` };
     }

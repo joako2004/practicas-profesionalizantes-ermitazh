@@ -27,6 +27,7 @@ const ATRIBUTOS_EDITABLES: Array<{
   { key: "precioBase", label: "Precio Base", type: "decimal", editable: true },
   { key: "servicios", label: "Servicios", type: "array", editable: true },
   { key: "activa", label: "Activa", type: "boolean", editable: true },
+  { key: "promoSemanal", label: "Promo semanal", type: "number", editable: true },
   { key: "id", label: "ID", type: "text", editable: false },
   { key: "creadaEn", label: "Creada el", type: "text", editable: false },
   { key: "actualizadaEn", label: "Actualizada el", type: "text", editable: false },

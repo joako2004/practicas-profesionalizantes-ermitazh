@@ -73,8 +73,8 @@ export default function AtributoEditable({
 
     switch (tipo) {
       case "number":
-        if (!Number.isInteger(valor as number) || (valor as number) <= 0) {
-          return "Debe ser un número entero mayor a 0";
+        if (!Number.isInteger(valor as number) || (valor as number) < 0) {
+          return "Debe ser un número entero mayor o igual a 0";
         }
         break;
       case "decimal":
@@ -182,7 +182,7 @@ export default function AtributoEditable({
             }`}
             placeholder={`Nuevo ${atributo}`}
             step={tipo === "decimal" ? "0.01" : undefined}
-            min={tipo === "number" ? "1" : tipo === "decimal" ? "0" : undefined}
+            min={tipo === "number" ? "0" : tipo === "decimal" ? "0" : undefined}
           />
         )}
         {error && <p className="mt-1 text-xs text-danger">{error}</p>}
