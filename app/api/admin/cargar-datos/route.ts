@@ -1,13 +1,9 @@
-import { TramoNoches, type Prisma } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 
-const TRAMOS_VALIDOS = Object.values(TramoNoches);
-
-function validarFechas(fechaInicio: Date, fechaFin: Date): boolean {
-  return fechaInicio < fechaFin;
-}
+const TRAMOS_VALIDOS = ["UNA_NOCHE", "DE_DOS_A_SEIS", "SIETE_O_MAS"] as const;
 
 export async function GET(request: NextRequest) {
   try {
@@ -49,8 +45,19 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { propiedadId, nombre, fechaInicio, fechaFin, precioPorNoche, tramoNoches, cantidadPersonas, tipoDia, activo } = body;
+    const {
+      propiedadId,
+      nombre,
+      fechaInicio,
+      fechaFin,
+      precioPorNoche,
+      tramoNoches,
+      cantidadPersonas,
+      tipoDia,
+      activo,
+    } = body;
 
+    // Validar campos obligatorios
     if (!propiedadId || !nombre || !fechaInicio || !fechaFin || precioPorNoche === undefined) {
       return NextResponse.json(
         { error: "Faltan campos obligatorios: propiedadId, nombre, fechaInicio, fechaFin, precioPorNoche." },
@@ -58,13 +65,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validar tramoNoches
     if (!TRAMOS_VALIDOS.includes(tramoNoches)) {
       return NextResponse.json(
-        { error: `El campo tramoNoches es obligatorio y debe ser uno de: ${TRAMOS_VALIDOS.join(", ")}.` },
+        { error: `El campo tramoNoches debe ser uno de: ${TRAMOS_VALIDOS.join(", ")}.` },
         { status: 400 }
       );
     }
 
+    // Validar cantidadPersonas
     if (
       typeof cantidadPersonas !== "number" ||
       !Number.isInteger(cantidadPersonas) ||
@@ -112,7 +121,7 @@ export async function POST(request: NextRequest) {
         fechaFin: fin,
         tramoNoches,
         cantidadPersonas,
-        precioPorNoche,
+        precioPorNoche: Number(precioPorNoche),
         tipoDia: tipoDia || "TODOS",
         activo: activo !== undefined ? activo : true,
       },
@@ -134,4 +143,8 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function validarFechas(fechaInicio: Date, fechaFin: Date): boolean {
+  return fechaInicio < fechaFin;
 }
