@@ -13,6 +13,7 @@ interface UpdatePropiedadResult {
     descripcion: string;
     capacidad: number;
     precioBase: number;
+    promoSemanal: number | null;
     servicios: string[];
     activa: boolean;
   };
@@ -117,6 +118,7 @@ export async function updatePropiedadAtributo(
         descripcion: propiedadActualizada.descripcion,
         capacidad: propiedadActualizada.capacidad,
         precioBase: Number(propiedadActualizada.precioBase),
+        promoSemanal: Number(propiedadActualizada.promoSemanal),
         servicios: propiedadActualizada.servicios,
         activa: propiedadActualizada.activa,
       },
@@ -170,6 +172,7 @@ export async function crearPropiedad(data: {
         descripcion: propiedad.descripcion,
         capacidad: propiedad.capacidad,
         precioBase: Number(propiedad.precioBase),
+        promoSemanal: Number(propiedad.promoSemanal),
         servicios: propiedad.servicios,
         activa: propiedad.activa,
       },

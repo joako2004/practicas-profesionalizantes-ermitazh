@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { serializarPropiedad } from "@/lib/serializers";
 
 export async function GET(
   request: NextRequest,
@@ -217,7 +218,7 @@ export async function PATCH(
       data: dataToUpdate,
     });
 
-    return NextResponse.json(propiedadActualizada, { status: 200 });
+    return NextResponse.json(serializarPropiedad(propiedadActualizada), { status: 200 });
   } catch (error) {
     console.error("Error al actualizar la propiedad:", error);
 

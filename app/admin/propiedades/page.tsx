@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import PropiedadCard from "./_components/PropiedadCard";
+import { serializarPropiedad } from "@/lib/serializers";
 
 export default async function PropiedadesPage() {
   const propiedades = await prisma.propiedad.findMany({
@@ -42,10 +43,7 @@ export default async function PropiedadesPage() {
           {propiedades.map((propiedad) => (
             <PropiedadCard
               key={propiedad.id}
-              propiedad={{
-                ...propiedad,
-                precioBase: Number(propiedad.precioBase) as any,
-              }}
+              propiedad={serializarPropiedad(propiedad)}
             />
           ))}
         </div>

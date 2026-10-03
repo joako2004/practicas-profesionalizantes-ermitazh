@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Propiedad } from "@prisma/client";
+import { PropiedadSerializer } from "@/lib/serializers";
 import AtributoEditable from "./AtributoEditable";
 import ConfirmDialog from "./ConfirmDialog";
 import { updatePropiedadAtributo } from "@/lib/actions/propiedades";
 
 interface PropiedadCardProps {
-  propiedad: Propiedad;
+  propiedad: PropiedadSerializer;
 }
 
 const ATRIBUTOS_EDITABLES: Array<{
-  key: keyof Propiedad;
+  key: keyof PropiedadSerializer;
   label: string;
   type: "text" | "number" | "decimal" | "boolean" | "array";
   editable: boolean;
@@ -72,7 +72,7 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
     setError(null);
   };
 
-  const formatValue = (key: keyof Propiedad, value: unknown): string => {
+  const formatValue = (key: keyof PropiedadSerializer, value: unknown): string => {
     if (value === null || value === undefined) return "—";
     if (key === "precioBase") return `$${Number(value).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     if (key === "servicios") return (value as string[]).join(", ") || "—";
@@ -218,9 +218,9 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
           open={confirmDialog.open}
           onConfirm={handleConfirm}
           onCancel={handleCancel}
-          atributo={confirmDialog.atributo}
-          valorActual={formatValue(confirmDialog.atributo as keyof Propiedad, propiedad[confirmDialog.atributo as keyof Propiedad])}
-          nuevoValor={formatValue(confirmDialog.atributo as keyof Propiedad, confirmDialog.nuevoValor)}
+          atributo={confirmDialog.atributo as keyof PropiedadSerializer}
+          valorActual={formatValue(confirmDialog.atributo as keyof PropiedadSerializer, propiedad[confirmDialog.atributo as keyof PropiedadSerializer])}
+          nuevoValor={formatValue(confirmDialog.atributo as keyof PropiedadSerializer, confirmDialog.nuevoValor)}
           disabled={isPending}
         />
       )}

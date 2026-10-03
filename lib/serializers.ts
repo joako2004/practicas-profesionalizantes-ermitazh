@@ -5,6 +5,7 @@ export interface PropiedadSerializer {
   capacidad: number;
   precioBase: number;
   promoSemanal: number | null;
+  fotos: string[];
   servicios: string[];
   activa: boolean;
   orden: number;
@@ -20,6 +21,7 @@ export function serializarPropiedad(raw: any): PropiedadSerializer {
     capacidad: raw.capacidad ?? 0,
     precioBase: Number(raw.precioBase) ?? 0,
     promoSemanal: Number(raw.promoSemanal) ?? null,
+    fotos: raw.fotos ?? [],
     servicios: raw.servicios ?? [],
     activa: raw.activa ?? false,
     orden: raw.orden ?? 0,
