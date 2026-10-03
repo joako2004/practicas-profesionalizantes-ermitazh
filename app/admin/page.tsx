@@ -25,19 +25,6 @@ export default function AdminPage() {
         </Link>
 
         <Link
-          href="/admin/precios"
-          className="group rounded-lg border border-desert-sand/20 bg-white p-6 shadow-sm transition-all hover:border-toasted-brown/40 hover:shadow-md"
-        >
-          <div className="mb-3 text-3xl">💰</div>
-          <h3 className="font-semibold text-dark-pine group-hover:text-toasted-brown transition-colors">
-            Precios
-          </h3>
-          <p className="mt-1 text-sm text-dark-pine/50">
-            Configurar tarifas por temporada y ocupación
-          </p>
-        </Link>
-
-        <Link
           href="/admin/reservas"
           className="group rounded-lg border border-desert-sand/20 bg-white p-6 shadow-sm transition-all hover:border-toasted-brown/40 hover:shadow-md"
         >

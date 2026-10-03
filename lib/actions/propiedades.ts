@@ -180,52 +180,6 @@ export async function crearPropiedad(data: {
   }
 }
 
-interface PrecioOpcion {
-  tramoNoches: "UNA_NOCHE" | "DE_DOS_A_SEIS" | "SIETE_O_MAS";
-  precioPorNoche: number;
-  tipoDia: "TODOS" | "SEMANA" | "FIN_DE_SEMANA";
-  estanciaTemporada: "baja" | "alta";
-}
-
-export async function actualizarMenuPrecios(
-  propiedadId: string,
-  precios: PrecioOpcion[]
-): Promise<UpdatePropiedadResult> {
-  try {
-    for (const p of precios) {
-      await fetch("/api/precios", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          propiedadId,
-          nombre: p.estanciaTemporada,
-          fechaInicio: new Date().toISOString().split("T")[0],
-          fechaFin: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
-          precioPorNoche: p.precioPorNoche,
-          tramoNoches: p.tramoNoches,
-          cantidadPersonas: 1,
-          tipoDia: p.tipoDia,
-          activo: true,
-        }),
-      });
-    }
-
-    revalidatePath("/admin/propiedades");
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error al actualizar menú de precios:", error);
-    return {
-      success: false,
-      error: "Error interno del servidor al actualizar el menú de precios",
-    };
-  }
-}
-
 export async function eliminarPropiedad(propiedadId: string): Promise<UpdatePropiedadResult> {
   try {
     const propiedad = await prisma.propiedad.findUnique({

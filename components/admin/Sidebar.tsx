@@ -22,15 +22,6 @@ const sidebarItems = [
     ],
   },
   {
-    key: "precios",
-    label: "Gestión de precios",
-    icon: "💰",
-    submenu: [
-      { label: "Listado de precios", href: "/admin/precios" },
-      { label: "Nuevo precio", href: "/admin/precios/new" },
-    ],
-  },
-  {
     key: "reservas",
     label: "Ver reservas",
     icon: "📋",

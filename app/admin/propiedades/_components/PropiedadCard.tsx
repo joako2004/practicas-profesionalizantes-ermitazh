@@ -4,11 +4,7 @@ import { useState, useTransition } from "react";
 import { Propiedad } from "@prisma/client";
 import AtributoEditable from "./AtributoEditable";
 import ConfirmDialog from "./ConfirmDialog";
-import {
-  actualizarMenuPrecios,
-  updatePropiedadAtributo,
-} from "@/lib/actions/propiedades";
-import PrecioMenu from "./PrecioMenu";
+import { updatePropiedadAtributo } from "@/lib/actions/propiedades";
 
 interface PropiedadCardProps {
   propiedad: Propiedad;
@@ -45,8 +41,7 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
 
   const handleEditRequest = (atributo: string, nuevoValor: unknown) => {
     if (atributo === "precioBase") {
-      // El menú de precios maneja su propio guardado
-      setError("Guardando menú de precios...");
+      setConfirmDialog({ open: true, atributo, nuevoValor });
     } else {
       setConfirmDialog({ open: true, atributo, nuevoValor });
       setError(null);
@@ -79,7 +74,7 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
 
   const formatValue = (key: keyof Propiedad, value: unknown): string => {
     if (value === null || value === undefined) return "—";
-    if (key === "precioBase") return `$${Number(value).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`;
+    if (key === "precioBase") return `$${Number(value).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     if (key === "servicios") return (value as string[]).join(", ") || "—";
     if (key === "activa") return value ? "Sí" : "No";
     if (key === "creadaEn" || key === "actualizadaEn") {
@@ -142,17 +137,42 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
                       Precio
                     </dt>
                     <dd className="flex-1 text-sm text-dark-pine">
-                      <PrecioMenu
-                        propiedadId={propiedad.id}
-                        onSave={async (precios) => {
-                          const result = await actualizarMenuPrecios(propiedad.id, precios);
-                          if (result.success) {
-                            setError(null);
-                          } else {
-                            setError(result.error || "Error al guardar");
-                          }
-                        }}
-                      />
+                      {editable ? (
+                        <AtributoEditable
+                          propiedadId={propiedad.id}
+                          atributo={key}
+                          tipo={type}
+                          valorActual={propiedad[key]}
+                          onEditRequest={handleEditRequest}
+                        />
+                      ) : (
+                        <span className="text-dark-pine/60">{formatValue(key, propiedad[key])}</span>
+                      )}
+                    </dd>
+                  </div>
+                );
+              }
+              if (key === "promoSemanal") {
+                return (
+                  <div
+                    key={key}
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-white border border-desert-sand/20"
+                  >
+                    <dt className="flex items-center gap-2 text-sm font-medium text-dark-pine/70 min-w-[140px]">
+                      Promo semanal
+                    </dt>
+                    <dd className="flex-1 text-sm text-dark-pine">
+                      {editable ? (
+                        <AtributoEditable
+                          propiedadId={propiedad.id}
+                          atributo={key}
+                          tipo={type}
+                          valorActual={propiedad[key]}
+                          onEditRequest={handleEditRequest}
+                        />
+                      ) : (
+                        <span className="text-dark-pine/60">{formatValue(key, propiedad[key])}</span>
+                      )}
                     </dd>
                   </div>
                 );
