@@ -49,6 +49,10 @@ model Propiedad {
   // precioBase mínimo. Se mantiene en la tabla por conveniencia de consulta.
   precioBase  Decimal  @db.Decimal(10, 2)
   promoSemanal Decimal  @db.Decimal(10, 2) @default(0)
+  precioNocheAlta  Decimal  @db.Decimal(10, 2) @default(0)
+  promoSemanalAlta  Decimal  @db.Decimal(5, 2) @default(0)
+  precioNocheBaja  Decimal  @db.Decimal(10, 2) @default(0)
+  promoSemanalBaja  Decimal  @db.Decimal(5, 2) @default(0)
   fotos       String[]
   servicios   String[]
   activa      Boolean  @default(true)

@@ -24,6 +24,7 @@ export default function PriceCalculator({
   const [ingreso, setIngreso] = useState("");
   const [salida, setSalida] = useState("");
   const [personas, setPersonas] = useState(Math.min(2, capacidad));
+  const [temporada, setTemporada] = useState<"alta" | "baja">("alta");
   const [resultado, setResultado] = useState<{
     precioPorNoche: number;
     totalEstadia: number;
@@ -41,7 +42,7 @@ export default function PriceCalculator({
     setResultado(null);
 
     startTransition(async () => {
-      const res = await calcularPrecio(propiedadId, ingreso, salida, personas);
+      const res = await calcularPrecio(propiedadId, ingreso, salida, personas, temporada);
       if ("error" in res) {
         setError(res.error);
       } else {
@@ -100,33 +101,51 @@ export default function PriceCalculator({
         </div>
       </div>
 
-      <div className="mt-3">
-        <label className="mb-1 block text-xs font-medium text-[var(--color-ink)]/60">
-          Personas
-        </label>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setPersonas((p) => Math.max(1, p - 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-ink)]/60 transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
-          >
-            −
-          </button>
-          <span className="min-w-[2ch] text-center text-sm font-medium text-[var(--color-ink)]">
-            {personas}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPersonas((p) => Math.min(capacidad, p + 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-ink)]/60 transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
-          >
-            +
-          </button>
-          <span className="text-xs text-[var(--color-ink)]/50">
-            de {capacidad} máximo
-          </span>
+<div className="mt-3">
+          <label className="mb-1 block text-xs font-medium text-[var(--color-ink)]/60">
+            Personas
+          </label>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setPersonas((p) => Math.max(1, p - 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-ink)]/60 transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
+            >
+              −
+            </button>
+            <span className="min-w-[2ch] text-center text-sm font-medium text-[var(--color-ink)]">
+              {personas}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPersonas((p) => Math.min(capacidad, p + 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-ink)]/60 transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
+            >
+              +
+            </button>
+            <span className="text-xs text-[var(--color-ink)]/50">
+              de {capacidad} máximo
+            </span>
+          </div>
         </div>
-      </div>
+
+        <div className="mt-3">
+          <label className="mb-1 block text-xs font-medium text-[var(--color-ink)]/60">
+            Temporada
+          </label>
+          <div className="flex items-center gap-2">
+            <label
+              className={`flex h-5 w-24 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-bg)] px-2 text-xs font-medium text-[var(--color-ink)] ${temporada === "alta" ? "bg-[var(--color-accent)] text-[var(--color-ink)]" : ""}`}
+            >
+              Temporada Alta
+            </label>
+            <label
+              className={`flex h-5 w-24 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-bg)] px-2 text-xs font-medium text-[var(--color-ink)] ${temporada === "baja" ? "bg-[var(--color-accent)] text-[var(--color-ink)]" : ""}`}
+            >
+              Temporada Baja
+            </label>
+          </div>
+        </div>
 
       <button
         type="button"

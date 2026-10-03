@@ -20,10 +20,10 @@ const ATRIBUTOS_EDITABLES: Array<{
   { key: "descripcion", label: "Descripción", type: "text", editable: true },
   { key: "capacidad", label: "Capacidad", type: "number", editable: true },
   { key: "orden", label: "Orden", type: "number", editable: true },
-  { key: "precioBase", label: "Precio Base", type: "decimal", editable: true },
-  { key: "servicios", label: "Servicios", type: "array", editable: true },
-  { key: "activa", label: "Activa", type: "boolean", editable: true },
-  { key: "promoSemanal", label: "Promo semanal", type: "number", editable: true },
+  { key: "precioNocheAlta", label: "Precio Noche Alta", type: "decimal", editable: true },
+  { key: "promoSemanalAlta", label: "Promo Alta (%)", type: "number", editable: true },
+  { key: "precioNocheBaja", label: "Precio Noche Baja", type: "decimal", editable: true },
+  { key: "promoSemanalBaja", label: "Promo Baja (%)", type: "number", editable: true },
   { key: "id", label: "ID", type: "text", editable: false },
   { key: "creadaEn", label: "Creada el", type: "text", editable: false },
   { key: "actualizadaEn", label: "Actualizada el", type: "text", editable: false },
@@ -40,12 +40,8 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
   const [isPending, startTransition] = useTransition();
 
   const handleEditRequest = (atributo: string, nuevoValor: unknown) => {
-    if (atributo === "precioBase") {
-      setConfirmDialog({ open: true, atributo, nuevoValor });
-    } else {
-      setConfirmDialog({ open: true, atributo, nuevoValor });
-      setError(null);
-    }
+    setConfirmDialog({ open: true, atributo, nuevoValor });
+    setError(null);
   };
 
   const handleConfirm = () => {
@@ -74,7 +70,6 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
 
   const formatValue = (key: keyof PropiedadSerializer, value: unknown): string => {
     if (value === null || value === undefined) return "—";
-    if (key === "precioBase") return `$${Number(value).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     if (key === "servicios") return (value as string[]).join(", ") || "—";
     if (key === "activa") return value ? "Sí" : "No";
     if (key === "creadaEn" || key === "actualizadaEn") {
@@ -102,9 +97,6 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
             <span className="flex items-center gap-1">
               👥 {propiedad.capacidad} personas
             </span>
-            <span className="font-medium text-toasted-brown">
-              {formatValue("precioBase", propiedad.precioBase)}/noche
-            </span>
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                 propiedad.activa
@@ -127,56 +119,6 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
         <div className="border-t border-desert-sand/20 bg-desert-sand/5 px-6 pb-6 animate-slide-down">
           <dl className="space-y-3">
             {ATRIBUTOS_EDITABLES.map(({ key, label, type, editable }) => {
-              if (key === "precioBase") {
-                return (
-                  <div
-                    key={key}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-white border border-desert-sand/20"
-                  >
-                    <dt className="flex items-center gap-2 text-sm font-medium text-dark-pine/70 min-w-[140px]">
-                      Precio
-                    </dt>
-                    <dd className="flex-1 text-sm text-dark-pine">
-                      {editable ? (
-                        <AtributoEditable
-                          propiedadId={propiedad.id}
-                          atributo={key}
-                          tipo={type}
-                          valorActual={propiedad[key]}
-                          onEditRequest={handleEditRequest}
-                        />
-                      ) : (
-                        <span className="text-dark-pine/60">{formatValue(key, propiedad[key])}</span>
-                      )}
-                    </dd>
-                  </div>
-                );
-              }
-              if (key === "promoSemanal") {
-                return (
-                  <div
-                    key={key}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-white border border-desert-sand/20"
-                  >
-                    <dt className="flex items-center gap-2 text-sm font-medium text-dark-pine/70 min-w-[140px]">
-                      Promo semanal
-                    </dt>
-                    <dd className="flex-1 text-sm text-dark-pine">
-                      {editable ? (
-                        <AtributoEditable
-                          propiedadId={propiedad.id}
-                          atributo={key}
-                          tipo={type}
-                          valorActual={propiedad[key]}
-                          onEditRequest={handleEditRequest}
-                        />
-                      ) : (
-                        <span className="text-dark-pine/60">{formatValue(key, propiedad[key])}</span>
-                      )}
-                    </dd>
-                  </div>
-                );
-              }
               return (
                 <div
                   key={key}

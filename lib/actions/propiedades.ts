@@ -14,6 +14,10 @@ interface UpdatePropiedadResult {
     capacidad: number;
     precioBase: number;
     promoSemanal: number | null;
+    precioNocheAlta: number;
+    promoSemanalAlta: number;
+    precioNocheBaja: number;
+    promoSemanalBaja: number;
     servicios: string[];
     activa: boolean;
   };
@@ -90,12 +94,44 @@ export async function updatePropiedadAtributo(
         dataToUpdate.activa = valor;
         break;
       }
+      case "precioNocheAlta": {
+        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
+        if (isNaN(num) || num < 0) {
+          return { success: false, error: "El precio nocturna alta debe ser un número mayor o igual a 0" };
+        }
+        dataToUpdate.precioNocheAlta = Math.round(num * 100) / 100;
+        break;
+      }
+      case "promoSemanalAlta": {
+        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
+        if (!Number.isFinite(num) || num < 0 || num > 100) {
+          return { success: false, error: "La promo semanal alta debe ser un número entre 0 y 100" };
+        }
+        dataToUpdate.promoSemanalAlta = Math.round(num * 100) / 100;
+        break;
+      }
       case "promoSemanal": {
         const num = typeof valor === "number" ? valor : parseFloat(String(valor));
         if (!Number.isFinite(num) || num < 0) {
           return { success: false, error: "La promo semanal debe ser un número mayor o igual a 0" };
         }
         dataToUpdate.promoSemanal = Math.round(num * 100) / 100;
+        break;
+      }
+      case "precioNocheBaja": {
+        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
+        if (isNaN(num) || num < 0) {
+          return { success: false, error: "El precio nocturna baja debe ser un número mayor o igual a 0" };
+        }
+        dataToUpdate.precioNocheBaja = Math.round(num * 100) / 100;
+        break;
+      }
+      case "promoSemanalBaja": {
+        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
+        if (!Number.isFinite(num) || num < 0 || num > 100) {
+          return { success: false, error: "La promo semanal baja debe ser un número entre 0 y 100" };
+        }
+        dataToUpdate.promoSemanalBaja = Math.round(num * 100) / 100;
         break;
       }
       default:
@@ -119,9 +155,13 @@ export async function updatePropiedadAtributo(
         capacidad: propiedadActualizada.capacidad,
         precioBase: Number(propiedadActualizada.precioBase),
         promoSemanal: Number(propiedadActualizada.promoSemanal),
+        precioNocheAlta: Number(propiedadActualizada.precioNocheAlta) ?? 0,
+        promoSemanalAlta: Number(propiedadActualizada.promoSemanalAlta) ?? 0,
+        precioNocheBaja: Number(propiedadActualizada.precioNocheBaja) ?? 0,
+        promoSemanalBaja: Number(propiedadActualizada.promoSemanalBaja) ?? 0,
         servicios: propiedadActualizada.servicios,
         activa: propiedadActualizada.activa,
-      },
+      } as UpdatePropiedadResult["propiedad"],
     };
   } catch (error) {
     console.error("Error al actualizar propiedad:", error);
@@ -173,6 +213,10 @@ export async function crearPropiedad(data: {
         capacidad: propiedad.capacidad,
         precioBase: Number(propiedad.precioBase),
         promoSemanal: Number(propiedad.promoSemanal),
+        precioNocheAlta: Number(propiedad.precioNocheAlta) ?? 0,
+        promoSemanalAlta: Number(propiedad.promoSemanalAlta) ?? 0,
+        precioNocheBaja: Number(propiedad.precioNocheBaja) ?? 0,
+        promoSemanalBaja: Number(propiedad.promoSemanalBaja) ?? 0,
         servicios: propiedad.servicios,
         activa: propiedad.activa,
       },

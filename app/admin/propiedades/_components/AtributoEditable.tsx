@@ -23,21 +23,6 @@ export default function AtributoEditable({
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (editando) {
-      const inicial = formatoParaInput(valorActual, tipo);
-      setValorEditado(inicial);
-      setError("");
-      setTimeout(() => {
-        if (tipo === "array") {
-          textareaRef.current?.focus();
-        } else {
-          inputRef.current?.focus();
-        }
-      }, 0);
-    }
-  }, [editando, valorActual, tipo]);
-
   const formatoParaInput = (valor: unknown, tipo: string): string => {
     if (valor === null || valor === undefined) return "";
     if (tipo === "array") return (valor as string[]).join("\n");
@@ -47,13 +32,13 @@ export default function AtributoEditable({
   };
 
   const parsearValor = (valor: string, tipo: string): unknown => {
-    const trimmed = valor.trim();
+    const trimmed = valor.trim().replace(",", ".");
     if (!trimmed) return null;
 
     switch (tipo) {
       case "number":
-        const num = parseInt(trimmed, 10);
-        return isNaN(num) ? null : num;
+        const num = parseFloat(trimmed);
+        return isNaN(num) ? null : Number.isInteger(num) ? num : Math.round(num);
       case "decimal":
         const dec = parseFloat(trimmed);
         return isNaN(dec) ? null : Math.round(dec * 100) / 100;
@@ -66,24 +51,40 @@ export default function AtributoEditable({
     }
   };
 
-  const validar = (valor: unknown, tipo: string): string | null => {
+  const validar = (valor: unknown, tipo: string, atributo?: string): string | null => {
     if (valor === null || valor === "") {
       return "Este campo es obligatorio";
     }
 
     switch (tipo) {
-      case "number":
-        if (!Number.isInteger(valor as number) || (valor as number) < 0) {
-          return "Debe ser un número entero mayor o igual a 0";
+      case "number": {
+        const val = Number(valor);
+        if (!Number.isFinite(val)) {
+          return "Debe ser un número válido";
+        }
+        if (atributo && atributo.includes("promo")) {
+          if (val < 0 || val > 100) {
+            return "El porcentaje debe estar entre 0 y 100";
+          }
+        } else {
+          if (val < 0) {
+            return "Debe ser un número mayor o igual a 0";
+          }
         }
         break;
-      case "decimal":
-        if (typeof valor !== "number" || (valor as number) < 0) {
-          return "Debe ser un número válido mayor o igual a 0";
+      }
+      case "decimal": {
+        const val = Number(valor);
+        if (!Number.isFinite(val)) {
+          return "Debe ser un número válido";
+        }
+        if (val < 0) {
+          return "Debe ser un número mayor o igual a 0";
         }
         break;
+      }
       case "text":
-        if (typeof valor === "string" && (valor as string).trim() === "") {
+        if (typeof valor === "string" && valor.trim() === "") {
           return "No puede estar vacío";
         }
         break;
@@ -99,7 +100,7 @@ export default function AtributoEditable({
   const manejarBlur = () => {
     if (!editando) return;
     const parseado = parsearValor(valorEditado, tipo);
-    const errorValidacion = validar(parseado, tipo);
+    const errorValidacion = validar(parseado, tipo, atributo);
     if (errorValidacion) {
       setError(errorValidacion);
       return;
@@ -112,7 +113,7 @@ export default function AtributoEditable({
     if (e.key === "Enter" && tipo !== "array") {
       e.preventDefault();
       const parseado = parsearValor(valorEditado, tipo);
-      const errorValidacion = validar(parseado, tipo);
+      const errorValidacion = validar(parseado, tipo, atributo);
       if (!errorValidacion) {
         onEditRequest(atributo, parseado);
         setEditando(false);
@@ -146,7 +147,7 @@ export default function AtributoEditable({
   };
 
   if (editando) {
-    const inputType = tipo === "number" ? "number" : tipo === "decimal" ? "number" : "text";
+    const inputType = "text";
 
     return (
       <div className="flex-1 w-full">

@@ -1,8 +1,9 @@
 import CabinCard from "./CabinCard";
-import type { PropiedadParaHome } from "@/app/(public)/page";
+import { serializarPropiedad, PropiedadSerializer } from "@/lib/serializers";
+import { buildReservaWhatsApp } from "@/lib/config";
 
 interface CabinsSectionProps {
-  propiedades: (Omit<PropiedadParaHome, "precioBase"> & { precioBase: number })[];
+  propiedades: PropiedadSerializer[];
 }
 
 export default function CabinsSection({ propiedades }: CabinsSectionProps) {
