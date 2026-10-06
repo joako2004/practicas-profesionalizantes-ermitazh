@@ -41,12 +41,6 @@ export async function calcularPrecio(
 
     const propiedad = await prisma.propiedad.findUnique({
       where: { id: propiedadId },
-      select: {
-        precioNocheAlta: true,
-        promoSemanalAlta: true,
-        precioNocheBaja: true,
-        promoSemanalBaja: true,
-      },
     });
 
     if (!propiedad) {

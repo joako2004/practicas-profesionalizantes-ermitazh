@@ -3,10 +3,10 @@ import { COMPLEJO } from "@/lib/config";
 
 const NAV_LINKS = [
   { label: "Inicio", href: "/" },
-  { label: "Cabañas", href: "#cabanas" },
+  { label: "Cabañas", href: "/#cabanas" },
   { label: "Galería", href: "/galeria" },
-  { label: "Nuestro Complejo", href: "#bienvenidos" },
-  { label: "Ubicación", href: "#ubicacion" },
+  { label: "Nuestro Complejo", href: "/#bienvenidos" },
+  { label: "Ubicación", href: "/#ubicacion" },
 ];
 
 export default function Header() {
@@ -41,13 +41,13 @@ export default function Header() {
             )
           )}
           <a
-            href="#contacto"
+            href="/#contacto"
             className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-5 py-2 text-sm font-medium text-[var(--color-ink)]/70 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
           >
             Contacto
           </a>
           <a
-            href="#buscador"
+            href="/#buscador"
             className="rounded-[var(--radius-md)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-5 py-2 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/80 hover:border-[var(--color-accent)]/80 active:scale-[0.97]"
           >
             Reservar

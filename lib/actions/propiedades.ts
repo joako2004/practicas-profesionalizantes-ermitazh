@@ -31,6 +31,20 @@ export async function updatePropiedadAtributo(
   try {
     const propiedadExistente = await prisma.propiedad.findUnique({
       where: { id: propiedadId },
+      select: {
+        id: true,
+        nombre: true,
+        descripcion: true,
+        capacidad: true,
+        precioBase: true,
+        promoSemanal: true,
+        precioNocheAlta: true,
+        promoSemanalAlta: true,
+        precioNocheBaja: true,
+        promoSemanalBaja: true,
+        servicios: true,
+        activa: true,
+      },
     });
 
     if (!propiedadExistente) {
