@@ -21,7 +21,7 @@ export default async function AdminLayout({
 
   return (
     <AdminShell user={user}>
-      <div className="min-h-[calc(100dvh-9rem)] px-16 py-12 md:px-20 md:py-16">
+      <div className="h-full px-16 py-12 md:px-20 md:py-16">
         {children}
       </div>
     </AdminShell>

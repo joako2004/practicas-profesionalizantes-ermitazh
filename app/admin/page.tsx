@@ -1,10 +1,10 @@
 export default function AdminPage() {
   return (
-    <div className="flex min-h-[calc(100dvh-9rem)] flex-col items-center justify-start pt-12 text-center md:pt-16">
-      <h2 className="text-2xl font-semibold text-dark-pine">
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+      <h2 className="font-heading text-2xl font-semibold text-white md:text-3xl">
         Bienvenido al Panel de Administración
       </h2>
-      <p className="mt-2 text-dark-pine/60">
+      <p className="mt-2 text-white/80">
         Selecciona una opción del menú lateral para comenzar.
       </p>
     </div>

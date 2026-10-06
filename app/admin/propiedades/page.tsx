@@ -11,8 +11,8 @@ export default async function PropiedadesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-dark-pine">Gestión de Propiedades</h2>
-          <p className="mt-1 text-sm text-dark-pine/50">
+          <h2 className="text-2xl font-semibold text-white drop-shadow-sm">Gestión de Propiedades</h2>
+          <p className="mt-1 text-sm text-white/85 drop-shadow-sm">
             {propiedades.length} propiedad{propiedades.length !== 1 ? "es" : ""} registrada{propiedades.length !== 1 ? "s" : ""}
           </p>
         </div>

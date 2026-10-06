@@ -110,37 +110,27 @@ function SidebarIcon({
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const sidebarClasses = `fixed inset-y-0 left-0 z-50 flex w-[280px] -translate-x-full flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl transition-transform duration-300 ease-in-out md:translate-x-0 ${isOpen ? "translate-x-0" : ""}`;
+  const sidebarClasses = `fixed bottom-0 left-0 top-[60px] z-50 flex w-[var(--admin-sidebar-width)] max-w-[80vw] -translate-x-full flex-col border-r border-[var(--color-border)] bg-[var(--color-clay-cream)]/80 shadow-xl backdrop-blur-md transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? "translate-x-0" : ""}`;
 
   return (
     <aside className={sidebarClasses} aria-label="Menú lateral de administración">
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] px-6 py-6">
-        <Link href="/admin" className="block">
-          <p className="font-heading text-xl font-semibold text-[var(--color-ink)]">
-            Administración
-          </p>
-          <p className="mt-1 text-xs text-[var(--color-ink)]/60">
-            Cabañas Ermitazh
-          </p>
-        </Link>
-        <button
-          onClick={onClose}
-          className="rounded-[var(--radius-sm)] p-2 text-[var(--color-ink)]/60 transition-colors hover:bg-[var(--color-warm)]/30 hover:text-[var(--color-ink)] md:hidden"
-          aria-controls="sidebar"
-          aria-expanded={isOpen}
-          aria-label="Cerrar menú"
-        >
-          <span aria-hidden="true">×</span>
-        </button>
-      </div>
+      <button
+        onClick={onClose}
+        className="absolute right-4 top-4 rounded-[var(--radius-sm)] p-2 text-[var(--color-ink)]/60 transition-colors hover:bg-[var(--color-warm)]/30 hover:text-[var(--color-ink)] lg:hidden"
+        aria-controls="sidebar"
+        aria-expanded={isOpen}
+        aria-label="Cerrar menú"
+      >
+        <span aria-hidden="true">×</span>
+      </button>
 
-      <nav className="flex flex-1 flex-col gap-1 px-4 py-6" aria-label="Secciones de administración">
+      <nav className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-6 pt-16 lg:pt-6" aria-label="Secciones de administración">
         {sidebarItems.map((item) => (
           item.href ? (
             <Link
               key={item.key}
               href={item.href}
-              className="group flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-3 text-sm font-medium text-[var(--color-ink)]/75 transition-all hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-ink)]"
+              className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-transparent px-4 py-2.5 text-sm font-medium text-[var(--color-ink)]/75 transition-all hover:border-[var(--color-border)]/70 hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-ink)]"
             >
               <SidebarIcon
                 name={item.icon}
@@ -151,7 +141,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           ) : (
             <div
               key={item.key}
-              className="group flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-3 text-sm font-medium text-[var(--color-ink)]/75 transition-all hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-ink)]"
+              className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-transparent px-4 py-2.5 text-sm font-medium text-[var(--color-ink)]/75 transition-all hover:border-[var(--color-border)]/70 hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-ink)]"
             >
               <SidebarIcon
                 name={item.icon}
@@ -163,10 +153,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="border-t border-[var(--color-border)] p-4">
+      <div className="shrink-0 border-t border-[var(--color-border)]/70 px-4 pb-16 pt-4">
         <Link
           href="/"
-          className="group flex w-full items-center gap-3 rounded-[var(--radius-sm)] px-3 py-3 text-sm font-medium text-[var(--color-danger)] transition-all hover:bg-[var(--color-danger-bg)] hover:text-[var(--color-danger)] focus:outline-none focus:ring-2 focus:ring-[var(--color-danger)]/40"
+          className="group flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-danger)]/40 px-4 py-2.5 text-sm font-medium text-[var(--color-danger)] transition-all hover:bg-[var(--color-danger-bg)] hover:text-[var(--color-danger)] focus:outline-none focus:ring-2 focus:ring-[var(--color-danger)]/40"
         >
           <SidebarIcon
             name="logout"
