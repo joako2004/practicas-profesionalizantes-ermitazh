@@ -124,3 +124,21 @@ model Imagen {
 
   @@map("imagenes")
 }
+
+enum Rol {
+  ADMIN
+  HUESPED
+}
+
+model Perfil {
+  id          String   @id @db.Uuid
+  email       String   @unique
+  nombre      String?
+  apellido    String?
+  telefono    String?
+  rol         Rol      @default(HUESPED)
+  creadoEn    DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("perfiles")
+}
