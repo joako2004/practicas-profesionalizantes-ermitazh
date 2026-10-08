@@ -1,6 +1,5 @@
-import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
+import { requireAdminApi } from "@/lib/auth/perfil";
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
@@ -13,36 +12,8 @@ export async function POST(
     const { id } = await params;
 
     // 1. Verificar sesión de Supabase (mismo patrón que las otras rutas)
-    const cookieStore = await cookies();
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          },
-        },
-      }
-    );
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: "No autorizado." },
-        { status: 401 }
-      );
-    }
+    const auth = await requireAdminApi();
+    if (!auth.ok) return auth.response;
 
     // 2. Verificar que la propiedad exista
     const propiedadExistente = await prisma.propiedad.findUnique({
