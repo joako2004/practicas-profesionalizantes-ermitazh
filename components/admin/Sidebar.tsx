@@ -1,35 +1,38 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import type { ReactNode, SVGProps } from "react";
 import Link from "next/link";
 
-const sidebarItems = [
-  {
-    key: "cabañas",
-    label: "Cabañas",
-    icon: "🏡",
-    submenu: [
-      { label: "Ver cabañas", href: "/admin/cabañas" },
-    ],
-  },
+type IconName =
+  | "properties"
+  | "reservations"
+  | "cabins"
+  | "availability"
+  | "prices"
+  | "inquiries"
+  | "reports"
+  | "logout";
+
+interface SidebarItem {
+  key: string;
+  label: string;
+  icon: Exclude<IconName, "logout">;
+  href?: string;
+}
+
+const sidebarItems: SidebarItem[] = [
   {
     key: "propiedades",
-    label: "Administrar propiedades",
-    icon: "🏠",
-    submenu: [
-      { label: "Listado", href: "/admin/propiedades" },
-      { label: "Nueva propiedad", href: "/admin/propiedades/new" },
-    ],
+    label: "Propiedades",
+    icon: "properties",
+    href: "/admin/propiedades",
   },
-  {
-    key: "reservas",
-    label: "Ver reservas",
-    icon: "📋",
-    submenu: [
-      { label: "Listado de reservas", href: "/admin/reservas" },
-      { label: "Nueva reserva", href: "/admin/reservas/new" },
-    ],
-  },
+  { key: "reservas", label: "Reservas", icon: "reservations" },
+  { key: "cabanas", label: "Cabañas", icon: "cabins" },
+  { key: "disponibilidad", label: "Disponibilidad", icon: "availability" },
+  { key: "precios", label: "Precios", icon: "prices" },
+  { key: "consultas", label: "Consultas", icon: "inquiries" },
+  { key: "reportes", label: "Reportes", icon: "reports" },
 ];
 
 interface SidebarProps {
@@ -37,68 +40,131 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
-
-  const handleItemClick = useCallback((key: string) => {
-    setSelectedKey(key);
-    onClose();
-  }, [onClose]);
-
-  const sidebarClasses = `fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-desert-sand/20 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`;
+function SidebarIcon({
+  name,
+  ...props
+}: { name: IconName } & SVGProps<SVGSVGElement>) {
+  const iconPaths: Record<IconName, ReactNode> = {
+    properties: (
+      <>
+        <path d="M3.5 10.5 12 3l8.5 7.5" />
+        <path d="M5.5 9.5V21h13V9.5M9 21v-6h6v6" />
+      </>
+    ),
+    reservations: (
+      <>
+        <rect x="4" y="5" width="16" height="15" rx="2" />
+        <path d="M8 3v4M16 3v4M4 10h16M8 14h2M12 14h4M8 17h5" />
+      </>
+    ),
+    cabins: (
+      <>
+        <path d="m3.5 11 8.5-7 8.5 7" />
+        <path d="M5.5 9.5V21h13V9.5M9 21v-5h6v5" />
+      </>
+    ),
+    availability: (
+      <>
+        <rect x="3.5" y="4" width="17" height="17" rx="2" />
+        <path d="M7.5 3v3M16.5 3v3M3.5 9h17M7 14l2.5 2.5L16.5 11" />
+      </>
+    ),
+    prices: (
+      <>
+        <path d="M12 3v18M16 7.5c0-1.4-1.8-2.5-4-2.5S8 6.1 8 7.5s1.8 2.5 4 2.5 4 1.1 4 2.5-1.8 2.5-4 2.5-4-1.1-4-2.5" />
+      </>
+    ),
+    inquiries: (
+      <>
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z" />
+        <path d="M8 8h8M8 11h5" />
+      </>
+    ),
+    reports: (
+      <>
+        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+      </>
+    ),
+    logout: (
+      <>
+        <path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10" />
+        <path d="M14 8l4 4-4 4M18 12H8" />
+      </>
+    ),
+  };
 
   return (
-    <div className={sidebarClasses} aria-label="Menú lateral de administración">
-      <div className="h-full p-6 flex flex-col gap-4">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-semibold text-dark-pine">
-            Panel Administración
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-btn border border-desert-sand/40 px-3 py-1.5 text-sm text-dark-pine/70 transition-all hover:border-desert-sand"
-            aria-controls="sidebar"
-            aria-expanded={isOpen}
-          >
-            Cerrar menú
-          </button>
-        </div>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+    >
+      {iconPaths[name]}
+    </svg>
+  );
+}
 
-        <nav className="flex flex-col gap-2">
-          {sidebarItems.map((item) => (
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const sidebarClasses = `fixed bottom-0 left-0 top-[60px] z-50 flex w-[var(--admin-sidebar-width)] max-w-[80vw] -translate-x-full flex-col border-r border-[var(--color-border)] bg-[var(--color-clay-cream)]/80 shadow-xl backdrop-blur-md transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? "translate-x-0" : ""}`;
+
+  return (
+    <aside className={sidebarClasses} aria-label="Menú lateral de administración">
+      <button
+        onClick={onClose}
+        className="absolute right-4 top-4 rounded-[var(--radius-sm)] p-2 text-[var(--color-ink)]/60 transition-colors hover:bg-[var(--color-warm)]/30 hover:text-[var(--color-ink)] lg:hidden"
+        aria-controls="sidebar"
+        aria-expanded={isOpen}
+        aria-label="Cerrar menú"
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+
+      <nav className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-6 pt-16 lg:pt-6" aria-label="Secciones de administración">
+        {sidebarItems.map((item) => (
+          item.href ? (
+            <Link
+              key={item.key}
+              href={item.href}
+              className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-transparent px-4 py-2.5 text-sm font-medium text-[var(--color-ink)]/75 transition-all hover:border-[var(--color-border)]/70 hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-ink)]"
+            >
+              <SidebarIcon
+                name={item.icon}
+                className="h-5 w-5 shrink-0 text-[var(--color-accent)] transition-colors group-hover:text-[var(--color-ink)]"
+              />
+              <span>{item.label}</span>
+            </Link>
+          ) : (
             <div
               key={item.key}
-              className={`
-                group 
-                ${selectedKey === item.key ? "bg-desert-sand/10 text-dark-pine" : "text-transparent"}
-              `}
-              onClick={() => handleItemClick(item.key)}
+              className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-transparent px-4 py-2.5 text-sm font-medium text-[var(--color-ink)]/75 transition-all hover:border-[var(--color-border)]/70 hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-ink)]"
             >
-              <button
-                className="flex items-center gap-3 rounded-btn px-4 py-2.5 text-sm font-medium transition-all 
-                  group-hover:text-dark-pine group-focus:text-dark-pine focus:outline-none focus:ring-2 focus:ring-desert-sand/40"
-              >
-                <span className="text-base">{item.icon}</span>
-                <span className="hidden sm:inline">{item.label}</span>
-              </button>
-              {selectedKey === item.key && (
-                <div className="mt-2 bg-white rounded-lg p-4 shadow-sm border border-desert-sand/20">
-                  {item.submenu.map((sub) => (
-                    <Link
-                      key={sub.label}
-                      href={sub.href}
-                      className="display:block px-3 py-1.5 rounded-btn text-sm text-dark-pine/60 hover:bg-desert-sand/10 hover:text-dark-pine transition-all"
-                      onClick={onClose}
-                    >
-                      {sub.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
+              <SidebarIcon
+                name={item.icon}
+                className="h-5 w-5 shrink-0 text-[var(--color-accent)] transition-colors group-hover:text-[var(--color-ink)]"
+              />
+              <span>{item.label}</span>
             </div>
-          ))}
-        </nav>
+          )
+        ))}
+      </nav>
+
+      <div className="shrink-0 border-t border-[var(--color-border)]/70 px-4 pb-16 pt-4">
+        <Link
+          href="/"
+          className="group flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-danger)]/40 px-4 py-2.5 text-sm font-medium text-[var(--color-danger)] transition-all hover:bg-[var(--color-danger-bg)] hover:text-[var(--color-danger)] focus:outline-none focus:ring-2 focus:ring-[var(--color-danger)]/40"
+        >
+          <SidebarIcon
+            name="logout"
+            className="h-5 w-5 shrink-0 text-[var(--color-danger)] transition-colors group-hover:text-[var(--color-ink)]"
+          />
+          <span>Cerrar sesión</span>
+        </Link>
       </div>
-    </div>
+    </aside>
   );
 }
