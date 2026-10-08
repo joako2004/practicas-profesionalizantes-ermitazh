@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import PropiedadCard from "./_components/PropiedadCard";
 import { serializarPropiedad } from "@/lib/serializers";
+import { requireAdmin } from "@/lib/auth/perfil";
 
 export default async function PropiedadesPage() {
+  await requireAdmin();
   const propiedades = await prisma.propiedad.findMany({
     orderBy: { orden: "asc" },
   });
