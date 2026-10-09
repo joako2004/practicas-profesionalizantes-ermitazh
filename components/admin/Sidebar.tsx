@@ -110,14 +110,18 @@ function SidebarIcon({
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const sidebarClasses = `fixed bottom-0 left-0 top-[60px] z-50 flex w-[var(--admin-sidebar-width)] max-w-[80vw] -translate-x-full flex-col border-r border-[var(--color-border)] bg-[var(--color-clay-cream)]/80 shadow-xl backdrop-blur-md transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? "translate-x-0" : ""}`;
+  const sidebarClasses = `fixed bottom-0 left-0 top-[60px] z-50 flex w-[var(--admin-sidebar-width)] max-w-[80vw] -translate-x-full flex-col border-r border-[var(--color-border)] bg-[var(--color-clay-cream)]/80 shadow-xl backdrop-blur-md transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : ""}`;
 
   return (
-    <aside className={sidebarClasses} aria-label="Menú lateral de administración">
+    <aside
+      id="admin-sidebar"
+      className={sidebarClasses}
+      aria-label="Menú lateral de administración"
+    >
       <button
         onClick={onClose}
         className="absolute right-4 top-4 rounded-[var(--radius-sm)] p-2 text-[var(--color-ink)]/60 transition-colors hover:bg-[var(--color-warm)]/30 hover:text-[var(--color-ink)] lg:hidden"
-        aria-controls="sidebar"
+        aria-controls="admin-sidebar"
         aria-expanded={isOpen}
         aria-label="Cerrar menú"
       >
@@ -130,6 +134,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <Link
               key={item.key}
               href={item.href}
+              onClick={onClose}
               className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-transparent px-4 py-2.5 text-sm font-medium text-[var(--color-ink)]/75 transition-all hover:border-[var(--color-border)]/70 hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-ink)]"
             >
               <SidebarIcon
@@ -156,6 +161,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <div className="shrink-0 border-t border-[var(--color-border)]/70 px-4 pb-16 pt-4">
         <Link
           href="/"
+          onClick={onClose}
           className="group flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-danger)]/40 px-4 py-2.5 text-sm font-medium text-[var(--color-danger)] transition-all hover:bg-[var(--color-danger-bg)] hover:text-[var(--color-danger)] focus:outline-none focus:ring-2 focus:ring-[var(--color-danger)]/40"
         >
           <SidebarIcon
