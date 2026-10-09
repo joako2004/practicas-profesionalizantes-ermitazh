@@ -2,6 +2,7 @@
 
 import type { ReactNode, SVGProps } from "react";
 import Link from "next/link";
+import { logout } from "@/app/login/actions";
 
 type IconName =
   | "properties"
@@ -154,16 +155,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </nav>
 
       <div className="shrink-0 border-t border-[var(--color-border)]/70 px-4 pb-16 pt-4">
-        <Link
-          href="/"
-          className="group flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-danger)]/40 px-4 py-2.5 text-sm font-medium text-[var(--color-danger)] transition-all hover:bg-[var(--color-danger-bg)] hover:text-[var(--color-danger)] focus:outline-none focus:ring-2 focus:ring-[var(--color-danger)]/40"
-        >
-          <SidebarIcon
-            name="logout"
-            className="h-5 w-5 shrink-0 text-[var(--color-danger)] transition-colors group-hover:text-[var(--color-ink)]"
-          />
-          <span>Cerrar sesión</span>
-        </Link>
+        <form action={logout}>
+          <button
+            type="submit"
+            className="group flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-danger)]/40 px-4 py-2.5 text-sm font-medium text-[var(--color-danger)] transition-all hover:bg-[var(--color-danger-bg)] hover:text-[var(--color-danger)] focus:outline-none focus:ring-2 focus:ring-[var(--color-danger)]/40"
+          >
+            <SidebarIcon
+              name="logout"
+              className="h-5 w-5 shrink-0 text-[var(--color-danger)] transition-colors group-hover:text-[var(--color-ink)]"
+            />
+            <span>Cerrar sesión</span>
+          </button>
+        </form>
       </div>
     </aside>
   );
