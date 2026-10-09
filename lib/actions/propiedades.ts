@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { esAdmin } from "@/lib/auth/perfil";
 
 interface UpdatePropiedadResult {
   success: boolean;
@@ -28,6 +29,9 @@ export async function updatePropiedadAtributo(
   campo: string,
   valor: unknown
 ): Promise<UpdatePropiedadResult> {
+  if (!(await esAdmin())) {
+    return { success: false, error: "No autorizado." };
+  }
   try {
     const propiedadExistente = await prisma.propiedad.findUnique({
       where: { id: propiedadId },
@@ -190,6 +194,9 @@ export async function crearPropiedad(data: {
   precioBase: number;
   servicios?: string[];
 }): Promise<UpdatePropiedadResult> {
+  if (!(await esAdmin())) {
+    return { success: false, error: "No autorizado." };
+  }
   try {
     if (!data.nombre?.trim()) {
       return { success: false, error: "El nombre es obligatorio" };
@@ -242,6 +249,9 @@ export async function crearPropiedad(data: {
 }
 
 export async function eliminarPropiedad(propiedadId: string): Promise<UpdatePropiedadResult> {
+  if (!(await esAdmin())) {
+    return { success: false, error: "No autorizado." };
+  }
   try {
     const propiedad = await prisma.propiedad.findUnique({
       where: { id: propiedadId },
