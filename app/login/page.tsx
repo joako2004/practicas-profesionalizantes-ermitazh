@@ -11,11 +11,11 @@ function LoginForm() {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="rounded-card bg-white p-8 shadow-sm ring-1 ring-desert-sand/20">
+      <div className="rounded-card border border-[var(--color-border)]/70 bg-[var(--color-clay-cream)]/80 p-8 shadow-xl backdrop-blur-md">
         <h1 className="mb-1 text-2xl font-semibold tracking-tight text-dark-pine">
           Iniciar sesión
         </h1>
-        <p className="mb-8 text-sm text-dark-pine/50">
+        <p className="mb-8 text-sm text-dark-pine/75">
           Panel de administración — Cabañas Ermitazh
         </p>
 
@@ -33,7 +33,7 @@ function LoginForm() {
               type="email"
               required
               autoComplete="email"
-              className="w-full rounded-btn border border-desert-sand/40 bg-white px-4 py-2.5 text-sm text-dark-pine placeholder:text-dark-pine/30 focus:border-toasted-brown focus:outline-none focus:ring-2 focus:ring-toasted-brown/10"
+              className="min-h-11 w-full rounded-btn border border-desert-sand/60 bg-white/90 px-4 py-2.5 text-sm text-dark-pine placeholder:text-dark-pine/40 focus:border-toasted-brown focus:outline-none focus:ring-2 focus:ring-toasted-brown/20"
               placeholder="admin@ermitazh.com"
             />
           </div>
@@ -52,13 +52,13 @@ function LoginForm() {
                 type={showPassword ? "text" : "password"}
                 required
                 autoComplete="current-password"
-                className="w-full rounded-btn border border-desert-sand/40 bg-white px-4 py-2.5 pr-11 text-sm text-dark-pine placeholder:text-dark-pine/30 focus:border-toasted-brown focus:outline-none focus:ring-2 focus:ring-toasted-brown/10"
+                className="min-h-11 w-full rounded-btn border border-desert-sand/60 bg-white/90 px-4 py-2.5 pr-11 text-sm text-dark-pine placeholder:text-dark-pine/40 focus:border-toasted-brown focus:outline-none focus:ring-2 focus:ring-toasted-brown/20"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-pine/40 hover:text-dark-pine/70 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm p-1 text-dark-pine/55 transition-colors hover:text-dark-pine/85 focus:outline-none focus:ring-2 focus:ring-toasted-brown/30"
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
                 {showPassword ? (
@@ -79,7 +79,7 @@ function LoginForm() {
           </div>
 
           {error && (
-            <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+            <p className="rounded-md bg-red-50/95 px-3 py-2 text-sm text-red-600">
               Email o contraseña incorrectos.
             </p>
           )}
@@ -97,11 +97,42 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const heroImage =
+    "https://coehmfszuwczfxfpumub.supabase.co/storage/v1/object/public/propiedades-fotos/exteriores_pileta_juegos/144.jpeg";
+
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-champagne-pink px-6">
-      <Suspense fallback={null}>
-        <LoginForm />
-      </Suspense>
+    <div className="relative flex min-h-dvh flex-col overflow-hidden bg-champagne-pink">
+      <img
+        aria-hidden="true"
+        className="fixed inset-0 h-full w-full object-cover object-center"
+        src={heroImage}
+        alt=""
+      />
+      <div
+        aria-hidden="true"
+        className="fixed inset-0 bg-[var(--color-ink)]/65"
+      />
+
+      <header className="fixed inset-x-0 top-0 z-20 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-clay-cream)]/80 backdrop-blur-md">
+        <div className="flex h-[60px] items-center px-6">
+          <a
+            href="/"
+            className="cursor-pointer text-xl font-semibold tracking-wide text-dark-pine transition-opacity hover:opacity-80"
+          >
+            Cabañas Ermitazh
+          </a>
+        </div>
+      </header>
+
+      <main className="relative z-10 min-h-0 flex-1 overflow-y-auto pt-[60px]">
+        <div className="flex min-h-[calc(100dvh-60px)] items-center justify-center px-4 py-8 sm:px-6">
+          <div className="flex w-full justify-center -translate-y-[2%]">
+            <Suspense fallback={null}>
+              <LoginForm />
+            </Suspense>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
