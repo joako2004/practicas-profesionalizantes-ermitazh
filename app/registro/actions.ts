@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { destinoSeguro } from "@/lib/auth/destino";
 import { redirect } from "next/navigation";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -10,21 +11,14 @@ function texto(valor: FormDataEntryValue | null): string {
   return typeof valor === "string" ? valor.trim() : "";
 }
 
-function destinoSeguro(valor: string): string {
-  const valido =
-    valor.startsWith("/") &&
-    !valor.startsWith("//") &&
-    !valor.includes("://") &&
-    !valor.includes("\\");
-  return valido ? valor : "/";
-}
-
 export async function registrar(formData: FormData) {
   const nombre = texto(formData.get("nombre"));
   const apellido = texto(formData.get("apellido"));
   const telefono = texto(formData.get("telefono"));
   const email = texto(formData.get("email")).toLowerCase();
   const destino = destinoSeguro(texto(formData.get("next")));
+  const sufijoNext =
+    destino === "/" ? "" : `&next=${encodeURIComponent(destino)}`;
   const passwordCampo = formData.get("password");
   const password = typeof passwordCampo === "string" ? passwordCampo : "";
 
@@ -40,7 +34,7 @@ export async function registrar(formData: FormData) {
     password.length <= 72;
 
   if (!datosValidos) {
-    redirect("/registro?error=datos-invalidos");
+    redirect(`/registro?error=datos-invalidos${sufijoNext}`);
   }
 
   const supabase = await createClient();
@@ -49,12 +43,12 @@ export async function registrar(formData: FormData) {
 
   if (error) {
     console.error("registro: signUp falló", error.code);
-    redirect("/registro?error=no-se-pudo-crear");
+    redirect(`/registro?error=no-se-pudo-crear${sufijoNext}`);
   }
 
   if (!data.user || !data.session) {
     console.error("registro: signUp sin sesión (¿confirmación de email activa?)");
-    redirect("/registro?error=no-se-pudo-crear");
+    redirect(`/registro?error=no-se-pudo-crear${sufijoNext}`);
   }
 
   await prisma.perfil.upsert({
