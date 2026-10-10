@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { login } from "./actions";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -7,6 +8,10 @@ import { Suspense, useState } from "react";
 function LoginForm() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const next = searchParams.get("next");
+  const registroHref = next
+    ? `/registro?next=${encodeURIComponent(next)}`
+    : "/registro";
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -16,7 +21,7 @@ function LoginForm() {
           Iniciar sesión
         </h1>
         <p className="mb-8 text-sm text-dark-pine/50">
-          Panel de administración — Cabañas Ermitazh
+          Ingresá a tu cuenta — Cabañas Ermitazh
         </p>
 
         <form action={login} className="space-y-5">
@@ -34,7 +39,7 @@ function LoginForm() {
               required
               autoComplete="email"
               className="w-full rounded-btn border border-desert-sand/40 bg-white px-4 py-2.5 text-sm text-dark-pine placeholder:text-dark-pine/30 focus:border-toasted-brown focus:outline-none focus:ring-2 focus:ring-toasted-brown/10"
-              placeholder="admin@ermitazh.com"
+              placeholder="tu@email.com"
             />
           </div>
 
@@ -91,6 +96,16 @@ function LoginForm() {
             Ingresar
           </button>
         </form>
+
+        <p className="mt-6 text-center text-sm text-dark-pine/60">
+          ¿No tenés cuenta?{" "}
+          <Link
+            href={registroHref}
+            className="font-medium text-toasted-brown hover:underline"
+          >
+            Crear cuenta
+          </Link>
+        </p>
       </div>
     </div>
   );
