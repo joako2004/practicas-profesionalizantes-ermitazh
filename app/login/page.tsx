@@ -25,6 +25,7 @@ function LoginForm() {
         </p>
 
         <form action={login} className="space-y-5">
+          <input type="hidden" name="next" value={next ?? ""} />
           <div>
             <label
               htmlFor="email"

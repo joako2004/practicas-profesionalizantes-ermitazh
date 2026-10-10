@@ -2,9 +2,16 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { destinoSeguro } from "@/lib/auth/destino";
 import { redirect } from "next/navigation";
 
 export async function login(formData: FormData) {
+  const nextCampo = formData.get("next");
+  const destino = destinoSeguro(
+    typeof nextCampo === "string" ? nextCampo.trim() : "",
+  );
+  const sufijoNext =
+    destino === "/" ? "" : `&next=${encodeURIComponent(destino)}`;
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -13,7 +20,7 @@ export async function login(formData: FormData) {
   });
 
   if (error) {
-    redirect("/login?error=credenciales-invalidas");
+    redirect(`/login?error=credenciales-invalidas${sufijoNext}`);
   }
 
   const perfil = await prisma.perfil.findUnique({
@@ -25,7 +32,7 @@ export async function login(formData: FormData) {
     redirect("/admin");
   }
 
-  redirect("/");
+  redirect(destino);
 }
 
 export async function logout() {
