@@ -61,6 +61,7 @@ model Propiedad {
   actualizadaEn DateTime @updatedAt @map("actualizada_en")
 
   reservas Reserva[]
+  resenas  Resena[]
 
   @@map("propiedades")
 }
@@ -101,15 +102,20 @@ model Consulta {
 
 model Resena {
   id         String   @id @default(cuid())
-  reservaId  String   @unique @map("reserva_id")
+  reservaId  String?  @unique @map("reserva_id")
+  propiedadId String  @map("propiedad_id")
+  perfilId   String?  @map("perfil_id") @db.Uuid
   autor      String
   texto      String
   puntuacion Int
   publicada  Boolean  @default(false)
   creadaEn   DateTime @default(now()) @map("creada_en")
 
-  reserva Reserva @relation(fields: [reservaId], references: [id])
+  reserva   Reserva?   @relation(fields: [reservaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  propiedad Propiedad  @relation(fields: [propiedadId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  perfil    Perfil?    @relation(fields: [perfilId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  @@unique([perfilId, propiedadId])
   @@map("resenas")
 }
 
@@ -139,6 +145,8 @@ model Perfil {
   rol         Rol      @default(HUESPED)
   creadoEn    DateTime @default(now())
   actualizadoEn DateTime @updatedAt
+
+  resenas       Resena[]
 
   @@map("perfiles")
 }
