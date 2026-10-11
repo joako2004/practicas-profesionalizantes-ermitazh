@@ -111,7 +111,7 @@ model Resena {
   publicada  Boolean  @default(false)
   creadaEn   DateTime @default(now()) @map("creada_en")
 
-  reserva   Reserva?   @relation(fields: [reservaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reserva   Reserva?   @relation(fields: [reservaId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   propiedad Propiedad  @relation(fields: [propiedadId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   perfil    Perfil?    @relation(fields: [perfilId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
