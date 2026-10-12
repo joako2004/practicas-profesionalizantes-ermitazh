@@ -3,6 +3,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import CabinGallery from "@/components/public/CabinGallery";
 import PriceCalculator from "@/components/public/PriceCalculator";
+import ResenaForm from "@/components/public/ResenaForm";
+import { obterUsuarioActual } from "@/lib/auth/perfil";
 
 const precioFmt = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -26,6 +28,15 @@ async function getPropiedad(id: string) {
   return propiedad;
 }
 
+async function haySesion(): Promise<boolean> {
+  try {
+    const usuario = await obterUsuarioActual();
+    return usuario !== null;
+  } catch {
+    return false;
+  }
+}
+
 export default async function CabanaDetallePage({
   params,
 }: {
@@ -39,6 +50,7 @@ export default async function CabanaDetallePage({
   }
 
   const precioBase = propiedad.precioBase.toNumber();
+  const autenticado = await haySesion();
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12 md:py-16">
@@ -110,6 +122,10 @@ export default async function CabanaDetallePage({
             capacidad={propiedad.capacidad}
           />
         </aside>
+      </div>
+
+      <div className="mt-12">
+        <ResenaForm propiedadId={propiedad.id} autenticado={autenticado} />
       </div>
     </section>
   );
