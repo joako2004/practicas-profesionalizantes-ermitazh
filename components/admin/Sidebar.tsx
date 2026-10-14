@@ -12,6 +12,7 @@ type IconName =
   | "prices"
   | "inquiries"
   | "reports"
+  | "reviews"
   | "logout";
 
 interface SidebarItem {
@@ -28,6 +29,7 @@ const sidebarItems: SidebarItem[] = [
     icon: "properties",
     href: "/admin/propiedades",
   },
+  { key: "resenas", label: "Reseñas", icon: "reviews", href: "/admin/resenas" },
   { key: "reservas", label: "Reservas", icon: "reservations" },
   { key: "cabanas", label: "Cabañas", icon: "cabins" },
   { key: "disponibilidad", label: "Disponibilidad", icon: "availability" },
@@ -84,6 +86,11 @@ function SidebarIcon({
     reports: (
       <>
         <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+      </>
+    ),
+    reviews: (
+      <>
+        <path d="M12 3.5l2.6 5.3 5.9.9-4.25 4.15 1 5.85L12 16.9l-5.25 2.8 1-5.85L3.5 9.7l5.9-.9z" />
       </>
     ),
     logout: (
