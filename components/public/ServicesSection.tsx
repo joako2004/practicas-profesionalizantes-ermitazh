@@ -1,19 +1,8 @@
+import ServiceIcon from "./ServiceIcon";
+
 interface ServicesSectionProps {
   servicios: string[];
 }
-
-const ICONOS: Record<string, string> = {
-  "WiFi gratuito": "📶",
-  Pileta: "🏊",
-  Parrilla: "🔥",
-  Estacionamiento: "🚗",
-  "Ropa de cama": "🛏️",
-  "Aire acondicionado": "❄️",
-  "Pet friendly": "🐾",
-  Calefacción: "♨️",
-  "Smart TV": "📺",
-  "Cocina equipada": "🍳",
-};
 
 export default function ServicesSection({ servicios }: ServicesSectionProps) {
   return (
@@ -35,7 +24,10 @@ export default function ServicesSection({ servicios }: ServicesSectionProps) {
                 key={servicio}
                 className="flex items-center gap-2 rounded-[var(--radius-md)] bg-white px-5 py-3 ring-1 ring-[var(--color-border)] shadow-sm"
               >
-                <span className="text-xl">{ICONOS[servicio] || "✨"}</span>
+                <ServiceIcon
+                  servicio={servicio}
+                  className="h-5 w-5 shrink-0 text-[var(--color-accent)]"
+                />
                 <span className="text-sm font-medium text-[var(--color-ink)]">
                   {servicio}
                 </span>
