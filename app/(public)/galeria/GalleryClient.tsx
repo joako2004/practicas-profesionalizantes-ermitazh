@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
 import { SeccionGaleria, FotoConMetadatos, PHOTOS_PER_PAGE, asignarTamanosBento } from "@/lib/galeria";
 import Lightbox from "./Lightbox";
 
@@ -20,8 +19,6 @@ interface GalleryClientProps {
 }
 
 export default function GalleryClient({ secciones, filtros, filtroInicial, fotosIniciales }: GalleryClientProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [activeFilter, setActiveFilter] = useState<string>(filtroInicial);
   const [displayedPhotos, setDisplayedPhotos] = useState<FotoConMetadatos[]>(fotosIniciales);
   const [lightbox, setLightbox] = useState<{
@@ -57,23 +54,27 @@ export default function GalleryClient({ secciones, filtros, filtroInicial, fotos
 
   const photosWithSizes = useMemo(() => asignarTamanosBento(displayedPhotos), [displayedPhotos]);
 
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (activeFilter === "todas") {
-      params.delete("cabana");
+  const updateUrl = useCallback((filterId: string) => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (filterId === "todas") {
+      url.searchParams.delete("cabana");
     } else {
-      params.set("cabana", activeFilter);
+      url.searchParams.set("cabana", filterId);
     }
-    router.replace(`/galeria?${params.toString()}`, { scroll: false });
-  }, [activeFilter, router, searchParams]);
+    window.history.replaceState(null, "", url.toString());
+  }, []);
 
   const handleFilterChange = useCallback((filterId: string) => {
+    const isValidFilter = filterId === "todas" || filtros.some((f) => f.id === filterId);
+    if (!isValidFilter) return;
     setActiveFilter(filterId);
     const fotosFiltradas = filterId === "todas"
       ? fotosIniciales
       : secciones.find((s) => s.id === filterId)?.fotos || [];
     setDisplayedPhotos(fotosFiltradas.slice(0, PHOTOS_PER_PAGE));
-  }, [secciones, fotosIniciales]);
+    updateUrl(filterId);
+  }, [secciones, filtros, fotosIniciales, updateUrl]);
 
   const loadMore = useCallback(() => {
     const allFotos = activeFilter === "todas"
