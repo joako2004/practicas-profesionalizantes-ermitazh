@@ -1,8 +1,8 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+import { requireAdminApi } from "@/lib/auth/perfil";
 import { prisma } from "@/lib/prisma";
+import { serializarPropiedad } from "@/lib/serializers";
 
 export async function GET(
   request: NextRequest,
@@ -39,36 +39,8 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const cookieStore = await cookies();
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          },
-        },
-      }
-    );
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: "No autorizado." },
-        { status: 401 }
-      );
-    }
+    const auth = await requireAdminApi();
+    if (!auth.ok) return auth.response;
 
     let body: unknown;
 
@@ -217,7 +189,7 @@ export async function PATCH(
       data: dataToUpdate,
     });
 
-    return NextResponse.json(propiedadActualizada, { status: 200 });
+    return NextResponse.json(serializarPropiedad(propiedadActualizada), { status: 200 });
   } catch (error) {
     console.error("Error al actualizar la propiedad:", error);
 
@@ -236,36 +208,8 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const cookieStore = await cookies();
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          },
-        },
-      }
-    );
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: "No autorizado." },
-        { status: 401 }
-      );
-    }
+    const auth = await requireAdminApi();
+    if (!auth.ok) return auth.response;
 
     const propiedad = await prisma.propiedad.findUnique({
       where: { id },

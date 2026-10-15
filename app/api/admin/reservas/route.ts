@@ -1,20 +1,13 @@
 import { EstadoReserva, Prisma } from "@prisma/client";
-import { createClient } from "@/lib/supabase/server";
+import { requireAdminApi } from "@/lib/auth/perfil";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 const ESTADOS_PERMITIDOS = ["PENDIENTE", "CONFIRMADA", "RECHAZADA", "CANCELADA"];
 
 export async function GET(request: Request) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
+  const auth = await requireAdminApi();
+  if (!auth.ok) return auth.response;
 
   const { searchParams } = new URL(request.url);
   const estadoFilter = searchParams.get("estado");

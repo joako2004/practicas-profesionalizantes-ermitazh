@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { obtenerPrecioDesde } from "@/lib/serializers";
 import { buildReservaWhatsApp } from "@/lib/config";
 
 interface CabinCardProps {
@@ -6,8 +7,16 @@ interface CabinCardProps {
   nombre: string;
   descripcion: string;
   capacidad: number;
+  precioNocheAlta: number;
+  promoSemanalAlta: number;
+  precioNocheBaja: number;
+  promoSemanalBaja: number;
   precioBase: number;
   fotos: string[];
+  // Opcionales para el link de WhatsApp
+  fechaIngreso?: string;
+  fechaSalida?: string;
+  personas?: number;
 }
 
 const precioFormatter = new Intl.NumberFormat("es-AR", {
@@ -21,9 +30,22 @@ export default function CabinCard({
   nombre,
   descripcion,
   capacidad,
+  precioNocheAlta,
+  promoSemanalAlta,
+  precioNocheBaja,
+  promoSemanalBaja,
   precioBase,
   fotos,
+  fechaIngreso,
+  fechaSalida,
+  personas,
 }: CabinCardProps) {
+  const precioDesde = obtenerPrecioDesde({
+    precioNocheAlta: precioNocheAlta,
+    precioNocheBaja: precioNocheBaja,
+    precioBase: precioBase,
+  });
+
   const tieneFotos = fotos.length > 0;
 
   return (
@@ -38,7 +60,7 @@ export default function CabinCard({
         ) : (
           <div className="h-full w-full bg-[var(--color-warm)]/30" />
         )}
-        <div className="card-photo-overlay absolute inset-0" />
+        <div className="card-photo-overlay inset-0" />
         <div className="absolute top-3 left-3">
           <span className="rounded-[var(--radius-sm)] bg-white/90 px-2.5 py-1 text-xs font-medium text-[var(--color-ink)]">
             {capacidad} {capacidad === 1 ? "huésped" : "huéspedes"}
@@ -56,7 +78,9 @@ export default function CabinCard({
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
           <span className="text-lg font-semibold text-[var(--color-accent)] whitespace-nowrap">
-            Desde {precioFormatter.format(precioBase)}
+            {precioDesde === "Consultar precio"
+              ? "Consultar precio"
+              : precioFormatter.format(precioDesde as unknown as number)}
             <span className="text-sm font-normal text-[var(--color-ink)]/50">
               {" "}/ noche
             </span>
@@ -69,7 +93,7 @@ export default function CabinCard({
               Ver más
             </Link>
             <a
-              href={buildReservaWhatsApp(nombre)}
+              href={buildReservaWhatsApp(nombre, fechaIngreso, fechaSalida, personas)}
               target="_blank"
               rel="noopener noreferrer"
               className="whitespace-nowrap rounded-[var(--radius-md)] bg-[var(--color-accent)] px-3 py-2 text-xs font-medium text-white transition-all hover:bg-[var(--color-accent)]/90 active:scale-[0.97]"

@@ -24,6 +24,7 @@ export default function PriceCalculator({
   const [ingreso, setIngreso] = useState("");
   const [salida, setSalida] = useState("");
   const [personas, setPersonas] = useState(Math.min(2, capacidad));
+  const [temporada, setTemporada] = useState<"alta" | "baja">("alta");
   const [resultado, setResultado] = useState<{
     precioPorNoche: number;
     totalEstadia: number;
@@ -32,7 +33,22 @@ export default function PriceCalculator({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const validarFechas = () => {
+    if (!ingreso || !salida) return null;
+    const fechaIng = new Date(ingreso + "T12:00:00");
+    const fechaSal = new Date(salida + "T12:00:00");
+    if (fechaSal <= fechaIng) {
+      return "La fecha de salida no puede ser anterior o igual a la fecha de entrada";
+    }
+    return null;
+  };
+
   const handleCalcular = () => {
+    const errorFechas = validarFechas();
+    if (errorFechas) {
+      setError(errorFechas);
+      return;
+    }
     if (!ingreso || !salida) {
       setError("Seleccioná las fechas de ingreso y salida");
       return;
@@ -41,7 +57,7 @@ export default function PriceCalculator({
     setResultado(null);
 
     startTransition(async () => {
-      const res = await calcularPrecio(propiedadId, ingreso, salida, personas);
+      const res = await calcularPrecio(propiedadId, ingreso, salida, personas, temporada);
       if ("error" in res) {
         setError(res.error);
       } else {
@@ -50,17 +66,10 @@ export default function PriceCalculator({
     });
   };
 
-  const fechaInicioFmt = ingreso
-    ? new Date(ingreso + "T12:00:00").toLocaleDateString("es-AR", { day: "numeric", month: "short" })
-    : "";
-  const fechaFinFmt = salida
-    ? new Date(salida + "T12:00:00").toLocaleDateString("es-AR", { day: "numeric", month: "short" })
-    : "";
-
   const whatsappHref = buildReservaWhatsApp(
     nombre,
-    fechaInicioFmt || undefined,
-    fechaFinFmt || undefined,
+    ingreso || undefined,
+    salida || undefined,
     personas
   );
 
@@ -94,41 +103,49 @@ export default function PriceCalculator({
             type="date"
             value={salida}
             min={ingreso || new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 10)}
-            onChange={(e) => setSalida(e.target.value)}
+            onChange={(e) => {
+              const errorFechas = validarFechas();
+              if (errorFechas) {
+                setError(errorFechas);
+              } else {
+                setError(null);
+                setSalida(e.target.value);
+              }
+            }}
             className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-ink)] outline-none transition-colors focus:border-[var(--color-accent)]"
           />
         </div>
       </div>
 
-      <div className="mt-3">
-        <label className="mb-1 block text-xs font-medium text-[var(--color-ink)]/60">
-          Personas
-        </label>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setPersonas((p) => Math.max(1, p - 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-ink)]/60 transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
-          >
-            −
-          </button>
-          <span className="min-w-[2ch] text-center text-sm font-medium text-[var(--color-ink)]">
-            {personas}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPersonas((p) => Math.min(capacidad, p + 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-ink)]/60 transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
-          >
-            +
-          </button>
-          <span className="text-xs text-[var(--color-ink)]/50">
-            de {capacidad} máximo
-          </span>
+<div className="mt-3">
+          <label className="mb-1 block text-xs font-medium text-[var(--color-ink)]/60">
+            Personas
+          </label>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setPersonas((p) => Math.max(1, p - 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-ink)]/60 transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
+            >
+              −
+            </button>
+            <span className="min-w-[2ch] text-center text-sm font-medium text-[var(--color-ink)]">
+              {personas}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPersonas((p) => Math.min(capacidad, p + 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-ink)]/60 transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
+            >
+              +
+            </button>
+            <span className="text-xs text-[var(--color-ink)]/50">
+              de {capacidad} máximo
+            </span>
+          </div>
         </div>
-      </div>
 
-      <button
+        <button
         type="button"
         onClick={handleCalcular}
         disabled={isPending || !ingreso || !salida}

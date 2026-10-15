@@ -53,14 +53,40 @@ export function buildReservaWhatsApp(
   nombreCabana: string,
   fechaInicio?: string,
   fechaFin?: string,
-  personas?: number
+  personas?: number,
+  esBusquedaGeneral = false
 ): string {
-  let mensaje = `Hola, quiero reservar la ${nombreCabana}`;
-  if (fechaInicio && fechaFin) {
-    mensaje += ` del ${fechaInicio} al ${fechaFin}`;
+  const nombreFormateado = esBusquedaGeneral
+    ? `una cabaña para ${personas} personas`
+    : `la ${nombreCabana}`;
+
+  // Formatear fechas en formato legible en español: "5 de octubre de 2026"
+  const fechaActual = new Date();
+  const formatearFecha = (fechaStr: string | undefined) => {
+    if (!fechaStr) return null;
+    const fecha = new Date(fechaStr);
+    // Agregar año solo si es distinto al actual
+    const anioDiferente = fecha.getFullYear() !== fechaActual.getFullYear();
+    const opciones: Intl.DateTimeFormatOptions = {
+      day: "numeric",
+      month: "long",
+    };
+    if (anioDiferente) {
+      opciones.year = "numeric";
+    }
+    return fecha.toLocaleDateString("es-AR", opciones);
+  };
+
+  const fechaIngreso = formatearFecha(fechaInicio);
+  const fechaSalida = formatearFecha(fechaFin);
+
+  // Construir mensaje base con [tu nombre] literal (siempre presente desde el inicio)
+  let mensaje = `Hola, soy [tu nombre]. Quiero reservar ${nombreFormateado}`;
+
+  // Agregar tramo de fechas solo si ambas están presentes
+  if (fechaIngreso && fechaSalida) {
+    mensaje += ` desde el ${fechaIngreso} hasta el ${fechaSalida}`;
   }
-  if (personas) {
-    mensaje += ` para ${personas} persona${personas > 1 ? "s" : ""}`;
-  }
-  return buildWhatsAppLink(mensaje);
+
+return buildWhatsAppLink(mensaje);
 }

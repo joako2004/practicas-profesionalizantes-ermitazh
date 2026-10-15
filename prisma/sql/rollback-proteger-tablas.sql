@@ -1,0 +1,22 @@
+-- REABRE la exposición pública de 8 tablas; usar SOLO en emergencia
+BEGIN;
+ALTER TABLE public."_prisma_migrations" DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public."_prisma_migrations" TO anon, authenticated;
+ALTER TABLE public."complejos" DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public."complejos" TO anon, authenticated;
+ALTER TABLE public."consultas" DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public."consultas" TO anon, authenticated;
+ALTER TABLE public."imagenes" DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public."imagenes" TO anon, authenticated;
+ALTER TABLE public."precios" DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public."precios" TO anon, authenticated;
+ALTER TABLE public."propiedades" DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public."propiedades" TO anon, authenticated;
+ALTER TABLE public."resenas" DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public."resenas" TO anon, authenticated;
+ALTER TABLE public."reservas" DISABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public."reservas" TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated;
+COMMIT;

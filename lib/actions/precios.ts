@@ -1,20 +1,32 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { TramoNoches } from "@prisma/client";
 
-function tramoFromNoches(noches: number): TramoNoches {
-  if (noches === 1) return "UNA_NOCHE";
-  if (noches <= 6) return "DE_DOS_A_SEIS";
-  return "SIETE_O_MAS";
+// Función pura: calcula el precio total dado el precio por noche, noches y promo
+// No tiene efectos secundarios ni acceso a la base de datos
+function calcularPrecioPure(
+  precioNoche: number,
+  noches: number,
+  promoSemanal: number = 0
+): number {
+  let total = precioNoche * noches;
+  if (noches >= 7) {
+    total = total * (1 - promoSemanal / 100);
+  }
+  return Math.round(total * 100) / 100;
 }
 
 export async function calcularPrecio(
   propiedadId: string,
   fechaIngreso: string,
   fechaSalida: string,
-  personas: number
-): Promise<{ precioPorNoche: number; totalEstadia: number; noches: number } | { error: string }> {
+  personas: number,
+  temporada: "alta" | "baja" = "alta"
+): Promise<{
+  precioPorNoche: number;
+  totalEstadia: number;
+  noches: number;
+} | { error: string}> {
   try {
     const [ingresoAno, ingresoMes, ingresoDia] = fechaIngreso.split("-").map(Number);
     const [salidaAno, salidaMes, salidaDia] = fechaSalida.split("-").map(Number);
@@ -26,32 +38,27 @@ export async function calcularPrecio(
     }
 
     const noches = Math.round((salida.getTime() - ingreso.getTime()) / (1000 * 60 * 60 * 24));
-    const tramo = tramoFromNoches(noches);
 
-    const precios = await prisma.precio.findMany({
-      where: {
-        propiedadId,
-        activo: true,
-        tramoNoches: tramo,
-        fechaInicio: { lte: salida },
-        fechaFin: { gte: ingreso },
-      },
-      orderBy: { cantidadPersonas: "asc" },
+    const propiedad = await prisma.propiedad.findUnique({
+      where: { id: propiedadId },
     });
 
-    if (precios.length === 0) {
-      const propiedad = await prisma.propiedad.findUnique({
-        where: { id: propiedadId },
-        select: { precioBase: true },
-      });
-      const base = propiedad?.precioBase.toNumber() ?? 0;
-      return { precioPorNoche: base, totalEstadia: base * noches, noches };
+    if (!propiedad) {
+      return { error: "Propiedad no encontrada" };
     }
 
-    const precioMatch = precios.find((p) => personas <= p.cantidadPersonas) ?? precios[precios.length - 1];
-    const precioPorNoche = precioMatch.precioPorNoche.toNumber();
+// Seleccionar precio y promo según la temporada
+    // Los campos de Prisma son Decimal, convertimos a number usando .toNumber()
+    const precioNoche = temporada === "alta"
+      ? Number(propiedad.precioNocheAlta.toNumber()) ?? 0
+      : Number(propiedad.precioNocheBaja.toNumber()) ?? 0;
+    const promoSemanal = temporada === "alta"
+      ? Number(propiedad.promoSemanalAlta.toNumber()) ?? 0
+      : Number(propiedad.promoSemanalBaja.toNumber()) ?? 0;
 
-    return { precioPorNoche, totalEstadia: precioPorNoche * noches, noches };
+    const totalEstadia = calcularPrecioPure(precioNoche, noches, promoSemanal);
+
+    return { precioPorNoche: precioNoche, totalEstadia, noches };
   } catch {
     return { error: "Error al calcular el precio" };
   }

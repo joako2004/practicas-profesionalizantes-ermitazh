@@ -3,6 +3,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import CabinGallery from "@/components/public/CabinGallery";
 import PriceCalculator from "@/components/public/PriceCalculator";
+import ResenaForm from "@/components/public/ResenaForm";
+import ResenasLista from "@/components/public/ResenasLista";
+import { obterUsuarioActual } from "@/lib/auth/perfil";
 
 const precioFmt = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -26,6 +29,43 @@ async function getPropiedad(id: string) {
   return propiedad;
 }
 
+async function getResenas(propiedadId: string) {
+  const where = { propiedadId, publicada: true };
+  const [resenas, resumen] = await Promise.all([
+    prisma.resena.findMany({
+      where,
+      orderBy: { creadaEn: "desc" },
+      take: 20,
+      select: {
+        id: true,
+        autor: true,
+        texto: true,
+        puntuacion: true,
+        creadaEn: true,
+      },
+    }),
+    prisma.resena.aggregate({
+      where,
+      _avg: { puntuacion: true },
+      _count: { _all: true },
+    }),
+  ]);
+  return {
+    resenas,
+    promedio: resumen._avg.puntuacion,
+    total: resumen._count._all,
+  };
+}
+
+async function haySesion(): Promise<boolean> {
+  try {
+    const usuario = await obterUsuarioActual();
+    return usuario !== null;
+  } catch {
+    return false;
+  }
+}
+
 export default async function CabanaDetallePage({
   params,
 }: {
@@ -39,6 +79,8 @@ export default async function CabanaDetallePage({
   }
 
   const precioBase = propiedad.precioBase.toNumber();
+  const autenticado = await haySesion();
+  const { resenas, promedio, total } = await getResenas(id);
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12 md:py-16">
@@ -110,6 +152,14 @@ export default async function CabanaDetallePage({
             capacidad={propiedad.capacidad}
           />
         </aside>
+      </div>
+
+      <div className="mt-12">
+        <ResenasLista resenas={resenas} promedio={promedio} total={total} />
+      </div>
+
+      <div className="mt-12">
+        <ResenaForm propiedadId={propiedad.id} autenticado={autenticado} />
       </div>
     </section>
   );

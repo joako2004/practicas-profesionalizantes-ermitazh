@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { requireAdminApi } from "@/lib/auth/perfil";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -8,15 +8,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
+  const auth = await requireAdminApi();
+  if (!auth.ok) return auth.response;
 
   const resolvedParams = await params;
   const { estado } = await request.json();
@@ -66,15 +59,8 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
+  const auth = await requireAdminApi();
+  if (!auth.ok) return auth.response;
 
   const resolvedParams = await params;
 

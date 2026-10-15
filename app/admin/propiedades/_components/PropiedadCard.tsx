@@ -1,21 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Propiedad } from "@prisma/client";
+import { PropiedadSerializer } from "@/lib/serializers";
 import AtributoEditable from "./AtributoEditable";
 import ConfirmDialog from "./ConfirmDialog";
-import {
-  actualizarMenuPrecios,
-  updatePropiedadAtributo,
-} from "@/lib/actions/propiedades";
-import PrecioMenu from "./PrecioMenu";
+import { updatePropiedadAtributo } from "@/lib/actions/propiedades";
 
 interface PropiedadCardProps {
-  propiedad: Propiedad;
+  propiedad: PropiedadSerializer;
 }
 
 const ATRIBUTOS_EDITABLES: Array<{
-  key: keyof Propiedad;
+  key: keyof PropiedadSerializer;
   label: string;
   type: "text" | "number" | "decimal" | "boolean" | "array";
   editable: boolean;
@@ -24,9 +20,10 @@ const ATRIBUTOS_EDITABLES: Array<{
   { key: "descripcion", label: "Descripción", type: "text", editable: true },
   { key: "capacidad", label: "Capacidad", type: "number", editable: true },
   { key: "orden", label: "Orden", type: "number", editable: true },
-  { key: "precioBase", label: "Precio Base", type: "decimal", editable: true },
-  { key: "servicios", label: "Servicios", type: "array", editable: true },
-  { key: "activa", label: "Activa", type: "boolean", editable: true },
+  { key: "precioNocheAlta", label: "Precio Noche Alta", type: "decimal", editable: true },
+  { key: "promoSemanalAlta", label: "Promo Alta (%)", type: "number", editable: true },
+  { key: "precioNocheBaja", label: "Precio Noche Baja", type: "decimal", editable: true },
+  { key: "promoSemanalBaja", label: "Promo Baja (%)", type: "number", editable: true },
   { key: "id", label: "ID", type: "text", editable: false },
   { key: "creadaEn", label: "Creada el", type: "text", editable: false },
   { key: "actualizadaEn", label: "Actualizada el", type: "text", editable: false },
@@ -43,13 +40,8 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
   const [isPending, startTransition] = useTransition();
 
   const handleEditRequest = (atributo: string, nuevoValor: unknown) => {
-    if (atributo === "precioBase") {
-      // El menú de precios maneja su propio guardado
-      setError("Guardando menú de precios...");
-    } else {
-      setConfirmDialog({ open: true, atributo, nuevoValor });
-      setError(null);
-    }
+    setConfirmDialog({ open: true, atributo, nuevoValor });
+    setError(null);
   };
 
   const handleConfirm = () => {
@@ -76,9 +68,8 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
     setError(null);
   };
 
-  const formatValue = (key: keyof Propiedad, value: unknown): string => {
+  const formatValue = (key: keyof PropiedadSerializer, value: unknown): string => {
     if (value === null || value === undefined) return "—";
-    if (key === "precioBase") return `$${Number(value).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`;
     if (key === "servicios") return (value as string[]).join(", ") || "—";
     if (key === "activa") return value ? "Sí" : "No";
     if (key === "creadaEn" || key === "actualizadaEn") {
@@ -106,9 +97,6 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
             <span className="flex items-center gap-1">
               👥 {propiedad.capacidad} personas
             </span>
-            <span className="font-medium text-toasted-brown">
-              {formatValue("precioBase", propiedad.precioBase)}/noche
-            </span>
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                 propiedad.activa
@@ -131,31 +119,6 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
         <div className="border-t border-desert-sand/20 bg-desert-sand/5 px-6 pb-6 animate-slide-down">
           <dl className="space-y-3">
             {ATRIBUTOS_EDITABLES.map(({ key, label, type, editable }) => {
-              if (key === "precioBase") {
-                return (
-                  <div
-                    key={key}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-white border border-desert-sand/20"
-                  >
-                    <dt className="flex items-center gap-2 text-sm font-medium text-dark-pine/70 min-w-[140px]">
-                      Precio
-                    </dt>
-                    <dd className="flex-1 text-sm text-dark-pine">
-                      <PrecioMenu
-                        propiedadId={propiedad.id}
-                        onSave={async (precios) => {
-                          const result = await actualizarMenuPrecios(propiedad.id, precios);
-                          if (result.success) {
-                            setError(null);
-                          } else {
-                            setError(result.error || "Error al guardar");
-                          }
-                        }}
-                      />
-                    </dd>
-                  </div>
-                );
-              }
               return (
                 <div
                   key={key}
@@ -197,9 +160,9 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
           open={confirmDialog.open}
           onConfirm={handleConfirm}
           onCancel={handleCancel}
-          atributo={confirmDialog.atributo}
-          valorActual={formatValue(confirmDialog.atributo as keyof Propiedad, propiedad[confirmDialog.atributo as keyof Propiedad])}
-          nuevoValor={formatValue(confirmDialog.atributo as keyof Propiedad, confirmDialog.nuevoValor)}
+          atributo={confirmDialog.atributo as keyof PropiedadSerializer}
+          valorActual={formatValue(confirmDialog.atributo as keyof PropiedadSerializer, propiedad[confirmDialog.atributo as keyof PropiedadSerializer])}
+          nuevoValor={formatValue(confirmDialog.atributo as keyof PropiedadSerializer, confirmDialog.nuevoValor)}
           disabled={isPending}
         />
       )}

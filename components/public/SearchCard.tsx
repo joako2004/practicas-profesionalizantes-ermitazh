@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { buildWhatsAppLink } from "@/lib/config";
+import { buildReservaWhatsApp } from "@/lib/config";
 
 function hoy(): string {
   return new Date().toISOString().split("T")[0];
@@ -31,14 +31,14 @@ export default function SearchCard() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    let mensaje = "Hola, quiero consultar disponibilidad";
-    if (llegada && salida) {
-      mensaje += ` del ${llegada} al ${salida}`;
-    }
-    if (huespedes) {
-      mensaje += ` para ${huespedes} persona${huespedes > 1 ? "s" : ""}`;
-    }
-    window.open(buildWhatsAppLink(mensaje), "_blank");
+    const mensaje = buildReservaWhatsApp(
+      "", // nombreCabana - no específica aún
+      llegada || undefined,
+      salida || undefined,
+      huespedes,
+      true // esBusquedaGeneral
+    );
+    window.open(mensaje, "_blank");
   }
 
   return (

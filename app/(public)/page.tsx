@@ -1,5 +1,6 @@
-import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { serializarPropiedad } from "@/lib/serializers";
 import HeroCarousel from "@/components/public/HeroCarousel";
 import SearchCard from "@/components/public/SearchCard";
 import WelcomeSection from "@/components/public/WelcomeSection";
@@ -87,10 +88,7 @@ export default async function HomePage() {
       getPropiedades(),
     ]);
 
-  const propiedadesSerializadas = propiedades.map((p) => ({
-    ...p,
-    precioBase: p.precioBase.toNumber(),
-  }));
+  const propiedadesSerializadas = propiedades.map(serializarPropiedad);
 
   return (
     <>

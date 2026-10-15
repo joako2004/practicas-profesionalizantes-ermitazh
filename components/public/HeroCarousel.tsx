@@ -27,15 +27,6 @@ export default function HeroCarousel({ imagenes }: HeroCarouselProps) {
   const imagenesValidas =
     imagenes.length > 0 ? imagenes : FALLBACK_IMAGENES;
 
-  const goTo = useCallback(
-    (index: number) => {
-      if (index < 0) setCurrentIndex(imagenesValidas.length - 1);
-      else if (index >= imagenesValidas.length) setCurrentIndex(0);
-      else setCurrentIndex(index);
-    },
-    [imagenesValidas.length]
-  );
-
   useEffect(() => {
     if (imagenes.length > 0) return;
     const timer = setInterval(() => {
@@ -58,26 +49,6 @@ export default function HeroCarousel({ imagenes }: HeroCarouselProps) {
       ))}
 
       <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-ink)]/70 via-[var(--color-ink)]/20 to-transparent" />
-
-      <button
-        onClick={() => goTo(currentIndex - 1)}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-        aria-label="Imagen anterior"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m15 18-6-6 6-6"/>
-        </svg>
-      </button>
-
-      <button
-        onClick={() => goTo(currentIndex + 1)}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-        aria-label="Imagen siguiente"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m9 18 6-6-6-6"/>
-        </svg>
-      </button>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 w-full">
         <div className="max-w-2xl">

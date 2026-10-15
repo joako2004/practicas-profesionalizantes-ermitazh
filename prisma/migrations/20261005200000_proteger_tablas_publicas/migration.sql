@@ -1,0 +1,22 @@
+-- Proteger 8 tablas del schema public: RLS sin políticas + revocar anon/authenticated
+BEGIN;
+ALTER TABLE public."_prisma_migrations" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public."_prisma_migrations" FROM anon, authenticated;
+ALTER TABLE public."complejos" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public."complejos" FROM anon, authenticated;
+ALTER TABLE public."consultas" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public."consultas" FROM anon, authenticated;
+ALTER TABLE public."imagenes" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public."imagenes" FROM anon, authenticated;
+ALTER TABLE public."precios" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public."precios" FROM anon, authenticated;
+ALTER TABLE public."propiedades" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public."propiedades" FROM anon, authenticated;
+ALTER TABLE public."resenas" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public."resenas" FROM anon, authenticated;
+ALTER TABLE public."reservas" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public."reservas" FROM anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon, authenticated;
+COMMIT;

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { esAdmin } from "@/lib/auth/perfil";
 
 interface UpdatePropiedadResult {
   success: boolean;
@@ -13,6 +14,11 @@ interface UpdatePropiedadResult {
     descripcion: string;
     capacidad: number;
     precioBase: number;
+    promoSemanal: number | null;
+    precioNocheAlta: number;
+    promoSemanalAlta: number;
+    precioNocheBaja: number;
+    promoSemanalBaja: number;
     servicios: string[];
     activa: boolean;
   };
@@ -23,9 +29,26 @@ export async function updatePropiedadAtributo(
   campo: string,
   valor: unknown
 ): Promise<UpdatePropiedadResult> {
+  if (!(await esAdmin())) {
+    return { success: false, error: "No autorizado." };
+  }
   try {
     const propiedadExistente = await prisma.propiedad.findUnique({
       where: { id: propiedadId },
+      select: {
+        id: true,
+        nombre: true,
+        descripcion: true,
+        capacidad: true,
+        precioBase: true,
+        promoSemanal: true,
+        precioNocheAlta: true,
+        promoSemanalAlta: true,
+        precioNocheBaja: true,
+        promoSemanalBaja: true,
+        servicios: true,
+        activa: true,
+      },
     });
 
     if (!propiedadExistente) {
@@ -89,6 +112,46 @@ export async function updatePropiedadAtributo(
         dataToUpdate.activa = valor;
         break;
       }
+      case "precioNocheAlta": {
+        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
+        if (isNaN(num) || num < 0) {
+          return { success: false, error: "El precio nocturna alta debe ser un número mayor o igual a 0" };
+        }
+        dataToUpdate.precioNocheAlta = Math.round(num * 100) / 100;
+        break;
+      }
+      case "promoSemanalAlta": {
+        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
+        if (!Number.isFinite(num) || num < 0 || num > 100) {
+          return { success: false, error: "La promo semanal alta debe ser un número entre 0 y 100" };
+        }
+        dataToUpdate.promoSemanalAlta = Math.round(num * 100) / 100;
+        break;
+      }
+      case "promoSemanal": {
+        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
+        if (!Number.isFinite(num) || num < 0) {
+          return { success: false, error: "La promo semanal debe ser un número mayor o igual a 0" };
+        }
+        dataToUpdate.promoSemanal = Math.round(num * 100) / 100;
+        break;
+      }
+      case "precioNocheBaja": {
+        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
+        if (isNaN(num) || num < 0) {
+          return { success: false, error: "El precio nocturna baja debe ser un número mayor o igual a 0" };
+        }
+        dataToUpdate.precioNocheBaja = Math.round(num * 100) / 100;
+        break;
+      }
+      case "promoSemanalBaja": {
+        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
+        if (!Number.isFinite(num) || num < 0 || num > 100) {
+          return { success: false, error: "La promo semanal baja debe ser un número entre 0 y 100" };
+        }
+        dataToUpdate.promoSemanalBaja = Math.round(num * 100) / 100;
+        break;
+      }
       default:
         return { success: false, error: `Campo no editable: ${campo}` };
     }
@@ -109,9 +172,14 @@ export async function updatePropiedadAtributo(
         descripcion: propiedadActualizada.descripcion,
         capacidad: propiedadActualizada.capacidad,
         precioBase: Number(propiedadActualizada.precioBase),
+        promoSemanal: Number(propiedadActualizada.promoSemanal),
+        precioNocheAlta: Number(propiedadActualizada.precioNocheAlta) ?? 0,
+        promoSemanalAlta: Number(propiedadActualizada.promoSemanalAlta) ?? 0,
+        precioNocheBaja: Number(propiedadActualizada.precioNocheBaja) ?? 0,
+        promoSemanalBaja: Number(propiedadActualizada.promoSemanalBaja) ?? 0,
         servicios: propiedadActualizada.servicios,
         activa: propiedadActualizada.activa,
-      },
+      } as UpdatePropiedadResult["propiedad"],
     };
   } catch (error) {
     console.error("Error al actualizar propiedad:", error);
@@ -126,6 +194,9 @@ export async function crearPropiedad(data: {
   precioBase: number;
   servicios?: string[];
 }): Promise<UpdatePropiedadResult> {
+  if (!(await esAdmin())) {
+    return { success: false, error: "No autorizado." };
+  }
   try {
     if (!data.nombre?.trim()) {
       return { success: false, error: "El nombre es obligatorio" };
@@ -162,6 +233,11 @@ export async function crearPropiedad(data: {
         descripcion: propiedad.descripcion,
         capacidad: propiedad.capacidad,
         precioBase: Number(propiedad.precioBase),
+        promoSemanal: Number(propiedad.promoSemanal),
+        precioNocheAlta: Number(propiedad.precioNocheAlta) ?? 0,
+        promoSemanalAlta: Number(propiedad.promoSemanalAlta) ?? 0,
+        precioNocheBaja: Number(propiedad.precioNocheBaja) ?? 0,
+        promoSemanalBaja: Number(propiedad.promoSemanalBaja) ?? 0,
         servicios: propiedad.servicios,
         activa: propiedad.activa,
       },
@@ -172,53 +248,10 @@ export async function crearPropiedad(data: {
   }
 }
 
-interface PrecioOpcion {
-  tramoNoches: "UNA_NOCHE" | "DE_DOS_A_SEIS" | "SIETE_O_MAS";
-  precioPorNoche: number;
-  tipoDia: "TODOS" | "SEMANA" | "FIN_DE_SEMANA";
-  estanciaTemporada: "baja" | "alta";
-}
-
-export async function actualizarMenuPrecios(
-  propiedadId: string,
-  precios: PrecioOpcion[]
-): Promise<UpdatePropiedadResult> {
-  try {
-    for (const p of precios) {
-      await fetch("/api/precios", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          propiedadId,
-          nombre: p.estanciaTemporada,
-          fechaInicio: new Date().toISOString().split("T")[0],
-          fechaFin: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
-          precioPorNoche: p.precioPorNoche,
-          tramoNoches: p.tramoNoches,
-          cantidadPersonas: 1,
-          tipoDia: p.tipoDia,
-          activo: true,
-        }),
-      });
-    }
-
-    revalidatePath("/admin/propiedades");
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error al actualizar menú de precios:", error);
-    return {
-      success: false,
-      error: "Error interno del servidor al actualizar el menú de precios",
-    };
-  }
-}
-
 export async function eliminarPropiedad(propiedadId: string): Promise<UpdatePropiedadResult> {
+  if (!(await esAdmin())) {
+    return { success: false, error: "No autorizado." };
+  }
   try {
     const propiedad = await prisma.propiedad.findUnique({
       where: { id: propiedadId },
