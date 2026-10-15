@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { contarCaracteres } from "@/lib/utils";
 
 interface Propiedad {
   id: string;
@@ -12,6 +13,10 @@ interface PreReservaFormProps {
   propiedades: Propiedad[];
 }
 
+const MAX_CARACTERES_SIN_ESPACIOS = 1000;
+const MAX_CARACTERES_TOTAL = 3000;
+const UMBRAL_ADVERTENCIA = 900;
+
 function hoy(): string {
   return new Date().toISOString().split("T")[0];
 }
@@ -22,19 +27,42 @@ function diaSiguiente(fecha: string): string {
   return d.toISOString().split("T")[0];
 }
 
+function recortarAlLimite(texto: string): string {
+  let resultado = "";
+  let count = 0;
+
+  for (const char of texto) {
+    if (!/\s/.test(char)) {
+      if (count >= MAX_CARACTERES_SIN_ESPACIOS) {
+        break;
+      }
+      count++;
+    }
+    if (resultado.length >= MAX_CARACTERES_TOTAL) {
+      break;
+    }
+    resultado += char;
+  }
+
+  return resultado;
+}
+
 export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
   const [propiedadId, setPropiedadId] = useState("");
   const [llegada, setLlegada] = useState("");
   const [salida, setSalida] = useState("");
   const [huespedes, setHuespedes] = useState(2);
   const [nombre, setNombre] = useState("");
-  const [telefono, setTelefono] = useState("");
+  const [informacionAdicional, setInformacionAdicional] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const minSalida = llegada ? diaSiguiente(llegada) : hoy();
   const propiedadSeleccionada = propiedades.find((p) => p.id === propiedadId);
   const maxHuespedes = propiedadSeleccionada?.capacidad ?? 10;
+  const caracteresSinEspacios = contarCaracteres(informacionAdicional);
+  const cercaDelLimite = caracteresSinEspacios >= UMBRAL_ADVERTENCIA;
+  const excedeLimite = caracteresSinEspacios > MAX_CARACTERES_SIN_ESPACIOS;
 
   function handleLlegadaChange(e: React.ChangeEvent<HTMLInputElement>) {
     const nuevaLlegada = e.target.value;
@@ -45,12 +73,34 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
     }
   }
 
+  function handleInformacionAdicionalChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    const nuevoValor = e.target.value;
+
+    if (nuevoValor.length > MAX_CARACTERES_TOTAL) {
+      setInformacionAdicional(recortarAlLimite(nuevoValor));
+      return;
+    }
+
+    const recortado = recortarAlLimite(nuevoValor);
+    setInformacionAdicional(recortado);
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
 
-    if (!propiedadId || !llegada || !salida || !nombre.trim() || !telefono.trim() || !huespedes) {
-      setError("Completá todos los campos");
+    if (!propiedadId || !llegada || !salida || !nombre.trim() || !huespedes) {
+      setError("Completá todos los campos obligatorios");
+      return;
+    }
+
+    if (excedeLimite) {
+      setError(`La información adicional supera el límite de ${MAX_CARACTERES_SIN_ESPACIOS} caracteres (sin contar espacios)`);
+      return;
+    }
+
+    if (informacionAdicional.length > MAX_CARACTERES_TOTAL) {
+      setError(`La información adicional supera el límite de ${MAX_CARACTERES_TOTAL} caracteres totales`);
       return;
     }
 
@@ -70,8 +120,8 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
           fecha_inicio: llegada,
           fecha_fin: salida,
           huesped_nombre: nombre.trim(),
-          huesped_telefono: telefono.trim(),
           personas: huespedes,
+          informacion_adicional: informacionAdicional.trim() || null,
         }),
       });
 
@@ -166,35 +216,46 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div>
-          <label htmlFor="nombre" className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]">
-            Nombre completo
-          </label>
-          <input
-            id="nombre"
-            type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            placeholder="Tu nombre"
-            className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="telefono" className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]">
-            Teléfono (WhatsApp)
-          </label>
-          <input
-            id="telefono"
-            type="tel"
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            placeholder="+54 9 11 1234-5678"
-            className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10"
-            required
-          />
-        </div>
+      <div className="mb-4">
+        <label htmlFor="nombre" className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]">
+          Nombre completo
+        </label>
+        <input
+          id="nombre"
+          type="text"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          placeholder="Tu nombre"
+          className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10"
+          required
+        />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="informacion-adicional" className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]">
+          Información adicional
+        </label>
+        <textarea
+          id="informacion-adicional"
+          value={informacionAdicional}
+          onChange={handleInformacionAdicionalChange}
+          placeholder="Contanos cualquier detalle que quieras que tengamos en cuenta"
+          rows={4}
+          className={`w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10 resize-y ${
+            excedeLimite ? "border-[var(--color-danger)] focus:border-[var(--color-danger)]" : ""
+          }`}
+        />
+        <p
+          className={`mt-1.5 text-xs text-right transition-colors ${
+            excedeLimite
+              ? "text-[var(--color-danger)]"
+              : cercaDelLimite
+              ? "text-[var(--color-warning)]"
+              : "text-[var(--color-muted)]"
+          }`}
+        >
+          {caracteresSinEspacios} / {MAX_CARACTERES_SIN_ESPACIOS} caracteres (sin contar espacios)
+        </p>
       </div>
 
       <button

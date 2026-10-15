@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import PreReservaForm from "./PreReservaForm";
+import PreReservaForm from "@/app/pre-reserva/PreReservaForm";
 
 async function getPropiedades() {
   return prisma.propiedad.findMany({
@@ -13,7 +13,7 @@ export default async function PreReservaPage() {
   const propiedades = await getPropiedades();
 
   return (
-    <section className="py-16 md:py-20">
+    <section className="pt-32 pb-16 md:pt-40 md:pb-24">
       <div className="mx-auto max-w-3xl px-6">
         <div className="mx-auto max-w-xl text-center mb-12">
           <p className="mb-3 text-xs font-medium uppercase tracking-[0.22em] text-[var(--color-muted-dark)]">
