@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { obtenerPrecioDesde } from "@/lib/serializers";
+import { obtenerPrecioTemporadaAlta } from "@/lib/serializers";
 import { buildReservaWhatsApp } from "@/lib/config";
 
 interface CabinCardProps {
@@ -40,7 +40,7 @@ export default function CabinCard({
   fechaSalida,
   personas,
 }: CabinCardProps) {
-  const precioDesde = obtenerPrecioDesde({
+  const { precio, temporada } = obtenerPrecioTemporadaAlta({
     precioNocheAlta: precioNocheAlta,
     precioNocheBaja: precioNocheBaja,
     precioBase: precioBase,
@@ -78,9 +78,16 @@ export default function CabinCard({
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
           <span className="text-lg font-semibold text-[var(--color-accent)] whitespace-nowrap">
-            {precioDesde === "Consultar precio"
-              ? "Consultar precio"
-              : precioFormatter.format(precioDesde as unknown as number)}
+            {precio === "Consultar precio" ? (
+              "Consultar precio"
+            ) : (
+              <>
+                <span className="block text-xs font-medium text-[var(--color-ink)]/50">
+                  {temporada === "alta" ? "Temporada alta" : "Desde"}
+                </span>
+                {precioFormatter.format(precio as number)}
+              </>
+            )}
             <span className="text-sm font-normal text-[var(--color-ink)]/50">
               {" "}/ noche
             </span>

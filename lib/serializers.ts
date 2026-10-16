@@ -41,6 +41,25 @@ export function obtenerPrecioDesde(
   return precioDesde;
 }
 
+export interface PrecioConTemporada {
+  precio: number | string;
+  temporada: "alta" | "baja" | null;
+}
+
+export function obtenerPrecioTemporadaAlta(propiedad: {
+  precioNocheAlta: number;
+  precioNocheBaja: number;
+  precioBase: number;
+}): PrecioConTemporada {
+  if (propiedad.precioNocheAlta > 0) {
+    return { precio: propiedad.precioNocheAlta, temporada: "alta" };
+  }
+  if (propiedad.precioNocheBaja > 0) {
+    return { precio: propiedad.precioNocheBaja, temporada: "baja" };
+  }
+  return { precio: obtenerPrecioDesde(propiedad), temporada: null };
+}
+
 function numeroSeguro(valor: unknown): number {
   const numero = Number(valor);
   return Number.isFinite(numero) ? numero : 0;
