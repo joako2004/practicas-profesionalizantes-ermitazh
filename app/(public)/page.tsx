@@ -18,6 +18,10 @@ export type PropiedadParaHome = Prisma.PropiedadGetPayload<{
     descripcion: true;
     capacidad: true;
     precioBase: true;
+    precioNocheAlta: true;
+    promoSemanalAlta: true;
+    precioNocheBaja: true;
+    promoSemanalBaja: true;
     fotos: true;
   };
 }>;
@@ -72,6 +76,10 @@ async function getPropiedades() {
       descripcion: true,
       capacidad: true,
       precioBase: true,
+      precioNocheAlta: true,
+      promoSemanalAlta: true,
+      precioNocheBaja: true,
+      promoSemanalBaja: true,
       fotos: true,
     },
   });

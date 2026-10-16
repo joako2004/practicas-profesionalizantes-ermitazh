@@ -41,6 +41,11 @@ export function obtenerPrecioDesde(
   return precioDesde;
 }
 
+function numeroSeguro(valor: unknown): number {
+  const numero = Number(valor);
+  return Number.isFinite(numero) ? numero : 0;
+}
+
 export function serializarPropiedad(raw: any): PropiedadSerializer {
   return {
     id: raw.id,
@@ -49,10 +54,10 @@ export function serializarPropiedad(raw: any): PropiedadSerializer {
     capacidad: raw.capacidad ?? 0,
     precioBase: Number(raw.precioBase) ?? 0,
     promoSemanal: Number(raw.promoSemanal) ?? null,
-    precioNocheAlta: Number(raw.precioNocheAlta) ?? 0,
-    promoSemanalAlta: Number(raw.promoSemanalAlta) ?? 0,
-    precioNocheBaja: Number(raw.precioNocheBaja) ?? 0,
-    promoSemanalBaja: Number(raw.promoSemanalBaja) ?? 0,
+    precioNocheAlta: numeroSeguro(raw.precioNocheAlta),
+    promoSemanalAlta: numeroSeguro(raw.promoSemanalAlta),
+    precioNocheBaja: numeroSeguro(raw.precioNocheBaja),
+    promoSemanalBaja: numeroSeguro(raw.promoSemanalBaja),
     fotos: raw.fotos ?? [],
     servicios: raw.servicios ?? [],
     activa: raw.activa ?? false,
