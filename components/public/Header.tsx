@@ -77,16 +77,16 @@ export default function Header({ sesion }: { sesion: Sesion }) {
           >
             Contacto
           </a>
-          <a
-            href="/#buscador"
+          <Link
+            href="/pre-reserva"
             className="rounded-[var(--radius-md)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-5 py-2 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/80 hover:border-[var(--color-accent)]/80 active:scale-[0.97]"
           >
             Reservar
-          </a>
+          </Link>
           <SesionControles sesion={sesion} />
-        </div>
-        <div className="md:hidden">
-          <SesionControles sesion={sesion} />
+</div>
+<div className="md:hidden">
+  <SesionControles sesion={sesion} />
         </div>
       </nav>
     </header>
