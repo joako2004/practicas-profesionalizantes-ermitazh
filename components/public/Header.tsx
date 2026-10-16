@@ -85,7 +85,7 @@ export default function Header({
             Contacto
           </Link>
           {contexto === "publico" && (
-            <Link href="/#buscador" className={CLASE_BOTON_PRIMARIO}>
+            <Link href="/pre-reserva" className={CLASE_BOTON_PRIMARIO}>
               Reservar
             </Link>
           )}

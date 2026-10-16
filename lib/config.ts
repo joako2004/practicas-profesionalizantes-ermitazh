@@ -23,7 +23,7 @@ export const COMPLEJO = {
     "Un refugio en medio de la naturaleza para desconectar y recargar energías.",
   estadisticas: {
     cabanas: 8,
-    metrosCuadradosParque: 12000,
+    metrosCuadradosParque: 10000,
     reservaDirecta: 85,
   },
 };
