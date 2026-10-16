@@ -7,7 +7,7 @@ import { logout } from "@/app/login/actions";
 type IconName =
   | "properties"
   | "reservations"
-  | "cabins"
+  | "photos"
   | "availability"
   | "prices"
   | "inquiries"
@@ -31,7 +31,7 @@ const sidebarItems: SidebarItem[] = [
   },
   { key: "resenas", label: "Reseñas", icon: "reviews", href: "/admin/resenas" },
   { key: "reservas", label: "Reservas", icon: "reservations" },
-  { key: "cabanas", label: "Cabañas", icon: "cabins" },
+  { key: "fotos", label: "Fotos", icon: "photos" },
   { key: "disponibilidad", label: "Disponibilidad", icon: "availability" },
   { key: "precios", label: "Precios", icon: "prices" },
   { key: "consultas", label: "Consultas", icon: "inquiries" },
@@ -60,10 +60,11 @@ function SidebarIcon({
         <path d="M8 3v4M16 3v4M4 10h16M8 14h2M12 14h4M8 17h5" />
       </>
     ),
-    cabins: (
+    photos: (
       <>
-        <path d="m3.5 11 8.5-7 8.5 7" />
-        <path d="M5.5 9.5V21h13V9.5M9 21v-5h6v5" />
+        <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+        <circle cx="9" cy="10" r="1.4" />
+        <path d="M4 16.5 8.5 12l3.5 3.5 2.5-2.5 5 5" />
       </>
     ),
     availability: (
@@ -118,7 +119,7 @@ function SidebarIcon({
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const sidebarClasses = `fixed bottom-0 left-0 top-[60px] z-50 flex w-[var(--admin-sidebar-width)] max-w-[80vw] -translate-x-full flex-col border-r border-[var(--color-border)] bg-[var(--color-clay-cream)]/80 shadow-xl backdrop-blur-md transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : ""}`;
+  const sidebarClasses = `fixed bottom-0 left-0 top-[var(--admin-header-h)] z-50 flex w-[var(--admin-sidebar-width)] max-w-[80vw] -translate-x-full flex-col border-r border-[var(--color-border)] bg-[var(--color-clay-cream)]/80 shadow-xl backdrop-blur-md transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : ""}`;
 
   return (
     <aside
@@ -136,7 +137,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <span aria-hidden="true">×</span>
       </button>
 
-      <nav className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-6 pt-16 lg:pt-6" aria-label="Secciones de administración">
+      <nav className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-6 pt-16" aria-label="Secciones de administración">
         {sidebarItems.map((item) => (
           item.href ? (
             <Link
