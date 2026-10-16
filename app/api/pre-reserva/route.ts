@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { hayConflictoFecha } from "@/lib/disponibilidad";
+import { contarCaracteres } from "@/lib/utils";
+
+const MAX_CARACTERES_SIN_ESPACIOS = 1000;
+const MAX_CARACTERES_TOTAL = 3000;
 
 export async function POST(request: Request) {
   let body;
@@ -17,8 +21,8 @@ export async function POST(request: Request) {
     fecha_inicio,
     fecha_fin,
     huesped_nombre,
-    huesped_telefono,
     personas,
+    informacion_adicional,
   } = body;
 
   // 1. Validar campos requeridos
@@ -27,17 +31,41 @@ export async function POST(request: Request) {
     !fecha_inicio ||
     !fecha_fin ||
     !huesped_nombre ||
-    !huesped_telefono ||
     !personas ||
     typeof personas !== "number" || personas <= 0
   ) {
     return new Response(
-      JSON.stringify({ error: "Faltan campos requeridos o inválidos: propiedad_id, fecha_inicio, fecha_fin, huesped_nombre, huesped_telefono, personas (number > 0)" }),
+      JSON.stringify({ error: "Faltan campos requeridos o inválidos: propiedad_id, fecha_inicio, fecha_fin, huesped_nombre, personas (number > 0)" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  // 2. Validar que la fecha de inicio sea anterior a la fecha de fin
+  // 2. Validar información adicional si se proporciona
+  if (informacion_adicional !== null && informacion_adicional !== undefined) {
+    if (typeof informacion_adicional !== "string") {
+      return new Response(
+        JSON.stringify({ error: "informacion_adicional debe ser un string" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    if (informacion_adicional.length > MAX_CARACTERES_TOTAL) {
+      return new Response(
+        JSON.stringify({ error: `La información adicional supera el límite de ${MAX_CARACTERES_TOTAL} caracteres totales` }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const charsSinEspacios = contarCaracteres(informacion_adicional);
+    if (charsSinEspacios > MAX_CARACTERES_SIN_ESPACIOS) {
+      return new Response(
+        JSON.stringify({ error: `La información adicional supera el límite de ${MAX_CARACTERES_SIN_ESPACIOS} caracteres (sin contar espacios)` }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  }
+
+  // 3. Validar que la fecha de inicio sea anterior a la fecha de fin
   const fechaIn = new Date(fecha_inicio);
   const fechaFin = new Date(fecha_fin);
 
@@ -55,7 +83,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // 3. Validar que la propiedad existe
+  // 4. Validar que la propiedad existe
   const propiedadExistente = await prisma.propiedad.findUnique({
     where: { id: propiedad_id },
   });
@@ -67,7 +95,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // 4. Verificar conflicto de fechas (usando función compartida)
+  // 5. Verificar conflicto de fechas (usando función compartida)
   const conflicto = await hayConflictoFecha(propiedad_id, fechaIn, fechaFin);
   if (conflicto) {
     return new Response(
@@ -76,24 +104,25 @@ export async function POST(request: Request) {
     );
   }
 
-  // 5. Calcular diasEstadia automáticamente
+  // 6. Calcular diasEstadia automáticamente
   const diasEstadia = Math.ceil((fechaFin.getTime() - fechaIn.getTime()) / (1000 * 60 * 60 * 24));
 
-  // 6. Crear la pre-reserva con estado PENDIENTE
+  // 7. Crear la pre-reserva con estado PENDIENTE
   try {
     const reserva = await prisma.reserva.create({
       data: {
         propiedadId: propiedad_id,
         huespedNombre: huesped_nombre,
-        huespedTelefono: huesped_telefono,
+        huespedTelefono: "",
         fechaIngreso: fechaIn,
         fechaSalida: fechaFin,
         personas,
         diasEstadia,
+        notas: informacion_adicional?.trim() || undefined,
       },
     });
 
-    // 7. Retornar datos para WhatsApp redirect
+    // 8. Retornar datos para WhatsApp redirect
     const mensaje = `Hola, quiero confirmar mi pre-reserva #${reserva.id} para ${fecha_inicio} al ${fecha_fin}`;
 
     return new Response(
