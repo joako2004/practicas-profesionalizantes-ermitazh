@@ -1,19 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { COMPLEJO } from "@/lib/config";
-
-const SUPABASE_BUCKET = "https://coehmfszuwczfxfpumub.supabase.co/storage/v1/object/public/propiedades-fotos/exteriores_pileta_juegos";
-
-const FALLBACK_IMAGENES = [
-  { url: `${SUPABASE_BUCKET}/144.jpeg`, alt: "Cabañas Ermitazh —PILETA Y JUEGOS" },
-  { url: `${SUPABASE_BUCKET}/175.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
-  { url: `${SUPABASE_BUCKET}/169.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
-  { url: `${SUPABASE_BUCKET}/167.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
-  { url: `${SUPABASE_BUCKET}/165.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
-  { url: `${SUPABASE_BUCKET}/163.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
-  { url: `${SUPABASE_BUCKET}/161.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
-];
+import { COMPLEJO, IMAGENES_HERO_FALLBACK } from "@/lib/config";
 
 const INTERVALO_MS = 4000;
 
@@ -25,7 +13,7 @@ export default function HeroCarousel({ imagenes }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const imagenesValidas =
-    imagenes.length > 0 ? imagenes : FALLBACK_IMAGENES;
+    imagenes.length > 0 ? imagenes : IMAGENES_HERO_FALLBACK;
 
   useEffect(() => {
     if (imagenes.length > 0) return;

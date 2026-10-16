@@ -5,6 +5,11 @@ import { login } from "./actions";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
+const CLASE_INPUT =
+  "w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink)]/35 transition-colors focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10";
+
+const CLASE_LABEL = "mb-1.5 block text-sm font-medium text-[var(--color-ink)]";
+
 function LoginForm() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
@@ -16,21 +21,18 @@ function LoginForm() {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="rounded-card bg-white p-8 shadow-sm ring-1 ring-desert-sand/20">
-        <h1 className="mb-1 text-2xl font-semibold tracking-tight text-dark-pine">
+      <div className="rounded-[var(--radius-lg)] bg-white p-8 shadow-lg ring-1 ring-[var(--color-border)]">
+        <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-ink)]">
           Iniciar sesión
         </h1>
-        <p className="mb-8 text-sm text-dark-pine/50">
+        <p className="mt-1.5 text-sm text-[var(--color-ink)]/55">
           Ingresá a tu cuenta — Cabañas Ermitazh
         </p>
 
-        <form action={login} className="space-y-5">
+        <form action={login} className="mt-8 space-y-5">
           <input type="hidden" name="next" value={next ?? ""} />
           <div>
-            <label
-              htmlFor="email"
-              className="mb-1.5 block text-sm font-medium text-dark-pine"
-            >
+            <label htmlFor="email" className={CLASE_LABEL}>
               Email
             </label>
             <input
@@ -39,16 +41,13 @@ function LoginForm() {
               type="email"
               required
               autoComplete="email"
-              className="w-full rounded-btn border border-desert-sand/40 bg-white px-4 py-2.5 text-sm text-dark-pine placeholder:text-dark-pine/30 focus:border-toasted-brown focus:outline-none focus:ring-2 focus:ring-toasted-brown/10"
+              className={CLASE_INPUT}
               placeholder="tu@email.com"
             />
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="mb-1.5 block text-sm font-medium text-dark-pine"
-            >
+            <label htmlFor="password" className={CLASE_LABEL}>
               Contraseña
             </label>
             <div className="relative">
@@ -58,13 +57,13 @@ function LoginForm() {
                 type={showPassword ? "text" : "password"}
                 required
                 autoComplete="current-password"
-                className="w-full rounded-btn border border-desert-sand/40 bg-white px-4 py-2.5 pr-11 text-sm text-dark-pine placeholder:text-dark-pine/30 focus:border-toasted-brown focus:outline-none focus:ring-2 focus:ring-toasted-brown/10"
+                className={`${CLASE_INPUT} pr-11`}
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-pine/40 hover:text-dark-pine/70 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-ink)]/40 transition-colors hover:text-[var(--color-ink)]/70"
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
                 {showPassword ? (
@@ -85,28 +84,30 @@ function LoginForm() {
           </div>
 
           {error && (
-            <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+            <p className="rounded-[var(--radius-md)] border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] px-3 py-2 text-sm text-[var(--color-danger)]">
               Email o contraseña incorrectos.
             </p>
           )}
 
           <button
             type="submit"
-            className="w-full rounded-btn bg-toasted-brown px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-toasted-brown/90 active:scale-[0.97]"
+            className="w-full rounded-[var(--radius-md)] bg-[var(--color-accent)] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/90 active:scale-[0.97]"
           >
             Ingresar
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-dark-pine/60">
-          ¿No tenés cuenta?{" "}
-          <Link
-            href={registroHref}
-            className="font-medium text-toasted-brown hover:underline"
-          >
-            Crear cuenta
-          </Link>
-        </p>
+        <div className="mt-6 border-t border-[var(--color-border)] pt-6">
+          <p className="text-center text-sm text-[var(--color-ink)]/60">
+            ¿No tenés cuenta?{" "}
+            <Link
+              href={registroHref}
+              className="font-medium text-[var(--color-accent)] hover:underline"
+            >
+              Crear cuenta
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -114,10 +115,8 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-champagne-pink px-6">
-      <Suspense fallback={null}>
-        <LoginForm />
-      </Suspense>
-    </div>
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

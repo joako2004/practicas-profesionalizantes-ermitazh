@@ -28,6 +28,19 @@ export const COMPLEJO = {
   },
 };
 
+const SUPABASE_FOTOS_HERO =
+  "https://coehmfszuwczfxfpumub.supabase.co/storage/v1/object/public/propiedades-fotos/exteriores_pileta_juegos";
+
+export const IMAGENES_HERO_FALLBACK = [
+  { url: `${SUPABASE_FOTOS_HERO}/144.jpeg`, alt: "Cabañas Ermitazh —PILETA Y JUEGOS" },
+  { url: `${SUPABASE_FOTOS_HERO}/175.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+  { url: `${SUPABASE_FOTOS_HERO}/169.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+  { url: `${SUPABASE_FOTOS_HERO}/167.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+  { url: `${SUPABASE_FOTOS_HERO}/165.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+  { url: `${SUPABASE_FOTOS_HERO}/163.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+  { url: `${SUPABASE_FOTOS_HERO}/161.jpeg`, alt: "Cabañas Ermitazh — Exterior" },
+];
+
 export const SERVICIOS_GENERALES = [
   "WiFi gratuito",
   "Pileta",
