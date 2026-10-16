@@ -1,18 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import Sidebar from "@/components/admin/Sidebar";
+import { IMAGENES_HERO_FALLBACK } from "@/lib/config";
 
 interface AdminShellProps {
-  user: { email?: string | null };
   initialDesktopSidebarOpen: boolean;
+  header: React.ReactNode;
+  footer: React.ReactNode;
   children: React.ReactNode;
 }
 
 export default function AdminShell({
-  user,
   initialDesktopSidebarOpen,
+  header,
+  footer,
   children,
 }: AdminShellProps) {
   const [isDesktop, setIsDesktop] = useState(true);
@@ -20,8 +22,7 @@ export default function AdminShell({
     initialDesktopSidebarOpen,
   );
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const heroImage =
-    "https://coehmfszuwczfxfpumub.supabase.co/storage/v1/object/public/propiedades-fotos/exteriores_pileta_juegos/144.jpeg";
+  const heroImage = IMAGENES_HERO_FALLBACK[0].url;
 
   const sidebarOpen = isDesktop ? desktopSidebarOpen : mobileSidebarOpen;
 
@@ -73,79 +74,74 @@ export default function AdminShell({
   };
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-champagne-pink [--admin-sidebar-width:15rem]">
-      <header className="shrink-0 border-b border-[var(--color-border)] bg-[var(--color-clay-cream)]/80 backdrop-blur-md">
-        <div className="flex h-[60px] items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white/10 text-[var(--color-ink)] transition-all hover:border-[var(--color-accent)] hover:bg-white/20 active:scale-[0.97]"
-              aria-label={sidebarOpen ? "Cerrar menú" : "Abrir menú"}
-              aria-expanded={sidebarOpen}
-              aria-controls="admin-sidebar"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                aria-hidden="true"
-                className="h-5 w-5"
-              >
-                <path d="M4 7h16" />
-                <path d="M4 12h16" />
-                <path d="M4 17h16" />
-              </svg>
-            </button>
-            <Link
-              href="/admin"
-              onClick={closeMobileSidebar}
-              className="cursor-pointer text-xl font-semibold tracking-wide text-dark-pine transition-opacity hover:opacity-80"
-            >
-              Cabañas Ermitazh
-            </Link>
-          </div>
-          <span className="max-w-[55%] truncate text-right text-sm text-dark-pine/50 sm:max-w-none">
-            Conectado como{" "}
-            <span className="font-medium text-dark-pine">{user.email}</span>
-          </span>
-        </div>
-      </header>
+    <div className="relative flex h-dvh flex-col overflow-hidden bg-[var(--color-bg)] [--admin-header-h:69px] [--admin-sidebar-width:15rem]">
+      {header}
 
-      <div
-        className={`flex min-h-0 flex-1 transition-[padding] duration-300 ease-in-out ${
-          sidebarOpen ? "lg:pl-[var(--admin-sidebar-width)]" : ""
-        }`}
+      <button
+        type="button"
+        onClick={toggleSidebar}
+        aria-expanded={sidebarOpen}
+        aria-controls="admin-sidebar"
+        aria-label={sidebarOpen ? "Cerrar menú" : "Abrir menú"}
+        className="absolute left-4 top-[calc(var(--admin-header-h)_+_0.75rem)] z-[60] inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-medium text-[var(--color-ink)] shadow-md transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] active:scale-[0.97]"
       >
-        <Sidebar isOpen={sidebarOpen} onClose={closeMobileSidebar} />
-        {sidebarOpen && (
-          <button
-            type="button"
-            onClick={closeMobileSidebar}
-            className="fixed inset-x-0 bottom-0 top-[60px] z-40 bg-[var(--color-ink)]/20 backdrop-blur-[2px] lg:hidden"
-            aria-label="Cerrar menú"
-          />
-        )}
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          aria-hidden="true"
+          className="h-5 w-5"
+        >
+          {sidebarOpen ? (
+            <path d="M6 6l12 12M18 6L6 18" />
+          ) : (
+            <>
+              <path d="M4 7h16" />
+              <path d="M4 12h16" />
+              <path d="M4 17h16" />
+            </>
+          )}
+        </svg>
+        <span>{sidebarOpen ? "Cerrar menú" : "Menú"}</span>
+      </button>
 
-        <section className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${heroImage})` }}
-          />
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-[var(--color-ink)]/65"
-          />
-          <main className="relative z-10 h-full overflow-y-auto">
-            <div className="min-h-full px-6 pb-12 pt-6">
-              {children}
-            </div>
-          </main>
-        </section>
+      <div className="flex min-h-0 flex-1 flex-col pt-[var(--admin-header-h)]">
+        <div
+          className={`flex min-h-0 flex-1 flex-col transition-[padding] duration-300 ease-in-out ${
+            sidebarOpen ? "lg:pl-[var(--admin-sidebar-width)]" : ""
+          }`}
+        >
+          <section className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${heroImage})` }}
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-[var(--color-ink)]/65"
+            />
+            <main className="relative z-10 flex-1 overflow-y-auto">
+              <div className="min-h-[calc(100dvh_-_var(--admin-header-h))] px-6 pb-16 pt-6">
+                {children}
+              </div>
+              {footer}
+            </main>
+          </section>
+        </div>
       </div>
+
+      <Sidebar isOpen={sidebarOpen} onClose={closeMobileSidebar} />
+      {sidebarOpen && (
+        <button
+          type="button"
+          onClick={closeMobileSidebar}
+          className="fixed inset-x-0 bottom-0 top-[var(--admin-header-h)] z-40 bg-[var(--color-ink)]/20 backdrop-blur-[2px] lg:hidden"
+          aria-label="Cerrar menú"
+        />
+      )}
     </div>
   );
 }

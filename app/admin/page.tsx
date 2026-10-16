@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth/perfil";
 export default async function AdminPage() {
   await requireAdmin();
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+    <div className="flex min-h-[70vh] flex-col items-center justify-center text-center">
       <h2 className="font-heading text-2xl font-semibold text-white md:text-3xl">
         Bienvenido al Panel de Administración
       </h2>

@@ -7,15 +7,24 @@ const NAV_LINKS = [
   { label: "Cabañas", href: "/#cabanas" },
   { label: "Galería", href: "/galeria" },
   { label: "Nuestro Complejo", href: "/#bienvenidos" },
-  { label: "Ubicación", href: "/#ubicacion" },
 ];
 
 export type Sesion = { email: string | null; esAdmin: boolean } | null;
+export type HeaderContexto = "publico" | "admin";
 
 const CLASE_BOTON_SESION =
   "rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-ink)]/70 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]";
 
-function SesionControles({ sesion }: { sesion: Sesion }) {
+const CLASE_BOTON_PRIMARIO =
+  "rounded-[var(--radius-md)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-5 py-2 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/80 hover:border-[var(--color-accent)]/80 active:scale-[0.97]";
+
+function SesionControles({
+  sesion,
+  contexto,
+}: {
+  sesion: Sesion;
+  contexto: HeaderContexto;
+}) {
   if (!sesion) {
     return (
       <Link href="/login" className={CLASE_BOTON_SESION}>
@@ -27,7 +36,12 @@ function SesionControles({ sesion }: { sesion: Sesion }) {
   return (
     <div className="flex items-center gap-3">
       {sesion.esAdmin && (
-        <Link href="/admin" className={CLASE_BOTON_SESION}>
+        <Link
+          href="/admin"
+          className={
+            contexto === "admin" ? CLASE_BOTON_PRIMARIO : CLASE_BOTON_SESION
+          }
+        >
           Panel
         </Link>
       )}
@@ -40,7 +54,13 @@ function SesionControles({ sesion }: { sesion: Sesion }) {
   );
 }
 
-export default function Header({ sesion }: { sesion: Sesion }) {
+export default function Header({
+  sesion,
+  contexto = "publico",
+}: {
+  sesion: Sesion;
+  contexto?: HeaderContexto;
+}) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-clay-cream)]/80 backdrop-blur-md border-b border-[var(--color-border)]">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -52,41 +72,27 @@ export default function Header({ sesion }: { sesion: Sesion }) {
         </Link>
 
         <div className="hidden md:flex items-center gap-3 text-sm font-medium text-[var(--color-ink)]/70">
-          {NAV_LINKS.map((link) =>
-            link.href.startsWith("#") ? (
-              <a
-                key={link.href}
-                href={link.href}
-                className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-2 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
-              >
-                {link.label}
-              </a>
-            ) : (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-2 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
-              >
-                {link.label}
-              </Link>
-            )
-          )}
-          <a
-            href="/#contacto"
-            className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-5 py-2 text-sm font-medium text-[var(--color-ink)]/70 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
-          >
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-2 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]"
+            >
+              {link.label}
+            </Link>
+          ))}
+          <Link href="/#contacto" className={CLASE_BOTON_SESION}>
             Contacto
-          </a>
-          <a
-            href="/#buscador"
-            className="rounded-[var(--radius-md)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-5 py-2 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/80 hover:border-[var(--color-accent)]/80 active:scale-[0.97]"
-          >
-            Reservar
-          </a>
-          <SesionControles sesion={sesion} />
+          </Link>
+          {contexto === "publico" && (
+            <Link href="/#buscador" className={CLASE_BOTON_PRIMARIO}>
+              Reservar
+            </Link>
+          )}
+          <SesionControles sesion={sesion} contexto={contexto} />
         </div>
         <div className="md:hidden">
-          <SesionControles sesion={sesion} />
+          <SesionControles sesion={sesion} contexto={contexto} />
         </div>
       </nav>
     </header>
