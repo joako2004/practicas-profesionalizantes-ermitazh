@@ -39,7 +39,7 @@ export default async function LoginLayout({
   return (
     <>
       <Header sesion={sesion} />
-      <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-[var(--color-bg)] px-6 pt-[135px] pb-16">
+      <main className="relative flex min-h-[calc(100dvh_-_3rem)] flex-1 items-center justify-center overflow-hidden bg-[var(--color-bg)] px-6 pt-[135px] pb-16">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 scale-110 bg-cover bg-center blur-[22px]"
