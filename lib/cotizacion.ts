@@ -43,6 +43,13 @@ const URL_API_DOLARES = "https://dolarapi.com/v1/dolares";
 // La tabla cotizaciones es la caché: pasado el TTL se consulta la API de nuevo
 const TTL_COTIZACION_MS = 30 * 60 * 1000;
 const TIMEOUT_API_MS = 4000;
+// Si la API está caída y los datos guardados vencidos, sin backoff cada visita
+// esperaría el timeout completo (4 s); con esto se reintenta recién a los 5 minutos
+const BACKOFF_FALLO_MS = 5 * 60 * 1000;
+
+// Momento (ms) a partir del cual se puede volver a llamar a la API tras un fallo.
+// Es por proceso/instancia: mejor esfuerzo, no reemplaza la persistencia en base.
+let reintentoPermitidoDesde = 0;
 
 const FILTRO_TIPOS = { tipo: { in: [...TIPOS_DOLAR] } };
 
@@ -94,6 +101,9 @@ export function parsearRespuestaApi(json: unknown): CotizacionParseada[] {
 // Una sola llamada a la API refresca las 7 casas (upsert de todas las válidas).
 // Nunca lanza: ante cualquier error avisa por consola y devuelve false.
 async function refrescarDesdeApi(): Promise<boolean> {
+  // Durante el backoff no se llama a la API ni se avisa por consola
+  if (Date.now() < reintentoPermitidoDesde) return false;
+
   try {
     const respuesta = await fetch(URL_API_DOLARES, {
       signal: AbortSignal.timeout(TIMEOUT_API_MS),
@@ -103,12 +113,14 @@ async function refrescarDesdeApi(): Promise<boolean> {
 
     if (!respuesta.ok) {
       console.warn(`Cotización: la API respondió con estado ${respuesta.status}`);
+      reintentoPermitidoDesde = Date.now() + BACKOFF_FALLO_MS;
       return false;
     }
 
     const cotizaciones = parsearRespuestaApi(await respuesta.json());
     if (cotizaciones.length === 0) {
       console.warn("Cotización: la API no devolvió casas válidas");
+      reintentoPermitidoDesde = Date.now() + BACKOFF_FALLO_MS;
       return false;
     }
 
@@ -134,12 +146,20 @@ async function refrescarDesdeApi(): Promise<boolean> {
       });
     }
 
+    reintentoPermitidoDesde = 0;
+
     return true;
   } catch {
     // Timeout, API caída o error de base: se informa y se sigue usando lo guardado
     console.warn("Cotización: no se pudo refrescar desde la API");
+    reintentoPermitidoDesde = Date.now() + BACKOFF_FALLO_MS;
     return false;
   }
+}
+
+// Solo para pruebas: reinicia el backoff
+export function reiniciarBackoffCotizacion(): void {
+  reintentoPermitidoDesde = 0;
 }
 
 function estaVencida(obtenidaEn: Date): boolean {

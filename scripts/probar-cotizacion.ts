@@ -14,6 +14,7 @@ import {
   obtenerCotizaciones,
   obtenerTipoDolarActivo,
   parsearRespuestaApi,
+  reiniciarBackoffCotizacion,
 } from "@/lib/cotizacion";
 
 let pass = 0;
@@ -113,6 +114,7 @@ async function main(): Promise<void> {
   );
 
   // 4. Fallback: vencemos la fila de oficial y simulamos la API caída
+  reiniciarBackoffCotizacion();
   await prisma.cotizacion.update({
     where: { tipo: "oficial" },
     data: { obtenidaEn: new Date(Date.now() - 2 * 60 * 60 * 1000) },
@@ -121,7 +123,11 @@ async function main(): Promise<void> {
   const ventaEsperada = filaOficial ? filaOficial.venta.toNumber() : 0;
 
   const fetchReal = globalThis.fetch;
-  const fetchCaido: typeof fetch = () => Promise.reject(new Error("API simulada caída"));
+  let llamadasFetch = 0;
+  const fetchCaido: typeof fetch = () => {
+    llamadasFetch += 1;
+    return Promise.reject(new Error("API simulada caída"));
+  };
   globalThis.fetch = fetchCaido;
   try {
     const enFallback = await obtenerCotizacion("oficial");
@@ -133,18 +139,67 @@ async function main(): Promise<void> {
       "fallback: se marca desactualizada",
       enFallback !== null && enFallback.desactualizada === true
     );
+    verificar("falla de API: se intentó 1 vez", llamadasFetch === 1);
+
+    // 5. Backoff: durante los 5 minutos posteriores al fallo no se vuelve a llamar a la API
+    const enBackoff = await obtenerCotizacion("oficial");
+    await obtenerCotizaciones();
+    verificar("backoff: no reintenta la API", llamadasFetch === 1);
+    verificar(
+      "backoff: sigue sirviendo el valor guardado",
+      enBackoff !== null && enBackoff.venta === ventaEsperada && enBackoff.desactualizada === true
+    );
   } finally {
     globalThis.fetch = fetchReal;
   }
 
-  // 5. Recuperación: con la API real vuelve a quedar vigente
+  // 6. Recuperación: con la API real vuelve a quedar vigente
+  reiniciarBackoffCotizacion();
   const recuperada = await obtenerCotizacion("oficial");
   verificar(
     "recuperación: desactualizada vuelve a false",
     recuperada !== null && recuperada.desactualizada === false
   );
 
-  // 6. Lista blanca y tipo de dólar activo
+  // 7. Backoff: una respuesta HTTP no ok también lo activa
+  reiniciarBackoffCotizacion();
+  await prisma.cotizacion.update({
+    where: { tipo: "oficial" },
+    data: { obtenidaEn: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+  });
+
+  let llamadasHttpNoOk = 0;
+  const respuestaNoOk = { ok: false, status: 503 } as Response;
+  const fetchNoOk: typeof fetch = () => {
+    llamadasHttpNoOk += 1;
+    return Promise.resolve(respuestaNoOk);
+  };
+  globalThis.fetch = fetchNoOk;
+  try {
+    const conErrorHttp = await obtenerCotizacion("oficial");
+    verificar(
+      "HTTP no ok: conserva la última venta guardada",
+      conErrorHttp !== null &&
+        conErrorHttp.venta === ventaEsperada &&
+        conErrorHttp.desactualizada === true
+    );
+    verificar("HTTP no ok: se intentó 1 vez", llamadasHttpNoOk === 1);
+
+    await obtenerCotizacion("oficial");
+    verificar("HTTP no ok: el backoff evita el reintento", llamadasHttpNoOk === 1);
+  } finally {
+    globalThis.fetch = fetchReal;
+  }
+
+  // 8. Se deja la fila oficial refrescada con el fetch real
+  reiniciarBackoffCotizacion();
+  const recuperadaHttp = await obtenerCotizacion("oficial");
+  verificar(
+    "recuperación tras HTTP no ok: desactualizada vuelve a false",
+    recuperadaHttp !== null && recuperadaHttp.desactualizada === false
+  );
+
+  // 9. Lista blanca y tipo de dólar activo
   verificar("esTipoDolar('blue') es true", esTipoDolar("blue"));
   verificar("esTipoDolar('dolar-blue') es false", !esTipoDolar("dolar-blue"));
   verificar("esTipoDolar(42) es false", !esTipoDolar(42));
