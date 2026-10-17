@@ -20,6 +20,11 @@ enum TramoNoches {
   SIETE_O_MAS
 }
 
+enum Temporada {
+  ALTA
+  BAJA
+}
+
 enum EstadoConsulta {
   PENDIENTE
   RESPONDIDA
@@ -53,6 +58,10 @@ model Propiedad {
   promoSemanalAlta  Decimal  @db.Decimal(5, 2) @default(0)
   precioNocheBaja  Decimal  @db.Decimal(10, 2) @default(0)
   promoSemanalBaja  Decimal  @db.Decimal(5, 2) @default(0)
+  precioNocheAltaUsd Decimal? @db.Decimal(10, 2)
+  precioNocheBajaUsd Decimal? @db.Decimal(10, 2)
+  precio2a6AltaUsd   Decimal? @db.Decimal(10, 2)
+  precio2a6BajaUsd   Decimal? @db.Decimal(10, 2)
   fotos       String[]
   servicios   String[]
   activa      Boolean  @default(true)
@@ -79,6 +88,13 @@ model Reserva {
   diasEstadia     Int            @map("dias_estadia")
   sena            Decimal?       @db.Decimal(10, 2)
   formaPago       String?        @map("forma_pago")
+  totalEstimadoUsd       Decimal?     @map("total_estimado_usd") @db.Decimal(10, 2)
+  totalEstimadoArs       Decimal?     @map("total_estimado_ars") @db.Decimal(12, 2)
+  precioNocheUsdAplicado Decimal?     @map("precio_noche_usd_aplicado") @db.Decimal(10, 2)
+  tipoDolarUsado         String?      @map("tipo_dolar_usado")
+  cotizacionUsada        Decimal?     @map("cotizacion_usada") @db.Decimal(12, 2)
+  temporadaAplicada      Temporada?   @map("temporada_aplicada")
+  tramoAplicado          TramoNoches? @map("tramo_aplicado")
   notas           String?
   creadaEn        DateTime       @default(now()) @map("creada_en")
   actualizadaEn   DateTime       @updatedAt @map("actualizada_en")
@@ -149,4 +165,23 @@ model Perfil {
   resenas       Resena[]
 
   @@map("perfiles")
+}
+
+model ConfiguracionPrecios {
+  id              Int       @id @default(1)
+  tipoDolar       String    @default("blue")
+  temporadaActiva Temporada @default(ALTA)
+  actualizadoEn   DateTime  @updatedAt
+
+  @@map("configuracion_precios")
+}
+
+model Cotizacion {
+  tipo       String    @id
+  compra     Decimal?  @db.Decimal(12, 2)
+  venta      Decimal   @db.Decimal(12, 2)
+  fechaApi   DateTime?
+  obtenidaEn DateTime  @default(now())
+
+  @@map("cotizaciones")
 }
