@@ -5,6 +5,7 @@ import { PropiedadSerializer } from "@/lib/serializers";
 import AtributoEditable from "./AtributoEditable";
 import ConfirmDialog from "./ConfirmDialog";
 import { updatePropiedadAtributo } from "@/lib/actions/propiedades";
+import { esCampoUsd } from "@/lib/precios/validar";
 
 interface PropiedadCardProps {
   propiedad: PropiedadSerializer;
@@ -13,21 +14,34 @@ interface PropiedadCardProps {
 const ATRIBUTOS_EDITABLES: Array<{
   key: keyof PropiedadSerializer;
   label: string;
-  type: "text" | "number" | "decimal" | "boolean" | "array";
+  type: "text" | "number" | "decimal" | "boolean" | "array" | "usd";
   editable: boolean;
 }> = [
   { key: "nombre", label: "Nombre", type: "text", editable: true },
   { key: "descripcion", label: "Descripción", type: "text", editable: true },
   { key: "capacidad", label: "Capacidad", type: "number", editable: true },
   { key: "orden", label: "Orden", type: "number", editable: true },
-  { key: "precioNocheAlta", label: "Precio Noche Alta", type: "decimal", editable: true },
-  { key: "promoSemanalAlta", label: "Promo Alta (%)", type: "number", editable: true },
-  { key: "precioNocheBaja", label: "Precio Noche Baja", type: "decimal", editable: true },
-  { key: "promoSemanalBaja", label: "Promo Baja (%)", type: "number", editable: true },
+  { key: "precioNocheAltaUsd", label: "Precio 1 noche - Alta (USD)", type: "usd", editable: true },
+  { key: "precio2a6AltaUsd", label: "Precio por noche, 2 a 6 noches - Alta (USD)", type: "usd", editable: true },
+  { key: "promoSemanalAlta", label: "Promo 7 o más noches - Alta (%)", type: "number", editable: true },
+  { key: "precioNocheBajaUsd", label: "Precio 1 noche - Baja (USD)", type: "usd", editable: true },
+  { key: "precio2a6BajaUsd", label: "Precio por noche, 2 a 6 noches - Baja (USD)", type: "usd", editable: true },
+  { key: "promoSemanalBaja", label: "Promo 7 o más noches - Baja (%)", type: "number", editable: true },
   { key: "id", label: "ID", type: "text", editable: false },
   { key: "creadaEn", label: "Creada el", type: "text", editable: false },
   { key: "actualizadaEn", label: "Actualizada el", type: "text", editable: false },
 ];
+
+const AVISOS_AL_VACIAR: Record<string, string> = {
+  precioNocheAltaUsd:
+    "Al dejarlo sin precio, la cabaña mostrará «Consultar» cuando la temporada ALTA esté activa, aunque tenga cargado el precio de 2 a 6 noches.",
+  precioNocheBajaUsd:
+    "Al dejarlo sin precio, la cabaña mostrará «Consultar» cuando la temporada BAJA esté activa, aunque tenga cargado el precio de 2 a 6 noches.",
+  precio2a6AltaUsd:
+    "Al dejarlo sin precio, en temporada ALTA se usará el precio de 1 noche para estadías de 2 o más noches (la promo de 7 o más noches se aplica sobre ese valor).",
+  precio2a6BajaUsd:
+    "Al dejarlo sin precio, en temporada BAJA se usará el precio de 1 noche para estadías de 2 o más noches (la promo de 7 o más noches se aplica sobre ese valor).",
+};
 
 export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
   const [expanded, setExpanded] = useState(false);
@@ -69,6 +83,13 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
   };
 
   const formatValue = (key: keyof PropiedadSerializer, value: unknown): string => {
+    if (esCampoUsd(key)) {
+      if (value === null || value === undefined) return "Sin precio";
+      const n = Number(value);
+      return Number.isFinite(n)
+        ? `US$ ${n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        : "—";
+    }
     if (value === null || value === undefined) return "—";
     if (key === "servicios") return (value as string[]).join(", ") || "—";
     if (key === "activa") return value ? "Sí" : "No";
@@ -164,6 +185,8 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
           valorActual={formatValue(confirmDialog.atributo as keyof PropiedadSerializer, propiedad[confirmDialog.atributo as keyof PropiedadSerializer])}
           nuevoValor={formatValue(confirmDialog.atributo as keyof PropiedadSerializer, confirmDialog.nuevoValor)}
           disabled={isPending}
+          etiqueta={ATRIBUTOS_EDITABLES.find((a) => a.key === confirmDialog.atributo)?.label}
+          aviso={confirmDialog.nuevoValor === null ? AVISOS_AL_VACIAR[confirmDialog.atributo] : undefined}
         />
       )}
     </div>
