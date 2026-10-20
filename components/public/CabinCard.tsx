@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { obtenerPrecioTemporadaAlta } from "@/lib/serializers";
 import { buildReservaWhatsApp } from "@/lib/config";
 
 interface CabinCardProps {
@@ -7,11 +6,7 @@ interface CabinCardProps {
   nombre: string;
   descripcion: string;
   capacidad: number;
-  precioNocheAlta: number;
-  promoSemanalAlta: number;
-  precioNocheBaja: number;
-  promoSemanalBaja: number;
-  precioBase: number;
+  precioDesdeArs: number | null;
   fotos: string[];
   // Opcionales para el link de WhatsApp
   fechaIngreso?: string;
@@ -30,22 +25,12 @@ export default function CabinCard({
   nombre,
   descripcion,
   capacidad,
-  precioNocheAlta,
-  promoSemanalAlta,
-  precioNocheBaja,
-  promoSemanalBaja,
-  precioBase,
+  precioDesdeArs,
   fotos,
   fechaIngreso,
   fechaSalida,
   personas,
 }: CabinCardProps) {
-  const { precio, temporada } = obtenerPrecioTemporadaAlta({
-    precioNocheAlta: precioNocheAlta,
-    precioNocheBaja: precioNocheBaja,
-    precioBase: precioBase,
-  });
-
   const tieneFotos = fotos.length > 0;
 
   return (
@@ -77,21 +62,26 @@ export default function CabinCard({
         </p>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
-          <span className="text-lg font-semibold text-[var(--color-accent)] whitespace-nowrap">
-            {precio === "Consultar precio" ? (
-              "Consultar precio"
-            ) : (
-              <>
-                <span className="block text-xs font-medium text-[var(--color-ink)]/50">
-                  {temporada === "alta" ? "Temporada alta" : "Desde"}
-                </span>
-                {precioFormatter.format(precio as number)}
-              </>
-            )}
-            <span className="text-sm font-normal text-[var(--color-ink)]/50">
-              {" "}/ noche
+          {precioDesdeArs === null ? (
+            <span className="text-lg font-semibold text-[var(--color-accent)] whitespace-nowrap">
+              Consultar
             </span>
-          </span>
+          ) : (
+            <div>
+              <span className="block text-xs font-medium text-[var(--color-ink)]/50">
+                Noches a partir de:
+              </span>
+              <span className="block text-lg font-semibold text-[var(--color-accent)] whitespace-nowrap">
+                {precioFormatter.format(precioDesdeArs)}
+              </span>
+              <Link
+                href={`/cabanas/${id}`}
+                className="mt-1 inline-block text-xs font-medium text-[var(--color-ink)]/60 underline underline-offset-2 transition-colors hover:text-[var(--color-ink)]"
+              >
+                Conocé nuestras promociones
+              </Link>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <Link
               href={`/cabanas/${id}`}

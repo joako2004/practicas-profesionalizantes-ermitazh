@@ -1,6 +1,9 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { serializarPropiedad } from "@/lib/serializers";
+import { serializarPropiedad, obtenerPreciosUsd, type PropiedadSerializer } from "@/lib/serializers";
+import { calcularPrecio, type Temporada } from "@/lib/precios/calcular";
+import { obtenerConfiguracionPrecios } from "@/lib/configuracion-precios";
+import { obtenerCotizacion } from "@/lib/cotizacion";
 import HeroCarousel from "@/components/public/HeroCarousel";
 import SearchCard from "@/components/public/SearchCard";
 import WelcomeSection from "@/components/public/WelcomeSection";
@@ -22,6 +25,10 @@ export type PropiedadParaHome = Prisma.PropiedadGetPayload<{
     promoSemanalAlta: true;
     precioNocheBaja: true;
     promoSemanalBaja: true;
+    precioNocheAltaUsd: true;
+    precioNocheBajaUsd: true;
+    precio2a6AltaUsd: true;
+    precio2a6BajaUsd: true;
     fotos: true;
   };
 }>;
@@ -80,30 +87,77 @@ async function getPropiedades() {
       promoSemanalAlta: true,
       precioNocheBaja: true,
       promoSemanalBaja: true,
+      precioNocheAltaUsd: true,
+      precioNocheBajaUsd: true,
+      precio2a6AltaUsd: true,
+      precio2a6BajaUsd: true,
       fotos: true,
     },
   });
   return propiedades;
 }
 
+// Una sola lectura por carga del home; si falta la cotización las tarjetas muestran Consultar
+async function getContextoPrecios(): Promise<{
+  temporada: Temporada;
+  cotizacionVenta: number | null;
+}> {
+  const configuracion = await obtenerConfiguracionPrecios();
+  const cotizacion = await obtenerCotizacion(configuracion.tipoDolar);
+  return {
+    temporada: configuracion.temporadaActiva,
+    cotizacionVenta: cotizacion ? cotizacion.venta : null,
+  };
+}
+
+function calcularPrecioDesdeArs(
+  propiedad: PropiedadSerializer,
+  temporada: Temporada,
+  cotizacionVenta: number | null
+): number | null {
+  const resultado = calcularPrecio({
+    noches: 1,
+    temporada,
+    precios: obtenerPreciosUsd(propiedad),
+    cotizacionVenta,
+  });
+  if (!resultado.ok) return null;
+  const precioArs = resultado.precioNocheAplicadoArs;
+  return typeof precioArs === "number" && Number.isFinite(precioArs) && precioArs > 0
+    ? precioArs
+    : null;
+}
+
 export default async function HomePage() {
-  const [heroImages, galleryImages, ctaImage, testimonios, propiedades] =
+  const [heroImages, galleryImages, ctaImage, testimonios, propiedades, contextoPrecios] =
     await Promise.all([
       getHeroImages(),
       getGalleryImages(),
       getCtaImage(),
       getTestimonios(),
       getPropiedades(),
+      getContextoPrecios(),
     ]);
 
   const propiedadesSerializadas = propiedades.map(serializarPropiedad);
+  const preciosDesdeArs: Record<string, number | null> = {};
+  for (const propiedad of propiedadesSerializadas) {
+    preciosDesdeArs[propiedad.id] = calcularPrecioDesdeArs(
+      propiedad,
+      contextoPrecios.temporada,
+      contextoPrecios.cotizacionVenta
+    );
+  }
 
   return (
     <>
       <HeroCarousel imagenes={heroImages} />
       <SearchCard />
       <WelcomeSection />
-      <CabinsSection propiedades={propiedadesSerializadas} />
+      <CabinsSection
+        propiedades={propiedadesSerializadas}
+        preciosDesdeArs={preciosDesdeArs}
+      />
       <ServicesSection servicios={SERVICIOS_GENERALES} />
       <GallerySection imagenes={galleryImages} />
       <TestimonialsSection testimonios={testimonios} />
