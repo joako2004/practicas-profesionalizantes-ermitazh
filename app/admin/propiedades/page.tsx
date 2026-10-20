@@ -82,7 +82,7 @@ export default async function PropiedadesPage() {
         </a>
       </div>
 
-      <PanelConfiguracionPrecios tipoActivo={configuracion.tipoDolar} opciones={opciones} />
+      <PanelConfiguracionPrecios tipoActivo={configuracion.tipoDolar} opciones={opciones} temporadaActiva={configuracion.temporadaActiva} />
 
       {propiedades.length === 0 ? (
         <div className="rounded-lg border border-desert-sand/20 bg-white p-12 text-center">
