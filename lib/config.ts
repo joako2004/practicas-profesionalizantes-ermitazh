@@ -73,18 +73,38 @@ export function buildReservaWhatsApp(
     ? `una cabaña para ${personas} personas`
     : `la ${nombreCabana}`;
 
-  // Formatear fechas en formato legible en español: "5 de octubre de 2026"
-  const fechaActual = new Date();
+  // Formatear una fecha de calendario "YYYY-MM-DD" sin depender de la zona horaria
   const formatearFecha = (fechaStr: string | undefined) => {
     if (!fechaStr) return null;
-    const fecha = new Date(fechaStr);
-    // Agregar año solo si es distinto al actual
-    const anioDiferente = fecha.getFullYear() !== fechaActual.getFullYear();
+    const coincidencia = /^(\d{4})-(\d{2})-(\d{2})/.exec(fechaStr);
+    if (!coincidencia) return null;
+    const anio = Number(coincidencia[1]);
+    const mes = Number(coincidencia[2]);
+    const dia = Number(coincidencia[3]);
+    // Mediodía UTC evita corrimientos por bordes horarios
+    const fecha = new Date(Date.UTC(anio, mes - 1, dia, 12));
+    // Descartar fechas inexistentes (ej. "2026-02-30" rueda a marzo)
+    if (
+      Number.isNaN(fecha.getTime()) ||
+      fecha.getUTCFullYear() !== anio ||
+      fecha.getUTCMonth() !== mes - 1 ||
+      fecha.getUTCDate() !== dia
+    ) {
+      return null;
+    }
+    const anioActual = Number(
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Argentina/Buenos_Aires",
+        year: "numeric",
+      }).format(new Date())
+    );
     const opciones: Intl.DateTimeFormatOptions = {
       day: "numeric",
       month: "long",
+      timeZone: "UTC",
     };
-    if (anioDiferente) {
+    // Agregar año solo si es distinto al actual en Buenos Aires
+    if (anio !== anioActual) {
       opciones.year = "numeric";
     }
     return fecha.toLocaleDateString("es-AR", opciones);
