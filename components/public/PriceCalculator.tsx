@@ -256,7 +256,7 @@ export default function PriceCalculator({
           {resultado.cotizacion !== null && (
             <div className="mt-2">
               <p className="text-xs text-[var(--color-ink)]/60">
-                Dólar {resultado.cotizacion.etiqueta}: venta{" "}
+                {resultado.cotizacion.etiqueta}: venta{" "}
                 {arsVenta.format(resultado.cotizacion.venta)}
                 {resultado.cotizacion.fechaTexto
                   ? ` · ${resultado.cotizacion.fechaTexto}`
