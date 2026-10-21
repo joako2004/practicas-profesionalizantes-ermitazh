@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { serializarPropiedad, obtenerPreciosUsd } from "@/lib/serializers";
+import { obtenerContextoPrecios, precioUnaNocheArs } from "@/lib/precios/contexto";
 import CabinGallery from "@/components/public/CabinGallery";
 import PriceCalculator from "@/components/public/PriceCalculator";
 import ResenaForm from "@/components/public/ResenaForm";
@@ -21,7 +23,12 @@ async function getPropiedad(id: string) {
       nombre: true,
       descripcion: true,
       capacidad: true,
-      precioBase: true,
+      precioNocheAltaUsd: true,
+      precioNocheBajaUsd: true,
+      precio2a6AltaUsd: true,
+      precio2a6BajaUsd: true,
+      promoSemanalAlta: true,
+      promoSemanalBaja: true,
       fotos: true,
       servicios: true,
     },
@@ -72,13 +79,19 @@ export default async function CabanaDetallePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const propiedad = await getPropiedad(id);
+  const [propiedad, contextoPrecios] = await Promise.all([
+    getPropiedad(id),
+    obtenerContextoPrecios(),
+  ]);
 
   if (!propiedad) {
     notFound();
   }
 
-  const precioBase = propiedad.precioBase.toNumber();
+  const precioDesdeArs = precioUnaNocheArs(
+    obtenerPreciosUsd(serializarPropiedad(propiedad)),
+    contextoPrecios
+  );
   const autenticado = await haySesion();
   const { resenas, promedio, total } = await getResenas(id);
 
@@ -95,12 +108,20 @@ export default async function CabanaDetallePage({
         <h1 className="text-3xl font-semibold tracking-tight text-[var(--color-ink)] md:text-4xl">
           {propiedad.nombre}
         </h1>
-        <span className="text-lg font-semibold text-[var(--color-accent)]">
-          Desde {precioFmt.format(precioBase)}
-          <span className="text-sm font-normal text-[var(--color-ink)]/50">
-            {" "}/ noche
+        {precioDesdeArs === null ? (
+          <span className="text-lg font-semibold text-[var(--color-accent)]">
+            Consultar
           </span>
-        </span>
+        ) : (
+          <div className="text-right">
+            <span className="block text-xs font-medium text-[var(--color-ink)]/50">
+              Noches a partir de:
+            </span>
+            <span className="block text-lg font-semibold whitespace-nowrap text-[var(--color-accent)]">
+              {precioFmt.format(precioDesdeArs)}
+            </span>
+          </div>
+        )}
       </div>
 
       <CabinGallery fotos={propiedad.fotos} nombre={propiedad.nombre} />
