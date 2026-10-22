@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { hayConflictoFecha } from "@/lib/disponibilidad";
 import { contarCaracteres } from "@/lib/utils";
 import { estimarEstadia } from "@/lib/precios/estimar-estadia";
 import { nochesEntre, type EstadiaCalculada } from "@/lib/precios/estadia";
@@ -137,12 +136,9 @@ export async function POST(request: Request): Promise<Response> {
       return respuestaMotivo("FECHAS_INVALIDAS");
     }
 
-    if (await hayConflictoFecha(id, fechaIn, fechaFin)) {
-      return respuestaError("Ya existe una reserva pendiente para estas fechas", 409);
-    }
-
     const snapshot = snapshotDesdeEstadia(estadia);
 
+    // Sin validación de conflicto de fechas: por decisión de producto el administrador gestiona las superposiciones entre pre-reservas.
     const reserva = await prisma.reserva.create({
       data: {
         propiedadId: id,
