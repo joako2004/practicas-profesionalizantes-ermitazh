@@ -14,11 +14,7 @@ interface UpdatePropiedadResult {
     nombre: string;
     descripcion: string;
     capacidad: number;
-    precioBase: number;
-    promoSemanal: number | null;
-    precioNocheAlta: number;
     promoSemanalAlta: number;
-    precioNocheBaja: number;
     promoSemanalBaja: number;
     servicios: string[];
     activa: boolean;
@@ -50,11 +46,7 @@ export async function updatePropiedadAtributo(
         nombre: true,
         descripcion: true,
         capacidad: true,
-        precioBase: true,
-        promoSemanal: true,
-        precioNocheAlta: true,
         promoSemanalAlta: true,
-        precioNocheBaja: true,
         promoSemanalBaja: true,
         servicios: true,
         activa: true,
@@ -98,14 +90,6 @@ export async function updatePropiedadAtributo(
         dataToUpdate.orden = num;
         break;
       }
-      case "precioBase": {
-        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
-        if (isNaN(num) || num < 0) {
-          return { success: false, error: "El precio base debe ser un número válido mayor o igual a 0" };
-        }
-        dataToUpdate.precioBase = Math.round(num * 100) / 100;
-        break;
-      }
       case "servicios": {
         if (!Array.isArray(valor)) {
           return { success: false, error: "Los servicios deben ser un array" };
@@ -122,36 +106,12 @@ export async function updatePropiedadAtributo(
         dataToUpdate.activa = valor;
         break;
       }
-      case "precioNocheAlta": {
-        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
-        if (isNaN(num) || num < 0) {
-          return { success: false, error: "El precio nocturna alta debe ser un número mayor o igual a 0" };
-        }
-        dataToUpdate.precioNocheAlta = Math.round(num * 100) / 100;
-        break;
-      }
       case "promoSemanalAlta": {
         const num = typeof valor === "number" ? valor : parseFloat(String(valor));
         if (!Number.isFinite(num) || num < 0 || num > 100) {
           return { success: false, error: "La promo semanal alta debe ser un número entre 0 y 100" };
         }
         dataToUpdate.promoSemanalAlta = Math.round(num * 100) / 100;
-        break;
-      }
-      case "promoSemanal": {
-        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
-        if (!Number.isFinite(num) || num < 0) {
-          return { success: false, error: "La promo semanal debe ser un número mayor o igual a 0" };
-        }
-        dataToUpdate.promoSemanal = Math.round(num * 100) / 100;
-        break;
-      }
-      case "precioNocheBaja": {
-        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
-        if (isNaN(num) || num < 0) {
-          return { success: false, error: "El precio nocturna baja debe ser un número mayor o igual a 0" };
-        }
-        dataToUpdate.precioNocheBaja = Math.round(num * 100) / 100;
         break;
       }
       case "promoSemanalBaja": {
@@ -198,11 +158,7 @@ export async function updatePropiedadAtributo(
         nombre: propiedadActualizada.nombre,
         descripcion: propiedadActualizada.descripcion,
         capacidad: propiedadActualizada.capacidad,
-        precioBase: Number(propiedadActualizada.precioBase),
-        promoSemanal: Number(propiedadActualizada.promoSemanal),
-        precioNocheAlta: Number(propiedadActualizada.precioNocheAlta) ?? 0,
         promoSemanalAlta: Number(propiedadActualizada.promoSemanalAlta) ?? 0,
-        precioNocheBaja: Number(propiedadActualizada.precioNocheBaja) ?? 0,
         promoSemanalBaja: Number(propiedadActualizada.promoSemanalBaja) ?? 0,
         precioNocheAltaUsd: decimalANumero(propiedadActualizada.precioNocheAltaUsd),
         precioNocheBajaUsd: decimalANumero(propiedadActualizada.precioNocheBajaUsd),
@@ -263,11 +219,7 @@ export async function crearPropiedad(data: {
         nombre: propiedad.nombre,
         descripcion: propiedad.descripcion,
         capacidad: propiedad.capacidad,
-        precioBase: Number(propiedad.precioBase),
-        promoSemanal: Number(propiedad.promoSemanal),
-        precioNocheAlta: Number(propiedad.precioNocheAlta) ?? 0,
         promoSemanalAlta: Number(propiedad.promoSemanalAlta) ?? 0,
-        precioNocheBaja: Number(propiedad.precioNocheBaja) ?? 0,
         promoSemanalBaja: Number(propiedad.promoSemanalBaja) ?? 0,
         precioNocheAltaUsd: decimalANumero(propiedad.precioNocheAltaUsd),
         precioNocheBajaUsd: decimalANumero(propiedad.precioNocheBajaUsd),
