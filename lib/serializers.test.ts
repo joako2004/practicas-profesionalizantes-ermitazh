@@ -14,11 +14,7 @@ const rawBase = {
   nombre: "Cabaña 1",
   descripcion: "d",
   capacidad: 4,
-  precioBase: "100.00",
-  promoSemanal: "0.00",
-  precioNocheAlta: "0.00",
   promoSemanalAlta: "10.00",
-  precioNocheBaja: "0.00",
   promoSemanalBaja: "20.00",
   precioNocheAltaUsd: "160.00",
   precioNocheBajaUsd: "100.00",
@@ -87,12 +83,41 @@ describe("serializarPropiedad", () => {
     assert.equal(Number.isNaN(sinDato.precioNocheAltaUsd), false);
   });
 
-  it("no altera los campos legacy", () => {
-    const propiedad = serializarPropiedad(rawBase);
+  it("no expone los campos de precio en pesos ni el precio base", () => {
+    const propiedad = serializarPropiedad({
+      ...rawBase,
+      precioBase: "100.00",
+      promoSemanal: "5.00",
+      precioNocheAlta: "50000.00",
+      precioNocheBaja: "40000.00",
+    });
 
-    assert.equal(propiedad.precioNocheAlta, 0);
-    assert.equal(propiedad.precioBase, 100);
+    assert.equal("precioBase" in propiedad, false);
+    assert.equal("promoSemanal" in propiedad, false);
+    assert.equal("precioNocheAlta" in propiedad, false);
+    assert.equal("precioNocheBaja" in propiedad, false);
     assert.equal(propiedad.promoSemanalAlta, 10);
+    assert.equal(propiedad.promoSemanalBaja, 20);
+  });
+
+  it("las promos de 7 o más noches ausentes o inválidas quedan en 0", () => {
+    const invalidas = serializarPropiedad({
+      ...rawBase,
+      promoSemanalAlta: null,
+      promoSemanalBaja: "abc",
+    });
+    assert.equal(invalidas.promoSemanalAlta, 0);
+    assert.equal(invalidas.promoSemanalBaja, 0);
+
+    const sinPromoAlta: Record<string, unknown> = { ...rawBase };
+    delete sinPromoAlta.promoSemanalAlta;
+    assert.equal(serializarPropiedad(sinPromoAlta).promoSemanalAlta, 0);
+
+    const conDecimales = serializarPropiedad({
+      ...rawBase,
+      promoSemanalAlta: "7.50",
+    });
+    assert.equal(conDecimales.promoSemanalAlta, 7.5);
   });
 });
 
