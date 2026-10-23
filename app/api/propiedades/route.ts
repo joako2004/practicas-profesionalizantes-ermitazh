@@ -89,11 +89,10 @@ export async function POST(request: NextRequest) {
       nombre?: unknown;
       descripcion?: unknown;
       capacidad?: unknown;
-      precioBase?: unknown;
       servicios?: unknown;
     };
 
-    const { nombre, descripcion, capacidad, precioBase, servicios } = payload;
+    const { nombre, descripcion, capacidad, servicios } = payload;
 
     if (typeof nombre !== "string" || nombre.trim() === "") {
       return NextResponse.json(
@@ -128,20 +127,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (
-      typeof precioBase !== "number" ||
-      !Number.isFinite(precioBase) ||
-      precioBase < 0
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "El campo precioBase es obligatorio y debe ser un número válido.",
-        },
-        { status: 400 }
-      );
-    }
-
-    if (
       servicios !== undefined &&
       (!Array.isArray(servicios) ||
         servicios.some((servicio) => typeof servicio !== "string"))
@@ -166,7 +151,6 @@ export async function POST(request: NextRequest) {
         nombre: nombre.trim(),
         descripcion: descripcion.trim(),
         capacidad,
-        precioBase,
         fotos: [],
         servicios: serviciosValidos,
         activa: true,

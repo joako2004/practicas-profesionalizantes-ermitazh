@@ -50,13 +50,7 @@ model Propiedad {
   nombre      String
   descripcion String
   capacidad   Int
-  // Precio "desde $X" para listados. Se calcula dinámicamente como el
-  // precioBase mínimo. Se mantiene en la tabla por conveniencia de consulta.
-  precioBase  Decimal  @db.Decimal(10, 2)
-  promoSemanal Decimal  @db.Decimal(10, 2) @default(0)
-  precioNocheAlta  Decimal  @db.Decimal(10, 2) @default(0)
   promoSemanalAlta  Decimal  @db.Decimal(5, 2) @default(0)
-  precioNocheBaja  Decimal  @db.Decimal(10, 2) @default(0)
   promoSemanalBaja  Decimal  @db.Decimal(5, 2) @default(0)
   precioNocheAltaUsd Decimal? @db.Decimal(10, 2)
   precioNocheBajaUsd Decimal? @db.Decimal(10, 2)

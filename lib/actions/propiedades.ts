@@ -178,7 +178,6 @@ export async function crearPropiedad(data: {
   nombre: string;
   descripcion: string;
   capacidad: number;
-  precioBase: number;
   servicios?: string[];
 }): Promise<UpdatePropiedadResult> {
   if (!(await esAdmin())) {
@@ -194,16 +193,12 @@ export async function crearPropiedad(data: {
     if (!Number.isInteger(data.capacidad) || data.capacidad <= 0) {
       return { success: false, error: "La capacidad debe ser un número entero mayor a 0" };
     }
-    if (typeof data.precioBase !== "number" || data.precioBase < 0) {
-      return { success: false, error: "El precio base debe ser un número válido" };
-    }
 
     const propiedad = await prisma.propiedad.create({
       data: {
         nombre: data.nombre.trim(),
         descripcion: data.descripcion.trim(),
         capacidad: data.capacidad,
-        precioBase: data.precioBase,
         fotos: [],
         servicios: data.servicios?.map((s) => s.trim()).filter(Boolean) || [],
         activa: true,
