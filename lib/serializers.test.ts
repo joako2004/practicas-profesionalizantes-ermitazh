@@ -169,6 +169,6 @@ describe("integración con calcularPrecio", () => {
       assert.fail(`Se esperaba un cálculo válido, se obtuvo: ${resultado.motivo}`);
     }
     assert.equal(resultado.totalUsd, 913.5);
-    assert.equal(resultado.totalArs, 917000);
+    assert.equal(resultado.totalArs, 913500);
   });
 });

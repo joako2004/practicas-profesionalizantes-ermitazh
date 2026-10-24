@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   calcularPrecio,
-  redondearArsAMiles,
+  redondearArsAPesos,
   type CalculoPrecio,
   type CalculoPrecioOk,
   type PreciosPropiedadUsd,
@@ -91,18 +91,18 @@ describe("cálculo de precios por tramo", () => {
     assert.equal(resultado.promoAplicadaPct, 10);
     assert.equal(resultado.totalUsd, 913.5);
     assert.equal(resultado.precioNocheBaseArs, 145000);
-    assert.equal(resultado.precioNocheAplicadoArs, 131000);
-    assert.equal(resultado.totalArs, 917000);
+    assert.equal(resultado.precioNocheAplicadoArs, 130500);
+    assert.equal(resultado.totalArs, 913500);
   });
 
-  it("30 noches en ALTA aplican la promo y redondean el total por noche", () => {
+  it("30 noches en ALTA aplican la promo y el total sale del precio por noche exacto", () => {
     const resultado = calcular(30);
     esperarOk(resultado);
 
     assert.equal(resultado.tramo, "SIETE_O_MAS");
     assert.equal(resultado.totalUsd, 3915);
-    assert.equal(resultado.precioNocheAplicadoArs, 131000);
-    assert.equal(resultado.totalArs, 3930000);
+    assert.equal(resultado.precioNocheAplicadoArs, 130500);
+    assert.equal(resultado.totalArs, 3915000);
   });
 });
 
@@ -216,35 +216,66 @@ describe("falta de precio y de cotización", () => {
 });
 
 describe("redondeo de pesos", () => {
-  it("redondea los empates de mil hacia arriba", () => {
-    const cara = calcular(1, { precios: conPrecios({ precioNocheAltaUsd: 176.5 }) });
-    esperarOk(cara);
-    assert.equal(cara.precioNocheAplicadoArs, 177000);
+  it("no redondea al millar: muestra el valor exacto de una noche", () => {
+    const resultado = calcular(1, { cotizacionVenta: 1565 });
+    esperarOk(resultado);
 
-    const media = calcular(1, { precios: conPrecios({ precioNocheAltaUsd: 0.5 }) });
-    esperarOk(media);
-    assert.equal(media.precioNocheAplicadoArs, 1000);
-
-    const sieteNoches = calcular(7);
-    esperarOk(sieteNoches);
-    assert.equal(sieteNoches.precioNocheAplicadoArs, 131000);
+    assert.equal(resultado.precioNocheBaseArs, 250400);
+    assert.equal(resultado.precioNocheAplicadoArs, 250400);
+    assert.equal(resultado.totalArs, 250400);
   });
 
-  it("redondea un valor que no es empate", () => {
+  it("3 noches sin precio de 2 a 6 usan el de una noche y no se redondean al millar", () => {
+    const resultado = calcular(3, {
+      cotizacionVenta: 1565,
+      precios: conPrecios({ precio2a6AltaUsd: null }),
+    });
+    esperarOk(resultado);
+
+    assert.equal(resultado.precioNocheAplicadoArs, 250400);
+    assert.equal(resultado.totalArs, 751200);
+  });
+
+  it("7 noches con promo: el total en pesos coincide con el total en USD por la cotización", () => {
+    const resultado = calcular(7, {
+      cotizacionVenta: 1565,
+      precios: conPrecios({ precio2a6AltaUsd: null }),
+    });
+    esperarOk(resultado);
+
+    assert.equal(resultado.precioNocheAplicadoUsd, 144);
+    assert.equal(resultado.totalUsd, 1008);
+    assert.equal(resultado.precioNocheAplicadoArs, 225360);
+    assert.equal(resultado.totalArs, 1577520);
+    assert.equal(resultado.totalArs, resultado.totalUsd * 1565);
+  });
+
+  it("redondea al peso entero cuando la cotización trae decimales", () => {
+    // 160 × 1640,77 = 262523,2
+    const resultado = calcular(1, { cotizacionVenta: 1640.77 });
+    esperarOk(resultado);
+
+    assert.equal(resultado.precioNocheAplicadoArs, 262523);
+    assert.equal(resultado.totalArs, 262523);
+  });
+
+  it("redondea la mitad de un peso hacia arriba y arma el total desde el precio por noche ya redondeado", () => {
+    // 145 × 1234,5 = 179002,5
     const resultado = calcular(2, { cotizacionVenta: 1234.5 });
     esperarOk(resultado);
 
-    assert.equal(resultado.precioNocheBaseArs, 179000);
-    assert.equal(resultado.precioNocheAplicadoArs, 179000);
-    assert.equal(resultado.totalArs, 358000);
+    assert.equal(resultado.precioNocheBaseArs, 179003);
+    assert.equal(resultado.precioNocheAplicadoArs, 179003);
+    assert.equal(resultado.totalArs, 358006);
   });
 
-  it("redondearArsAMiles resuelve los casos límite", () => {
-    assert.equal(redondearArsAMiles(176500), 177000);
-    assert.equal(redondearArsAMiles(176499), 176000);
-    assert.equal(redondearArsAMiles(0), 0);
-    assert.equal(redondearArsAMiles(500), 1000);
-    assert.equal(redondearArsAMiles(499), 0);
+  it("redondearArsAPesos resuelve los casos límite", () => {
+    assert.equal(redondearArsAPesos(176500), 176500);
+    assert.equal(redondearArsAPesos(176500.4), 176500);
+    assert.equal(redondearArsAPesos(176500.5), 176501);
+    assert.equal(redondearArsAPesos(0), 0);
+    assert.equal(redondearArsAPesos(0.4), 0);
+    assert.equal(redondearArsAPesos(0.5), 1);
   });
 });
 

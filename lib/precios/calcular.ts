@@ -66,9 +66,10 @@ function redondearUsdADosDecimales(valor: number): number {
   return limpiarRuido(Math.round(limpiarRuido(limpio * 100)) / 100);
 }
 
-// Los valores son positivos: Math.round redondea la mitad hacia arriba.
-export function redondearArsAMiles(valor: number): number {
-  return Math.round(Number((valor / 1000).toPrecision(12))) * 1000;
+// Redondea al peso entero (mitad hacia arriba; los valores son positivos).
+// No redondea al millar: el precio se muestra exacto y el admin decide el monto final al cobrar.
+export function redondearArsAPesos(valor: number): number {
+  return Math.round(limpiarRuido(valor));
 }
 
 export function calcularPrecio(input: CalcularPrecioInput): CalculoPrecio {
@@ -118,8 +119,8 @@ export function calcularPrecio(input: CalcularPrecioInput): CalculoPrecio {
   let totalArs: number | null = null;
 
   if (venta !== null) {
-    precioNocheBaseArs = redondearArsAMiles(precioNocheBaseUsd * venta);
-    precioNocheAplicadoArs = redondearArsAMiles(precioNocheAplicadoUsd * venta);
+    precioNocheBaseArs = redondearArsAPesos(precioNocheBaseUsd * venta);
+    precioNocheAplicadoArs = redondearArsAPesos(precioNocheAplicadoUsd * venta);
     // El total se calcula desde el precio por noche ya redondeado.
     totalArs = precioNocheAplicadoArs * noches;
   }
