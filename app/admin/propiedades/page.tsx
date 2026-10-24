@@ -1,12 +1,68 @@
 import { prisma } from "@/lib/prisma";
 import PropiedadCard from "./_components/PropiedadCard";
+import PanelConfiguracionPrecios, {
+  type OpcionTipoDolar,
+} from "./_components/PanelConfiguracionPrecios";
 import { serializarPropiedad } from "@/lib/serializers";
 import { requireAdmin } from "@/lib/auth/perfil";
+import { obtenerConfiguracionPrecios } from "@/lib/configuracion-precios";
+import {
+  obtenerCotizaciones,
+  TIPOS_DOLAR,
+  ETIQUETAS_TIPO_DOLAR,
+  type CotizacionDolar,
+  type TipoDolar,
+} from "@/lib/cotizacion";
 
 export default async function PropiedadesPage() {
   await requireAdmin();
-  const propiedades = await prisma.propiedad.findMany({
-    orderBy: { orden: "asc" },
+  const [propiedades, configuracion, cotizaciones] = await Promise.all([
+    prisma.propiedad.findMany({
+      orderBy: { orden: "asc" },
+    }),
+    obtenerConfiguracionPrecios(),
+    obtenerCotizaciones(),
+  ]);
+
+  // Fechas, montos y etiquetas se formatean en el servidor: al cliente solo llegan strings
+  const cotizacionesPorTipo = new Map<TipoDolar, CotizacionDolar>();
+  for (const cotizacion of cotizaciones) {
+    cotizacionesPorTipo.set(cotizacion.tipo, cotizacion);
+  }
+
+  const formateadorFecha = new Intl.DateTimeFormat("es-AR", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "America/Argentina/Buenos_Aires",
+  });
+
+  // Siempre los 7 tipos en el orden de TIPOS_DOLAR, aunque falte la cotización
+  const opciones: OpcionTipoDolar[] = TIPOS_DOLAR.map((tipo) => {
+    const etiqueta = ETIQUETAS_TIPO_DOLAR[tipo];
+    const cotizacion = cotizacionesPorTipo.get(tipo);
+
+    if (!cotizacion) {
+      return {
+        tipo,
+        etiqueta,
+        ventaTexto: null,
+        desactualizada: false,
+        fechaTexto: null,
+      };
+    }
+
+    return {
+      tipo,
+      etiqueta,
+      ventaTexto:
+        "$" +
+        cotizacion.venta.toLocaleString("es-AR", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        }),
+      desactualizada: cotizacion.desactualizada,
+      fechaTexto: formateadorFecha.format(cotizacion.fechaApi ?? cotizacion.obtenidaEn),
+    };
   });
 
   return (
@@ -25,6 +81,8 @@ export default async function PropiedadesPage() {
           <span>+</span> Nueva propiedad
         </a>
       </div>
+
+      <PanelConfiguracionPrecios tipoActivo={configuracion.tipoDolar} opciones={opciones} temporadaActiva={configuracion.temporadaActiva} />
 
       {propiedades.length === 0 ? (
         <div className="rounded-lg border border-desert-sand/20 bg-white p-12 text-center">

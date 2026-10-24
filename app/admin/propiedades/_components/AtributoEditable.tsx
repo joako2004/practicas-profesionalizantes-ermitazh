@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 interface AtributoEditableProps {
   propiedadId: string;
   atributo: string;
-  tipo: "text" | "number" | "decimal" | "boolean" | "array";
+  tipo: "text" | "number" | "decimal" | "boolean" | "array" | "usd";
   valorActual: unknown;
   onEditRequest: (atributo: string, nuevoValor: unknown) => void;
 }
@@ -25,6 +25,7 @@ export default function AtributoEditable({
 
   const formatoParaInput = (valor: unknown, tipo: string): string => {
     if (valor === null || valor === undefined) return "";
+    if (tipo === "usd") return Number(valor).toFixed(2);
     if (tipo === "array") return (valor as string[]).join("\n");
     if (tipo === "boolean") return valor ? "true" : "false";
     if (tipo === "decimal") return Number(valor).toFixed(2);
@@ -42,6 +43,8 @@ export default function AtributoEditable({
       case "decimal":
         const dec = parseFloat(trimmed);
         return isNaN(dec) ? null : Math.round(dec * 100) / 100;
+      case "usd":
+        return /^\d+(\.\d{1,2})?$/.test(trimmed) ? Number(trimmed) : trimmed;
       case "boolean":
         return trimmed.toLowerCase() === "true";
       case "array":
@@ -51,7 +54,29 @@ export default function AtributoEditable({
     }
   };
 
+  // Evita abrir el diálogo (y vaciar por accidente) si no hubo cambio.
+  const esSinCambioUsd = (parseado: unknown, actual: unknown): boolean => {
+    if (parseado === null || parseado === undefined) {
+      return actual === null || actual === undefined;
+    }
+    return typeof actual === "number" && Number(actual) === parseado;
+  };
+
   const validar = (valor: unknown, tipo: string, atributo?: string): string | null => {
+    if (tipo === "usd") {
+      if (valor === null) return null;
+      if (typeof valor !== "number" || !Number.isFinite(valor)) {
+        return "Ingresá un número positivo con hasta 2 decimales (por ejemplo 145 o 145,50)";
+      }
+      if (valor <= 0) {
+        return "Debe ser mayor a 0 (para dejar sin precio, vaciá el campo)";
+      }
+      if (valor > 1000000) {
+        return "El máximo es US$ 1.000.000";
+      }
+      return null;
+    }
+
     if (valor === null || valor === "") {
       return "Este campo es obligatorio";
     }
@@ -105,6 +130,11 @@ export default function AtributoEditable({
       setError(errorValidacion);
       return;
     }
+    if (tipo === "usd" && esSinCambioUsd(parseado, valorActual)) {
+      setEditando(false);
+      setError("");
+      return;
+    }
     onEditRequest(atributo, parseado);
     setEditando(false);
   };
@@ -115,6 +145,11 @@ export default function AtributoEditable({
       const parseado = parsearValor(valorEditado, tipo);
       const errorValidacion = validar(parseado, tipo, atributo);
       if (!errorValidacion) {
+        if (tipo === "usd" && esSinCambioUsd(parseado, valorActual)) {
+          setEditando(false);
+          setError("");
+          return;
+        }
         onEditRequest(atributo, parseado);
         setEditando(false);
       } else {
@@ -130,7 +165,10 @@ export default function AtributoEditable({
   };
 
   const manejarClick = () => {
-    if (!editando) setEditando(true);
+    if (!editando) {
+      if (tipo === "usd") setValorEditado(formatoParaInput(valorActual, tipo));
+      setEditando(true);
+    }
   };
 
   const manejarChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -139,6 +177,10 @@ export default function AtributoEditable({
   };
 
   const formatearMostrar = (valor: unknown): string => {
+    if (tipo === "usd") {
+      if (valor === null || valor === undefined) return "Sin precio";
+      return `US$ ${Number(valor).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
     if (valor === null || valor === undefined) return "—";
     if (tipo === "decimal") return `$${Number(valor).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`;
     if (tipo === "array") return (valor as string[]).join(", ") || "—";
@@ -181,7 +223,8 @@ export default function AtributoEditable({
                 ? "border-danger text-danger bg-danger-bg"
                 : "border-desert-sand/40 bg-white"
             }`}
-            placeholder={`Nuevo ${atributo}`}
+            placeholder={tipo === "usd" ? "US$ (vacío = sin precio)" : `Nuevo ${atributo}`}
+            inputMode={tipo === "usd" ? "decimal" : undefined}
             step={tipo === "decimal" ? "0.01" : undefined}
             min={tipo === "number" ? "0" : tipo === "decimal" ? "0" : undefined}
           />

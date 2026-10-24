@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { esAdmin } from "@/lib/auth/perfil";
+import { esCampoUsd, validarPrecioUsd } from "@/lib/precios/validar";
 
 interface UpdatePropiedadResult {
   success: boolean;
@@ -13,15 +14,20 @@ interface UpdatePropiedadResult {
     nombre: string;
     descripcion: string;
     capacidad: number;
-    precioBase: number;
-    promoSemanal: number | null;
-    precioNocheAlta: number;
     promoSemanalAlta: number;
-    precioNocheBaja: number;
     promoSemanalBaja: number;
     servicios: string[];
     activa: boolean;
+    precioNocheAltaUsd: number | null;
+    precioNocheBajaUsd: number | null;
+    precio2a6AltaUsd: number | null;
+    precio2a6BajaUsd: number | null;
   };
+}
+
+// Convierte el Decimal de Prisma (o null/undefined) a number | null, nunca a 0.
+function decimalANumero(valor: { toNumber: () => number } | null | undefined): number | null {
+  return valor == null ? null : valor.toNumber();
 }
 
 export async function updatePropiedadAtributo(
@@ -40,11 +46,7 @@ export async function updatePropiedadAtributo(
         nombre: true,
         descripcion: true,
         capacidad: true,
-        precioBase: true,
-        promoSemanal: true,
-        precioNocheAlta: true,
         promoSemanalAlta: true,
-        precioNocheBaja: true,
         promoSemanalBaja: true,
         servicios: true,
         activa: true,
@@ -88,14 +90,6 @@ export async function updatePropiedadAtributo(
         dataToUpdate.orden = num;
         break;
       }
-      case "precioBase": {
-        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
-        if (isNaN(num) || num < 0) {
-          return { success: false, error: "El precio base debe ser un número válido mayor o igual a 0" };
-        }
-        dataToUpdate.precioBase = Math.round(num * 100) / 100;
-        break;
-      }
       case "servicios": {
         if (!Array.isArray(valor)) {
           return { success: false, error: "Los servicios deben ser un array" };
@@ -112,14 +106,6 @@ export async function updatePropiedadAtributo(
         dataToUpdate.activa = valor;
         break;
       }
-      case "precioNocheAlta": {
-        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
-        if (isNaN(num) || num < 0) {
-          return { success: false, error: "El precio nocturna alta debe ser un número mayor o igual a 0" };
-        }
-        dataToUpdate.precioNocheAlta = Math.round(num * 100) / 100;
-        break;
-      }
       case "promoSemanalAlta": {
         const num = typeof valor === "number" ? valor : parseFloat(String(valor));
         if (!Number.isFinite(num) || num < 0 || num > 100) {
@@ -128,28 +114,28 @@ export async function updatePropiedadAtributo(
         dataToUpdate.promoSemanalAlta = Math.round(num * 100) / 100;
         break;
       }
-      case "promoSemanal": {
-        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
-        if (!Number.isFinite(num) || num < 0) {
-          return { success: false, error: "La promo semanal debe ser un número mayor o igual a 0" };
-        }
-        dataToUpdate.promoSemanal = Math.round(num * 100) / 100;
-        break;
-      }
-      case "precioNocheBaja": {
-        const num = typeof valor === "number" ? valor : parseFloat(String(valor));
-        if (isNaN(num) || num < 0) {
-          return { success: false, error: "El precio nocturna baja debe ser un número mayor o igual a 0" };
-        }
-        dataToUpdate.precioNocheBaja = Math.round(num * 100) / 100;
-        break;
-      }
       case "promoSemanalBaja": {
         const num = typeof valor === "number" ? valor : parseFloat(String(valor));
         if (!Number.isFinite(num) || num < 0 || num > 100) {
           return { success: false, error: "La promo semanal baja debe ser un número entre 0 y 100" };
         }
         dataToUpdate.promoSemanalBaja = Math.round(num * 100) / 100;
+        break;
+      }
+      case "precioNocheAltaUsd":
+      case "precioNocheBajaUsd":
+      case "precio2a6AltaUsd":
+      case "precio2a6BajaUsd": {
+        // Vaciar el precio de 1 noche deja la cabaña en "Consultar" para esa temporada
+        // aunque tenga cargado el 2-6; vaciar el 2-6 hace que se use el de 1 noche.
+        // NO validar relación entre ambos (autonomía total del admin).
+        const r = validarPrecioUsd(valor);
+        if (!r.ok) {
+          return { success: false, error: r.error };
+        }
+        if (esCampoUsd(campo)) {
+          dataToUpdate[campo] = r.valor;
+        }
         break;
       }
       default:
@@ -163,6 +149,7 @@ export async function updatePropiedadAtributo(
 
     revalidatePath("/admin/propiedades");
     revalidatePath("/");
+    revalidatePath("/cabanas/[id]", "page");
 
     return {
       success: true,
@@ -171,12 +158,12 @@ export async function updatePropiedadAtributo(
         nombre: propiedadActualizada.nombre,
         descripcion: propiedadActualizada.descripcion,
         capacidad: propiedadActualizada.capacidad,
-        precioBase: Number(propiedadActualizada.precioBase),
-        promoSemanal: Number(propiedadActualizada.promoSemanal),
-        precioNocheAlta: Number(propiedadActualizada.precioNocheAlta) ?? 0,
         promoSemanalAlta: Number(propiedadActualizada.promoSemanalAlta) ?? 0,
-        precioNocheBaja: Number(propiedadActualizada.precioNocheBaja) ?? 0,
         promoSemanalBaja: Number(propiedadActualizada.promoSemanalBaja) ?? 0,
+        precioNocheAltaUsd: decimalANumero(propiedadActualizada.precioNocheAltaUsd),
+        precioNocheBajaUsd: decimalANumero(propiedadActualizada.precioNocheBajaUsd),
+        precio2a6AltaUsd: decimalANumero(propiedadActualizada.precio2a6AltaUsd),
+        precio2a6BajaUsd: decimalANumero(propiedadActualizada.precio2a6BajaUsd),
         servicios: propiedadActualizada.servicios,
         activa: propiedadActualizada.activa,
       } as UpdatePropiedadResult["propiedad"],
@@ -191,7 +178,6 @@ export async function crearPropiedad(data: {
   nombre: string;
   descripcion: string;
   capacidad: number;
-  precioBase: number;
   servicios?: string[];
 }): Promise<UpdatePropiedadResult> {
   if (!(await esAdmin())) {
@@ -207,16 +193,12 @@ export async function crearPropiedad(data: {
     if (!Number.isInteger(data.capacidad) || data.capacidad <= 0) {
       return { success: false, error: "La capacidad debe ser un número entero mayor a 0" };
     }
-    if (typeof data.precioBase !== "number" || data.precioBase < 0) {
-      return { success: false, error: "El precio base debe ser un número válido" };
-    }
 
     const propiedad = await prisma.propiedad.create({
       data: {
         nombre: data.nombre.trim(),
         descripcion: data.descripcion.trim(),
         capacidad: data.capacidad,
-        precioBase: data.precioBase,
         fotos: [],
         servicios: data.servicios?.map((s) => s.trim()).filter(Boolean) || [],
         activa: true,
@@ -232,12 +214,12 @@ export async function crearPropiedad(data: {
         nombre: propiedad.nombre,
         descripcion: propiedad.descripcion,
         capacidad: propiedad.capacidad,
-        precioBase: Number(propiedad.precioBase),
-        promoSemanal: Number(propiedad.promoSemanal),
-        precioNocheAlta: Number(propiedad.precioNocheAlta) ?? 0,
         promoSemanalAlta: Number(propiedad.promoSemanalAlta) ?? 0,
-        precioNocheBaja: Number(propiedad.precioNocheBaja) ?? 0,
         promoSemanalBaja: Number(propiedad.promoSemanalBaja) ?? 0,
+        precioNocheAltaUsd: decimalANumero(propiedad.precioNocheAltaUsd),
+        precioNocheBajaUsd: decimalANumero(propiedad.precioNocheBajaUsd),
+        precio2a6AltaUsd: decimalANumero(propiedad.precio2a6AltaUsd),
+        precio2a6BajaUsd: decimalANumero(propiedad.precio2a6BajaUsd),
         servicios: propiedad.servicios,
         activa: propiedad.activa,
       },

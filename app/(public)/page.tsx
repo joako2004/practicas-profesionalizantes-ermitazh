@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { serializarPropiedad } from "@/lib/serializers";
+import { serializarPropiedad, obtenerPreciosUsd } from "@/lib/serializers";
+import { obtenerContextoPrecios, precioUnaNocheArs } from "@/lib/precios/contexto";
 import HeroCarousel from "@/components/public/HeroCarousel";
 import SearchCard from "@/components/public/SearchCard";
 import WelcomeSection from "@/components/public/WelcomeSection";
@@ -17,11 +18,12 @@ export type PropiedadParaHome = Prisma.PropiedadGetPayload<{
     nombre: true;
     descripcion: true;
     capacidad: true;
-    precioBase: true;
-    precioNocheAlta: true;
     promoSemanalAlta: true;
-    precioNocheBaja: true;
     promoSemanalBaja: true;
+    precioNocheAltaUsd: true;
+    precioNocheBajaUsd: true;
+    precio2a6AltaUsd: true;
+    precio2a6BajaUsd: true;
     fotos: true;
   };
 }>;
@@ -75,11 +77,12 @@ async function getPropiedades() {
       nombre: true,
       descripcion: true,
       capacidad: true,
-      precioBase: true,
-      precioNocheAlta: true,
       promoSemanalAlta: true,
-      precioNocheBaja: true,
       promoSemanalBaja: true,
+      precioNocheAltaUsd: true,
+      precioNocheBajaUsd: true,
+      precio2a6AltaUsd: true,
+      precio2a6BajaUsd: true,
       fotos: true,
     },
   });
@@ -87,23 +90,34 @@ async function getPropiedades() {
 }
 
 export default async function HomePage() {
-  const [heroImages, galleryImages, ctaImage, testimonios, propiedades] =
+  const [heroImages, galleryImages, ctaImage, testimonios, propiedades, contextoPrecios] =
     await Promise.all([
       getHeroImages(),
       getGalleryImages(),
       getCtaImage(),
       getTestimonios(),
       getPropiedades(),
+      obtenerContextoPrecios(),
     ]);
 
   const propiedadesSerializadas = propiedades.map(serializarPropiedad);
+  const preciosDesdeArs: Record<string, number | null> = {};
+  for (const propiedad of propiedadesSerializadas) {
+    preciosDesdeArs[propiedad.id] = precioUnaNocheArs(
+      obtenerPreciosUsd(propiedad),
+      contextoPrecios
+    );
+  }
 
   return (
     <>
       <HeroCarousel imagenes={heroImages} />
       <SearchCard />
       <WelcomeSection />
-      <CabinsSection propiedades={propiedadesSerializadas} />
+      <CabinsSection
+        propiedades={propiedadesSerializadas}
+        preciosDesdeArs={preciosDesdeArs}
+      />
       <ServicesSection servicios={SERVICIOS_GENERALES} />
       <GallerySection imagenes={galleryImages} />
       <TestimonialsSection testimonios={testimonios} />

@@ -2,6 +2,10 @@
 
 import { useState, FormEvent } from "react";
 import { contarCaracteres } from "@/lib/utils";
+import { buildWhatsAppLink } from "@/lib/config";
+import { nochesEntre } from "@/lib/precios/estadia";
+import { NOCHES_MAX } from "@/lib/precios/calcular";
+import { mensajeErrorPreReserva } from "@/lib/pre-reserva/mensaje";
 
 interface Propiedad {
   id: string;
@@ -17,14 +21,37 @@ const MAX_CARACTERES_SIN_ESPACIOS = 1000;
 const MAX_CARACTERES_TOTAL = 3000;
 const UMBRAL_ADVERTENCIA = 900;
 
+// El componente se renderiza en el servidor y en el cliente, por eso se usa una
+// zona fija y no la del navegador (evita desajustes de hidratación en el min).
+const FORMATEADOR_HOY = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Argentina/Buenos_Aires",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
 function hoy(): string {
-  return new Date().toISOString().split("T")[0];
+  const partes = FORMATEADOR_HOY.formatToParts(new Date());
+  const anio = partes.find((parte) => parte.type === "year")?.value;
+  const mes = partes.find((parte) => parte.type === "month")?.value;
+  const dia = partes.find((parte) => parte.type === "day")?.value;
+
+  if (!anio || !mes || !dia) {
+    return "";
+  }
+
+  return `${anio}-${mes}-${dia}`;
 }
 
+// Las fechas "YYYY-MM-DD" se tratan siempre en UTC para evitar corrimientos de un día.
 function diaSiguiente(fecha: string): string {
-  const d = new Date(fecha);
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().split("T")[0];
+  const ms = Date.parse(`${fecha}T00:00:00.000Z`);
+
+  if (Number.isNaN(ms)) {
+    return hoy();
+  }
+
+  return new Date(ms + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 }
 
 function recortarAlLimite(texto: string): string {
@@ -104,8 +131,14 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
       return;
     }
 
-    if (new Date(llegada) >= new Date(salida)) {
-      setError("La fecha de llegada debe ser anterior a la de salida");
+    const noches = nochesEntre(llegada, salida);
+    if (!noches.ok) {
+      setError(mensajeErrorPreReserva(noches.motivo));
+      return;
+    }
+
+    if (noches.noches > NOCHES_MAX) {
+      setError(mensajeErrorPreReserva("ESTADIA_MUY_LARGA"));
       return;
     }
 
@@ -125,13 +158,17 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
         }),
       });
 
-      const data = await res.json();
+      const data: { error?: string; mensaje?: string } | null = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(data.error || "Error al crear la pre-reserva");
+        throw new Error(data?.error || "Error al crear la pre-reserva");
       }
 
-      window.location.href = `https://wa.me/5491138785533?text=${encodeURIComponent(data.mensaje)}`;
+      if (data === null || typeof data.mensaje !== "string") {
+        throw new Error("Respuesta inesperada del servidor");
+      }
+
+      window.location.href = buildWhatsAppLink(data.mensaje);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ocurrió un error inesperado");
     } finally {

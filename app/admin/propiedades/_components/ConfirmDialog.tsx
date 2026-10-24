@@ -10,6 +10,8 @@ interface ConfirmDialogProps {
   valorActual: string;
   nuevoValor: string;
   disabled?: boolean;
+  etiqueta?: string;
+  aviso?: string;
 }
 
 export default function ConfirmDialog({
@@ -20,6 +22,8 @@ export default function ConfirmDialog({
   valorActual,
   nuevoValor,
   disabled = false,
+  etiqueta,
+  aviso,
 }: ConfirmDialogProps) {
   useEffect(() => {
     if (open) {
@@ -43,13 +47,18 @@ export default function ConfirmDialog({
 
         <div className="mt-4 space-y-3 text-sm">
           <div className="rounded-lg bg-desert-sand/10 p-3">
-            <p className="font-medium text-dark-pine/70">{capitalizar(atributo)}</p>
+            <p className="font-medium text-dark-pine/70">{etiqueta ?? capitalizar(atributo)}</p>
             <div className="mt-2 flex items-center gap-2 text-dark-pine/60">
               <span className="flex-1 text-right font-mono">{valorActual}</span>
               <span className="text-toasted-brown">→</span>
               <span className="flex-1 font-mono font-medium">{nuevoValor}</span>
             </div>
           </div>
+          {aviso && (
+            <div role="note" className="rounded-lg border border-warning-border bg-warning-bg p-3 text-sm text-warning">
+              ⚠ {aviso}
+            </div>
+          )}
         </div>
 
         <div className="mt-6 flex justify-end gap-3">

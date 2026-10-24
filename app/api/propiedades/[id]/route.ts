@@ -64,13 +64,11 @@ export async function PATCH(
       nombre?: unknown;
       descripcion?: unknown;
       capacidad?: unknown;
-      precioBase?: unknown;
       servicios?: unknown;
       activa?: unknown;
     };
 
-    const { nombre, descripcion, capacidad, precioBase, servicios, activa } =
-      payload;
+    const { nombre, descripcion, capacidad, servicios, activa } = payload;
 
     const propiedadExistente = await prisma.propiedad.findUnique({
       where: { id },
@@ -87,7 +85,6 @@ export async function PATCH(
       nombre?: string;
       descripcion?: string;
       capacidad?: number;
-      precioBase?: number;
       servicios?: string[];
       activa?: boolean;
     } = {};
@@ -130,24 +127,6 @@ export async function PATCH(
       }
 
       dataToUpdate.capacidad = capacidad;
-    }
-
-    if (precioBase !== undefined) {
-      if (
-        typeof precioBase !== "number" ||
-        !Number.isFinite(precioBase) ||
-        precioBase < 0
-      ) {
-        return NextResponse.json(
-          {
-            error:
-              "El campo precioBase debe ser un número válido mayor o igual a 0.",
-          },
-          { status: 400 }
-        );
-      }
-
-      dataToUpdate.precioBase = precioBase;
     }
 
     if (servicios !== undefined) {

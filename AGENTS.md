@@ -1,6 +1,6 @@
 # AGENTS.md — Reglas para agentes de IA
 > Cabañas Ermitazh · Sistema de Gestión de Reservas  
-> Stack: Next.js 14 · Supabase · Prisma · Tailwind CSS
+> Stack: Next.js 16 · Supabase · Prisma · Tailwind CSS
 
 ---
 
@@ -18,7 +18,7 @@
 
 ## 2. Stack y restricciones tecnológicas
 
-- **Framework:** Next.js 14 con App Router. No usar Pages Router.
+- **Framework:** Next.js 16 con App Router. No usar Pages Router.
 - **Estilos:** exclusivamente Tailwind CSS. No escribir CSS en archivos `.css` ni usar `style={}` inline salvo casos excepcionales justificados.
 - **Base de datos:** acceder siempre a través de Prisma. No escribir queries SQL directas.
 - **Autenticación:** usar Supabase Auth. No implementar sistemas de auth propios.
@@ -45,7 +45,7 @@
   /utils.ts         → funciones utilitarias generales
 /prisma
   schema.prisma     → modelos de datos
-  /migrations       → NO editar manualmente
+  /migrations       → SQL escrito a mano (ver sección 5)
 ```
 
 Respetar esta estructura. No crear carpetas fuera de ella sin justificación.
@@ -85,8 +85,9 @@ Respetar esta estructura. No crear carpetas fuera de ella sin justificación.
 
 ## 5. Base de datos y Prisma
 
-- **Nunca editar archivos dentro de `/prisma/migrations` manualmente.**
-- Para modificar el schema: editar `schema.prisma` → ejecutar `npx prisma migrate dev --name descripcion-del-cambio`.
+- **No usar `prisma migrate dev`, `prisma db push` ni `prisma migrate reset`:** la base tiene drift respecto de las migraciones y podrían proponer borrar datos.
+- Para modificar el schema: editar `schema.prisma` y escribir a mano un `migration.sql` idempotente (dentro de `BEGIN;` / `COMMIT;`) en `prisma/migrations/AAAAMMDDHHMMSS_descripcion_en_español_sin_acentos/`. Aplicarlo con `psql`, registrarlo con `npx prisma migrate resolve --applied <carpeta>` y recién después ejecutar `npx prisma generate`.
+- Antes de aplicar una migración que borre o modifique datos, hacer un backup (`pg_dump` versión 17, formato `-Fc`) y verificarlo con `pg_restore -l`. Los backups no se guardan en el repo.
 - Para inspeccionar datos en desarrollo: usar Prisma Studio (`npx prisma studio`).
 - El cliente Prisma debe instanciarse una sola vez desde `/lib/prisma.ts`. No crear instancias nuevas en otros archivos.
 - Ante un cambio de schema que afecte datos existentes, advertir explícitamente antes de ejecutar la migración.
