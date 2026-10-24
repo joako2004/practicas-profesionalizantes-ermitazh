@@ -270,13 +270,6 @@ export default function PriceCalculator({
             </div>
           )}
 
-          {resultado.totalArs !== null && (
-            <p className="mt-2 text-xs text-[var(--color-ink)]/60">
-              Los precios en pesos se redondean al millar más cercano por
-              noche.
-            </p>
-          )}
-
           <p className="mt-2 text-xs text-[var(--color-ink)]/60">
             Valor estimativo. La reserva se confirma por WhatsApp.
           </p>
