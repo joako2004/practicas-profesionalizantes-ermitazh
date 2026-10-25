@@ -99,14 +99,24 @@ const ICON_PATHS: Record<ServicioIconName, ReactNode> = {
 const SERVICIO_A_ICONO: Record<string, ServicioIconName> = {
   "WiFi gratuito": "wifi",
   Pileta: "pileta",
-  Parrilla: "parrilla",
+  Pool: "pileta",
+  "Parrilla": "parrilla",
+  "Parrilla privada": "parrilla",
   Estacionamiento: "estacionamiento",
+  Cochera: "estacionamiento",
+  "Cochera privada": "estacionamiento",
   "Ropa de cama": "ropa-cama",
   "Aire acondicionado": "aire",
   "Pet friendly": "pet",
   Calefacción: "calefaccion",
   "Smart TV": "tv",
   "Cocina equipada": "cocina",
+  "Sala de juegos": "generico",
+  "Cancha de vóley": "generico",
+  "Cancha de fútbol": "generico",
+  "Espacio verde": "generico",
+  "Plaza de juegos": "generico",
+  "Cama elástica": "generico",
 };
 
 interface ServiceIconProps extends SVGProps<SVGSVGElement> {

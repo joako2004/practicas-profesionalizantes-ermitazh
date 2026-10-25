@@ -44,7 +44,8 @@ export const IMAGENES_HERO_FALLBACK = [
 export const SERVICIOS_GENERALES = [
   "WiFi gratuito",
   "Pileta",
-  "Parrilla",
+  "Parrilla privada",
+  "Cochera privada",
   "Estacionamiento",
   "Ropa de cama",
   "Aire acondicionado",
@@ -52,6 +53,13 @@ export const SERVICIOS_GENERALES = [
   "Calefacción",
   "Smart TV",
   "Cocina equipada",
+  "Sala de juegos",
+  "Pool",
+  "Cancha de vóley",
+  "Cancha de fútbol",
+  "Espacio verde",
+  "Plaza de juegos",
+  "Cama elástica",
 ];
 
 export function buildWhatsAppLink(
