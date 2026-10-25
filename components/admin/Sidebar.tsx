@@ -9,7 +9,6 @@ type IconName =
   | "reservations"
   | "photos"
   | "availability"
-  | "prices"
   | "inquiries"
   | "reports"
   | "reviews"
@@ -33,7 +32,6 @@ const sidebarItems: SidebarItem[] = [
   { key: "reservas", label: "Reservas", icon: "reservations" },
   { key: "fotos", label: "Fotos", icon: "photos" },
   { key: "disponibilidad", label: "Disponibilidad", icon: "availability" },
-  { key: "precios", label: "Precios", icon: "prices" },
   { key: "consultas", label: "Consultas", icon: "inquiries" },
   { key: "reportes", label: "Reportes", icon: "reports" },
 ];
@@ -71,11 +69,6 @@ function SidebarIcon({
       <>
         <rect x="3.5" y="4" width="17" height="17" rx="2" />
         <path d="M7.5 3v3M16.5 3v3M3.5 9h17M7 14l2.5 2.5L16.5 11" />
-      </>
-    ),
-    prices: (
-      <>
-        <path d="M12 3v18M16 7.5c0-1.4-1.8-2.5-4-2.5S8 6.1 8 7.5s1.8 2.5 4 2.5 4 1.1 4 2.5-1.8 2.5-4 2.5-4-1.1-4-2.5" />
       </>
     ),
     inquiries: (
