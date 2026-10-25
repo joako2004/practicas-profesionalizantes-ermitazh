@@ -1,4 +1,7 @@
-export const WHATSAPP_NUMBER = "5491138785533";
+export const WHATSAPP_NUMBER = "5492604510202";
+
+export const CONTACT_PHONE_DISPLAY = "+54 9 260 451-0202";
+export const CONTACT_PHONE_TEL = "+5492604510202";
 
 export const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/complejoermitazh/?hl=es",
@@ -12,7 +15,7 @@ export const GOOGLE_MAPS_URL =
 
 export const CONTACTO = {
   email: "info@ermitazh.com",
-  telefono: "+54 9 11 3878-5533",
+  telefono: CONTACT_PHONE_DISPLAY,
   direccion: "San Rafael, Mendoza, Argentina",
 };
 
