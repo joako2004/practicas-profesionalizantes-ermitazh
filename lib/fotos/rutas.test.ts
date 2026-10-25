@@ -54,6 +54,15 @@ describe("extraerPathDeUrl", () => {
     );
   });
 
+  it("devuelve null si el prefijo aparece pero no al comienzo del pathname", () => {
+    assert.equal(
+      extraerPathDeUrl(
+        `${URL_BASE}/otra/storage/v1/object/public/propiedades-fotos/a.jpeg`
+      ),
+      null
+    );
+  });
+
   it("devuelve null para un string que no es URL", () => {
     assert.equal(extraerPathDeUrl("esto no es una url"), null);
   });

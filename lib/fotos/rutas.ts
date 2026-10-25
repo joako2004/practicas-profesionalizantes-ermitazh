@@ -85,10 +85,11 @@ export function extraerPathDeUrl(url: string): string | null {
     return null;
   }
 
-  const indice = pathname.indexOf(PREFIJO_PUBLICO);
-  if (indice === -1) return null;
+  // El prefijo debe estar al comienzo: una URL de otro sitio que lo contenga
+  // más adelante (por ejemplo /otra/storage/v1/...) no pertenece al bucket.
+  if (!pathname.startsWith(PREFIJO_PUBLICO)) return null;
 
-  const restoCodificado = pathname.slice(indice + PREFIJO_PUBLICO.length);
+  const restoCodificado = pathname.slice(PREFIJO_PUBLICO.length);
 
   let path: string;
   try {
