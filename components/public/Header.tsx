@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { COMPLEJO } from "@/lib/config";
-import { logout } from "@/app/login/actions";
+import UserMenu from "./UserMenu";
 
 const NAV_LINKS = [
   { label: "Inicio", href: "/" },
@@ -18,13 +18,7 @@ const CLASE_BOTON_SESION =
 const CLASE_BOTON_PRIMARIO =
   "rounded-[var(--radius-md)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-5 py-2 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/80 hover:border-[var(--color-accent)]/80 active:scale-[0.97]";
 
-function SesionControles({
-  sesion,
-  contexto,
-}: {
-  sesion: Sesion;
-  contexto: HeaderContexto;
-}) {
+function SesionControles({ sesion }: { sesion: Sesion }) {
   if (!sesion) {
     return (
       <Link href="/login" className={CLASE_BOTON_SESION}>
@@ -33,25 +27,7 @@ function SesionControles({
     );
   }
 
-  return (
-    <div className="flex items-center gap-3">
-      {sesion.esAdmin && (
-        <Link
-          href="/admin"
-          className={
-            contexto === "admin" ? CLASE_BOTON_PRIMARIO : CLASE_BOTON_SESION
-          }
-        >
-          Panel
-        </Link>
-      )}
-      <form action={logout}>
-        <button type="submit" className={CLASE_BOTON_SESION}>
-          Cerrar sesión
-        </button>
-      </form>
-    </div>
-  );
+  return <UserMenu esAdmin={sesion.esAdmin} />;
 }
 
 export default function Header({
@@ -89,10 +65,10 @@ export default function Header({
               Reservar
             </Link>
           )}
-          <SesionControles sesion={sesion} contexto={contexto} />
+          <SesionControles sesion={sesion} />
         </div>
         <div className="md:hidden">
-          <SesionControles sesion={sesion} contexto={contexto} />
+          <SesionControles sesion={sesion} />
         </div>
       </nav>
     </header>
