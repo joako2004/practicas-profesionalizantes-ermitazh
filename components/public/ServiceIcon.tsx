@@ -11,6 +11,13 @@ type ServicioIconName =
   | "calefaccion"
   | "tv"
   | "cocina"
+  | "pool-billar"
+  | "sala-juegos"
+  | "voley"
+  | "futbol"
+  | "espacio-verde"
+  | "plaza-juegos"
+  | "cama-elastica"
   | "generico";
 
 const ICON_PATHS: Record<ServicioIconName, ReactNode> = {
@@ -88,6 +95,69 @@ const ICON_PATHS: Record<ServicioIconName, ReactNode> = {
       <path d="M9 6.5c0-1.1.9-1.5 1.3-2.4M13 6.5c0-1.1.9-1.5 1.3-2.4" />
     </>
   ),
+  "pool-billar": (
+    <>
+      <circle cx="12" cy="12" r="4.2" />
+      <circle cx="12" cy="12" r="1.6" />
+      <path d="M12 7.8v-2.3M12 16.2v2.3M7.8 12h-2.3M16.2 12h2.3" />
+      <path d="M9.2 9.2 7.4 7.4M14.8 9.2 16.6 7.4M9.2 14.8 7.4 16.6M14.8 14.8 16.6 16.6" />
+      <path d="M5 19 14 10" />
+      <path d="M13.2 10.8 14 10 13.2 9.2" />
+      <path d="M10 13.2 9.2 14 10 14.8" />
+    </>
+  ),
+  "sala-juegos": (
+    <>
+      <rect x="4" y="7" width="16" height="10" rx="2" />
+      <path d="M8 10v4M6 12h4" />
+      <circle cx="15" cy="11" r="0.8" />
+      <circle cx="17" cy="13" r="0.8" />
+      <line x1="7" y1="7" x2="7" y2="5" />
+      <line x1="17" y1="7" x2="17" y2="5" />
+    </>
+  ),
+  voley: (
+    <>
+      <line x1="12" y1="4" x2="12" y2="20" />
+      <path d="M8 6v12M16 6v12" />
+      <path d="M8 7h8M8 17h8" />
+      <circle cx="12" cy="12" r="2.2" />
+    </>
+  ),
+  futbol: (
+    <>
+      <path d="M6 8h12v8H6z" />
+      <path d="M6 12h12" />
+      <circle cx="12" cy="12" r="0.8" />
+      <circle cx="6" cy="12" r="1.4" />
+      <circle cx="18" cy="12" r="1.4" />
+      <path d="M4.8 11.2 6 12 4.8 12.8M19.2 11.2 18 12 19.2 12.8" />
+    </>
+  ),
+  "espacio-verde": (
+    <>
+      <path d="M12 5c-1.6 0-2.8 1.2-2.8 2.8 0 1 .5 1.8 1.2 2.3-.2.5-.3 1.1-.3 1.7 0 2.3 1.9 4.2 4.2 4.2s4.2-1.9 4.2-4.2c0-.6-.1-1.2-.3-1.7.7-.5 1.2-1.3 1.2-2.3 0-1.6-1.2-2.8-2.8-2.8-.5 0-.9.1-1.3.3-.4-.2-.8-.3-1.3-.3s-.9.1-1.3.3c-.4-.2-.8-.3-1.3-.3z" />
+      <path d="M10.2 10.4c-1.3 0-2.4 1.1-2.4 2.4 0 1.1.8 2 1.8 2.3" />
+      <path d="M3 19h18" />
+      <path d="M12 16v3" />
+    </>
+  ),
+  "plaza-juegos": (
+    <>
+      <path d="M5 7h14" />
+      <path d="M6 7v3c0 1.7 1.3 3 3 3h6c1.7 0 3-1.3 3-3V7" />
+      <path d="M7 13l-1 5M17 13l1 5" />
+      <path d="M6 18h12" />
+    </>
+  ),
+  "cama-elastica": (
+    <>
+      <ellipse cx="12" cy="10" rx="6" ry="2.6" />
+      <path d="M6 10v2c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6v-2" />
+      <path d="M7 12.4v2.6M10 13.2v2.4M14 13.2v2.4M17 12.4v2.6" />
+      <path d="M10 9l2-2 2 2" />
+    </>
+  ),
   generico: (
     <>
       <path d="M11 3l1.7 4.8L17.5 9.5l-4.8 1.7L11 16l-1.7-4.8L4.5 9.5l4.8-1.7z" />
@@ -99,7 +169,7 @@ const ICON_PATHS: Record<ServicioIconName, ReactNode> = {
 const SERVICIO_A_ICONO: Record<string, ServicioIconName> = {
   "WiFi gratuito": "wifi",
   Pileta: "pileta",
-  Pool: "pileta",
+  Pool: "pool-billar",
   "Parrilla": "parrilla",
   "Parrilla privada": "parrilla",
   Estacionamiento: "estacionamiento",
@@ -111,12 +181,12 @@ const SERVICIO_A_ICONO: Record<string, ServicioIconName> = {
   Calefacción: "calefaccion",
   "Smart TV": "tv",
   "Cocina equipada": "cocina",
-  "Sala de juegos": "generico",
-  "Cancha de vóley": "generico",
-  "Cancha de fútbol": "generico",
-  "Espacio verde": "generico",
-  "Plaza de juegos": "generico",
-  "Cama elástica": "generico",
+  "Sala de juegos": "sala-juegos",
+  "Cancha de vóley": "voley",
+  "Cancha de fútbol": "futbol",
+  "Espacio verde": "espacio-verde",
+  "Plaza de juegos": "plaza-juegos",
+  "Cama elástica": "cama-elastica",
 };
 
 interface ServiceIconProps extends SVGProps<SVGSVGElement> {
