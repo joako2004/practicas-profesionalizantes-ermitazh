@@ -1,7 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent as EventoTecladoReact,
+} from "react";
 
 import { eliminarFoto } from "@/lib/actions/fotos";
 import {
@@ -37,15 +43,19 @@ export default function BotonEliminarFoto({
   const router = useRouter();
   const { ocupado, setOcupado, publicarAviso } = useEliminacion();
 
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [eliminando, setEliminando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const contenedorRef = useRef<HTMLDivElement | null>(null);
+  const disparadorRef = useRef<HTMLButtonElement | null>(null);
+  const opcionesRef = useRef<Array<HTMLButtonElement | null>>([]);
   const cancelarRef = useRef<HTMLButtonElement | null>(null);
   const estabaAbierto = useRef(false);
 
   const idBase = useId();
+  const idMenu = `${idBase}-menu`;
   const idTitulo = `${idBase}-titulo`;
   const idDescripcion = `${idBase}-descripcion`;
 
@@ -69,9 +79,50 @@ export default function BotonEliminarFoto({
 
     if (estabaAbierto.current) {
       estabaAbierto.current = false;
-      triggerRef.current?.focus();
+      disparadorRef.current?.focus();
     }
   }, [confirmando]);
+
+  // Menú de opciones: foco inicial en la primera opción, cierre por Escape,
+  // por Tab o por un pointerdown fuera del disparador y del menú.
+  useEffect(() => {
+    if (!menuAbierto) return;
+
+    opcionesRef.current[0]?.focus();
+
+    const manejarPointerDown = (evento: PointerEvent) => {
+      const objetivo = evento.target;
+
+      if (!(objetivo instanceof Node)) return;
+      if (contenedorRef.current?.contains(objetivo)) return;
+
+      setMenuAbierto(false);
+    };
+
+    const manejarTecla = (evento: KeyboardEvent) => {
+      if (evento.key === "Escape") {
+        evento.preventDefault();
+        setMenuAbierto(false);
+        disparadorRef.current?.focus();
+        return;
+      }
+
+      if (evento.key === "Tab") {
+        // El foco vuelve al disparador y el navegador sigue desde ahí con el
+        // orden natural, así no se pierde al desmontarse el menú.
+        setMenuAbierto(false);
+        disparadorRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("pointerdown", manejarPointerDown);
+    document.addEventListener("keydown", manejarTecla);
+
+    return () => {
+      document.removeEventListener("pointerdown", manejarPointerDown);
+      document.removeEventListener("keydown", manejarTecla);
+    };
+  }, [menuAbierto]);
 
   useEffect(() => {
     if (!confirmando) return;
@@ -92,6 +143,38 @@ export default function BotonEliminarFoto({
 
     setError(null);
     setConfirmando(true);
+  };
+
+  const alternarMenu = () => {
+    setMenuAbierto((abierto) => !abierto);
+  };
+
+  const manejarTecladoMenu = (evento: EventoTecladoReact<HTMLDivElement>) => {
+    if (evento.key !== "ArrowDown" && evento.key !== "ArrowUp") return;
+
+    evento.preventDefault();
+
+    const opciones = opcionesRef.current.filter(
+      (opcion): opcion is HTMLButtonElement => opcion !== null
+    );
+
+    if (opciones.length === 0) return;
+
+    const actual = opciones.findIndex(
+      (opcion) => opcion === document.activeElement
+    );
+    const paso = evento.key === "ArrowDown" ? 1 : -1;
+    const siguiente =
+      actual === -1
+        ? 0
+        : (actual + paso + opciones.length) % opciones.length;
+
+    opciones[siguiente]?.focus();
+  };
+
+  const elegirEliminar = () => {
+    setMenuAbierto(false);
+    abrirConfirmacion();
   };
 
   const cancelar = () => {
@@ -136,18 +219,53 @@ export default function BotonEliminarFoto({
 
   return (
     <>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={abrirConfirmacion}
-        disabled={ocupado || confirmando}
-        aria-label={`Eliminar la foto ${posicion + 1}`}
-        className={`absolute right-2 z-10 inline-flex min-h-7 items-center rounded-[var(--radius-sm)] border border-[var(--color-danger-border)] bg-[var(--color-surface)] px-2 py-1 text-xs font-medium text-[var(--color-danger)] shadow-sm transition-colors hover:bg-[var(--color-danger-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40 ${
-          esPortada ? "top-10" : "top-2"
-        }`}
-      >
-        Eliminar
-      </button>
+      <div ref={contenedorRef}>
+        <button
+          ref={disparadorRef}
+          type="button"
+          onClick={alternarMenu}
+          disabled={ocupado || confirmando}
+          aria-label={`Opciones de la foto ${posicion + 1}`}
+          aria-haspopup="menu"
+          aria-expanded={menuAbierto}
+          aria-controls={idMenu}
+          className="absolute right-2 top-2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/85 text-[var(--color-ink)] shadow-sm transition-colors hover:bg-[var(--color-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="h-5 w-5"
+          >
+            <circle cx="12" cy="5" r="1.8" />
+            <circle cx="12" cy="12" r="1.8" />
+            <circle cx="12" cy="19" r="1.8" />
+          </svg>
+        </button>
+
+        {menuAbierto && (
+          <div
+            id={idMenu}
+            role="menu"
+            aria-label={`Opciones de la foto ${posicion + 1}`}
+            onKeyDown={manejarTecladoMenu}
+            className="absolute right-2 top-12 z-30 min-w-32 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-1 shadow-lg sm:min-w-40"
+          >
+            {/* Para sumar una opción nueva, agregar otro botón hermano con role="menuitem". */}
+            <button
+              ref={(elemento) => {
+                opcionesRef.current[0] = elemento;
+              }}
+              type="button"
+              role="menuitem"
+              onClick={elegirEliminar}
+              className="flex w-full items-center rounded-[var(--radius-sm)] px-3 py-2 text-left text-sm font-medium text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger-bg)] focus-visible:bg-[var(--color-danger-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-inset"
+            >
+              Eliminar
+            </button>
+          </div>
+        )}
+      </div>
 
       {confirmando && (
         <div

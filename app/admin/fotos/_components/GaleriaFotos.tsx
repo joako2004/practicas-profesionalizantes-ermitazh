@@ -51,15 +51,17 @@ export default function GaleriaFotos({
                 className="h-full w-full object-cover"
               />
 
-              <span className="absolute left-2 top-2 inline-flex min-h-6 min-w-6 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-ink)]/80 px-2 text-xs font-semibold text-white">
-                {numero}
-              </span>
-
-              {esPortada && (
-                <span className="absolute right-2 top-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-2 py-1 text-xs font-semibold text-white">
-                  Portada
+              <div className="absolute left-2 right-12 top-2 flex flex-wrap items-start gap-1.5">
+                <span className="inline-flex min-h-6 min-w-6 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-ink)]/80 px-2 text-xs font-semibold text-white">
+                  {numero}
                 </span>
-              )}
+
+                {esPortada && (
+                  <span className="rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-2 py-1 text-xs font-semibold text-white">
+                    Portada
+                  </span>
+                )}
+              </div>
             </div>
 
             <BotonEliminarFoto
