@@ -1,6 +1,9 @@
 import type { EtiquetasFoto } from "@/lib/fotos/etiquetas";
 
+import BotonEliminarFoto from "./BotonEliminarFoto";
+
 interface GaleriaFotosProps {
+  propiedadId: string;
   nombreCabana: string;
   fotos: { url: string; etiquetas: EtiquetasFoto }[];
 }
@@ -9,6 +12,7 @@ const CLASES_ETIQUETA =
   "inline-flex max-w-full items-center rounded-[var(--radius-sm)] border px-2 py-1 text-xs font-medium leading-tight";
 
 export default function GaleriaFotos({
+  propiedadId,
   nombreCabana,
   fotos,
 }: GaleriaFotosProps) {
@@ -35,7 +39,7 @@ export default function GaleriaFotos({
         return (
           <li
             key={`${foto.url}-${indice}`}
-            className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm"
+            className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm"
           >
             <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--color-warm)]/25">
               {/* eslint-disable-next-line @next/next/no-img-element -- La URL viene de la base y puede no estar permitida en next.config.ts. */}
@@ -57,6 +61,19 @@ export default function GaleriaFotos({
                 </span>
               )}
             </div>
+
+            <BotonEliminarFoto
+              propiedadId={propiedadId}
+              url={foto.url}
+              posicion={indice}
+              total={fotos.length}
+              etiquetas={{
+                compartidaCon: etiquetas.compartidaCon,
+                enGaleriaExteriores: etiquetas.enGaleriaExteriores,
+                fijaEnElSitio: etiquetas.fijaEnElSitio,
+                externa: etiquetas.externa,
+              }}
+            />
 
             {hayEtiquetas && (
               <div className="flex flex-wrap gap-1.5 p-3">

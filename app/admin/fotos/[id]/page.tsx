@@ -6,6 +6,10 @@ import { IMAGENES_HERO_FALLBACK } from "@/lib/config";
 import { clasificarFoto } from "@/lib/fotos/etiquetas";
 import { obtenerPathsProtegidos } from "@/lib/fotos/rutas";
 import { prisma } from "@/lib/prisma";
+import {
+  AvisoEliminacion,
+  ProveedorEliminacion,
+} from "../_components/EliminacionContexto";
 import GaleriaFotos from "../_components/GaleriaFotos";
 import SubidaFotos from "../_components/SubidaFotos";
 
@@ -82,24 +86,32 @@ export default async function FotosCabanaPage({
 
       <SubidaFotos propiedadId={propiedad.id} />
 
-      <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
-        <p className="text-sm leading-relaxed text-[var(--color-ink)]/75">
-          <span className="font-medium text-[var(--color-ink)]">
-            Compartida:
-          </span>{" "}
-          otra cabaña usa el mismo archivo.{" "}
-          <span className="font-medium text-[var(--color-ink)]">
-            En galería:
-          </span>{" "}
-          el archivo también figura en la galería de exteriores.{" "}
-          <span className="font-medium text-[var(--color-ink)]">
-            Fija en el sitio:
-          </span>{" "}
-          el sitio usa este archivo en el inicio, el login o el panel.
-        </p>
-      </div>
+      <ProveedorEliminacion>
+        <AvisoEliminacion />
 
-      <GaleriaFotos nombreCabana={propiedad.nombre} fotos={fotos} />
+        <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
+          <p className="text-sm leading-relaxed text-[var(--color-ink)]/75">
+            <span className="font-medium text-[var(--color-ink)]">
+              Compartida:
+            </span>{" "}
+            otra cabaña usa el mismo archivo.{" "}
+            <span className="font-medium text-[var(--color-ink)]">
+              En galería:
+            </span>{" "}
+            el archivo también figura en la galería de exteriores.{" "}
+            <span className="font-medium text-[var(--color-ink)]">
+              Fija en el sitio:
+            </span>{" "}
+            el sitio usa este archivo en el inicio, el login o el panel.
+          </p>
+        </div>
+
+        <GaleriaFotos
+          propiedadId={propiedad.id}
+          nombreCabana={propiedad.nombre}
+          fotos={fotos}
+        />
+      </ProveedorEliminacion>
     </div>
   );
 }
