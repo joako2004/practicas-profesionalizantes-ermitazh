@@ -7,6 +7,7 @@ import { clasificarFoto } from "@/lib/fotos/etiquetas";
 import { obtenerPathsProtegidos } from "@/lib/fotos/rutas";
 import { prisma } from "@/lib/prisma";
 import GaleriaFotos from "../_components/GaleriaFotos";
+import SubidaFotos from "../_components/SubidaFotos";
 
 const PATRON_ID = /^[A-Za-z0-9_-]+$/;
 
@@ -78,6 +79,8 @@ export default async function FotosCabanaPage({
           portada: es la que se ve en el inicio y en la galería.
         </p>
       </div>
+
+      <SubidaFotos propiedadId={propiedad.id} />
 
       <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
         <p className="text-sm leading-relaxed text-[var(--color-ink)]/75">
