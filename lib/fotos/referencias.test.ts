@@ -9,6 +9,7 @@ import {
   contienePath,
   decidirBorradoArchivo,
   quitarFotoPorPath,
+  quitarFotoPorUrlExacta,
 } from "./referencias";
 
 const URL_BASE = "https://ejemplo.supabase.co";
@@ -70,6 +71,79 @@ describe("quitarFotoPorPath", () => {
     assert.deepEqual(quitarFotoPorPath(fotos, "1/a.jpeg"), [
       "esto no es una url",
     ]);
+  });
+});
+
+describe("quitarFotoPorUrlExacta", () => {
+  it("quita la coincidencia exacta y mantiene el orden del resto", () => {
+    const fotos = [
+      "https://externo.example/a.jpeg",
+      "https://externo.example/b.jpeg",
+      "https://externo.example/c.jpeg",
+    ];
+
+    assert.deepEqual(quitarFotoPorUrlExacta(fotos, fotos[1]), [
+      "https://externo.example/a.jpeg",
+      "https://externo.example/c.jpeg",
+    ]);
+  });
+
+  it("no quita URLs parecidas: barra final, mayúsculas o parámetros", () => {
+    const fotos = [
+      "https://externo.example/a.jpeg",
+      "https://externo.example/a.jpeg/",
+      "https://externo.example/A.jpeg",
+      "https://externo.example/a.jpeg?x=1",
+    ];
+
+    assert.deepEqual(
+      quitarFotoPorUrlExacta(fotos, "https://externo.example/a.jpeg"),
+      [
+        "https://externo.example/a.jpeg/",
+        "https://externo.example/A.jpeg",
+        "https://externo.example/a.jpeg?x=1",
+      ]
+    );
+  });
+
+  it("quita todas las apariciones repetidas de la URL", () => {
+    const repetida = "https://externo.example/a.jpeg";
+    const fotos = [repetida, "https://externo.example/b.jpeg", repetida];
+
+    assert.deepEqual(quitarFotoPorUrlExacta(fotos, repetida), [
+      "https://externo.example/b.jpeg",
+    ]);
+  });
+
+  it("no muta el array original", () => {
+    const fotos = [
+      "https://externo.example/a.jpeg",
+      "https://externo.example/b.jpeg",
+    ];
+    const copia = [...fotos];
+
+    quitarFotoPorUrlExacta(fotos, fotos[0]);
+
+    assert.deepEqual(fotos, copia);
+  });
+
+  it("con array vacío o sin coincidencias devuelve el mismo contenido", () => {
+    assert.deepEqual(
+      quitarFotoPorUrlExacta([], "https://externo.example/a.jpeg"),
+      []
+    );
+
+    const fotos = [
+      "https://externo.example/a.jpeg",
+      "https://externo.example/b.jpeg",
+    ];
+    const resultado = quitarFotoPorUrlExacta(
+      fotos,
+      "https://externo.example/otra.jpeg"
+    );
+
+    assert.deepEqual(resultado, fotos);
+    assert.notEqual(resultado, fotos);
   });
 });
 

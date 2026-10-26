@@ -39,6 +39,21 @@ export function quitarFotoPorPath(
 }
 
 /**
+ * Quita del array todas las entradas cuyo texto sea exactamente `url`.
+ *
+ * Se compara por texto y sin normalizar: una URL que difiera en mayúsculas, en
+ * la barra final o en los parámetros no es la misma foto. Es la regla para los
+ * enlaces externos, que no tienen un path dentro del bucket con el que
+ * comparar. Las apariciones repetidas del mismo texto se quitan todas.
+ */
+export function quitarFotoPorUrlExacta(
+  fotos: readonly string[],
+  url: string
+): string[] {
+  return fotos.filter((foto) => foto !== url);
+}
+
+/**
  * Indica si alguna entrada del array apunta al path pedido, sin importar el
  * formato de la barra ni la query string.
  */

@@ -39,7 +39,7 @@ export type MensajePostEliminacion = {
 const TITULO_CONFIRMACION = "¿Eliminar esta foto?";
 
 const LINEA_EXTERNA =
-  "Es un enlace externo: el panel no puede eliminar este tipo de foto, así que se conservará en esta cabaña.";
+  "Es un enlace externo: se quitará de esta cabaña. No se borra ningún archivo, pero tampoco se puede volver a agregar desde el panel.";
 const LINEA_FIJA =
   "Se quitará de esta cabaña. El archivo se conserva porque el sitio lo usa (inicio, login o panel).";
 const LINEA_GALERIA =

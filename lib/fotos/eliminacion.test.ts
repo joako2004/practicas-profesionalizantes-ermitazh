@@ -15,7 +15,7 @@ const LINEA_FIJA =
 const LINEA_GALERIA =
   "Se quitará de esta cabaña. El archivo se conserva porque figura en la galería de exteriores.";
 const LINEA_EXTERNA =
-  "Es un enlace externo: el panel no puede eliminar este tipo de foto, así que se conservará en esta cabaña.";
+  "Es un enlace externo: se quitará de esta cabaña. No se borra ningún archivo, pero tampoco se puede volver a agregar desde el panel.";
 const LINEA_PORTADA =
   "Es la portada: la siguiente foto pasará a ser la portada.";
 const LINEA_ULTIMA =

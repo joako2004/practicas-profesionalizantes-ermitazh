@@ -19,6 +19,7 @@ import {
   contienePath,
   decidirBorradoArchivo,
   quitarFotoPorPath,
+  quitarFotoPorUrlExacta,
   type MotivoConservacion,
 } from "@/lib/fotos/referencias";
 
@@ -40,6 +41,8 @@ export type ResultadoEliminarFoto =
   | { success: false; error: string };
 
 const PATRON_PROPIEDAD_ID = /^[A-Za-z0-9_-]+$/;
+
+const LONGITUD_MAXIMA_URL = 2048;
 
 const MENSAJE_ERROR_SUBIDA = "No se pudo preparar la subida de la foto.";
 const MENSAJE_ERROR_REGISTRO = "No se pudo registrar la foto.";
@@ -287,13 +290,55 @@ export async function eliminarFoto(
     return { success: false, error: "Cabaña inválida." };
   }
 
-  if (!textoNoVacio(url)) {
+  if (!textoNoVacio(url) || url.length > LONGITUD_MAXIMA_URL) {
     return { success: false, error: "Foto inválida." };
   }
 
   const path = extraerPathDeUrl(url);
   if (path === null) {
-    return { success: false, error: "Foto inválida." };
+    // Enlace externo: no hay ningún archivo propio en el Storage que borrar.
+    // Solo se quita de la lista de esta cabaña, comparando el texto exacto.
+    try {
+      const resultado = await prisma.$transaction(async (tx) => {
+        const propiedad = await tx.propiedad.findUnique({
+          where: { id: propiedadId },
+          select: { fotos: true },
+        });
+
+        if (!propiedad) {
+          return { estado: "inexistente" as const };
+        }
+
+        if (!propiedad.fotos.includes(url)) {
+          return { estado: "ausente" as const };
+        }
+
+        const nuevasFotos = quitarFotoPorUrlExacta(propiedad.fotos, url);
+
+        await tx.propiedad.update({
+          where: { id: propiedadId },
+          data: { fotos: { set: nuevasFotos } },
+        });
+
+        return { estado: "eliminada" as const };
+      });
+
+      if (resultado.estado === "inexistente") {
+        return { success: false, error: "La cabaña no existe." };
+      }
+
+      if (resultado.estado === "ausente") {
+        return { success: false, error: "Esa foto ya no está en esta cabaña." };
+      }
+    } catch (error) {
+      registrarError("Error al quitar el enlace externo de la cabaña", error);
+      return { success: false, error: MENSAJE_ERROR_ELIMINACION };
+    }
+
+    // Mismas vistas que revalida la rama de archivos propios.
+    revalidarFotos(propiedadId);
+
+    return { success: true, archivoBorrado: false };
   }
 
   try {
