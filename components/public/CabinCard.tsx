@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { buildReservaWhatsApp } from "@/lib/config";
 
 interface CabinCardProps {
   id: string;
@@ -8,10 +7,6 @@ interface CabinCardProps {
   capacidad: number;
   precioDesdeArs: number | null;
   fotos: string[];
-  // Opcionales para el link de WhatsApp
-  fechaIngreso?: string;
-  fechaSalida?: string;
-  personas?: number;
 }
 
 const precioFormatter = new Intl.NumberFormat("es-AR", {
@@ -27,9 +22,6 @@ export default function CabinCard({
   capacidad,
   precioDesdeArs,
   fotos,
-  fechaIngreso,
-  fechaSalida,
-  personas,
 }: CabinCardProps) {
   const tieneFotos = fotos.length > 0;
 
@@ -89,14 +81,12 @@ export default function CabinCard({
             >
               Ver más
             </Link>
-            <a
-              href={buildReservaWhatsApp(nombre, fechaIngreso, fechaSalida, personas)}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/pre-reserva"
               className="whitespace-nowrap rounded-[var(--radius-md)] bg-[var(--color-accent)] px-3 py-2 text-xs font-medium text-white transition-all hover:bg-[var(--color-accent)]/90 active:scale-[0.97]"
             >
               Reservar
-            </a>
+            </Link>
           </div>
         </div>
       </div>
