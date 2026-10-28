@@ -11,11 +11,16 @@ import {
 
 import type { MensajePostEliminacion } from "@/lib/fotos/eliminacion";
 
+type TipoAvisoPanel = "exito" | "error";
+
+type AvisoPanel = MensajePostEliminacion & { tipo?: TipoAvisoPanel };
+
 interface ValorEliminacion {
   ocupado: boolean;
   setOcupado: (ocupado: boolean) => void;
-  aviso: MensajePostEliminacion | null;
+  aviso: AvisoPanel | null;
   publicarAviso: (mensaje: MensajePostEliminacion) => void;
+  publicarAvisoPortada: (texto: string, tipo: TipoAvisoPanel) => void;
   limpiarAviso: () => void;
 }
 
@@ -33,11 +38,18 @@ export function ProveedorEliminacion({
   children: ReactNode;
 }) {
   const [ocupado, setOcupado] = useState(false);
-  const [aviso, setAviso] = useState<MensajePostEliminacion | null>(null);
+  const [aviso, setAviso] = useState<AvisoPanel | null>(null);
 
   const publicarAviso = useCallback((mensaje: MensajePostEliminacion) => {
     setAviso(mensaje);
   }, []);
+
+  const publicarAvisoPortada = useCallback(
+    (texto: string, tipo: TipoAvisoPanel) => {
+      setAviso({ texto, tipo });
+    },
+    []
+  );
 
   const limpiarAviso = useCallback(() => {
     setAviso(null);
@@ -49,9 +61,10 @@ export function ProveedorEliminacion({
       setOcupado,
       aviso,
       publicarAviso,
+      publicarAvisoPortada,
       limpiarAviso,
     }),
-    [ocupado, aviso, publicarAviso, limpiarAviso]
+    [ocupado, aviso, publicarAviso, publicarAvisoPortada, limpiarAviso]
   );
 
   return (
@@ -82,12 +95,27 @@ export function useEliminacion(): ValorEliminacion {
 export function AvisoEliminacion() {
   const { aviso, limpiarAviso } = useEliminacion();
 
+  const esError = aviso?.tipo === "error";
+  const esExito = aviso?.tipo === "exito";
+
   return (
     <div aria-live="polite" className="empty:hidden">
       {aviso && (
-        <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
+        <div
+          className={`rounded-[var(--radius-md)] border px-4 py-3 ${
+            esError
+              ? "border-[var(--color-danger-border)] bg-[var(--color-danger-bg)]"
+              : esExito
+                ? "border-[var(--color-success-border)] bg-[var(--color-success-bg)]"
+                : "border-[var(--color-border)] bg-[var(--color-surface)]"
+          }`}
+        >
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <p className="text-sm font-medium text-[var(--color-ink)]">
+            <p
+              className={`text-sm font-medium ${
+                esError ? "text-[var(--color-danger)]" : "text-[var(--color-ink)]"
+              }`}
+            >
               {aviso.texto}
             </p>
             <button

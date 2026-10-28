@@ -16,6 +16,10 @@ import {
   type ArchivoFoto,
 } from "@/lib/fotos/rutas";
 import {
+  hacerPortada,
+  mensajeFalloPortada,
+} from "@/lib/fotos/orden";
+import {
   contienePath,
   decidirBorradoArchivo,
   quitarFotoPorPath,
@@ -437,5 +441,78 @@ export async function eliminarFoto(
       archivoBorrado: false,
       advertencia: MENSAJE_ADVERTENCIA_REFERENCIAS,
     };
+  }
+}
+
+/**
+ * Mueve la foto indicada a la portada (posición 0) sin tocar el Storage.
+ *
+ * `posicion` y `url` son el estado que el administrador estaba viendo: si la
+ * posición ya no contiene esa URL exacta, la lista cambió y no se escribe
+ * nada. Solo se reordena el array; no se borra ni se sube ningún archivo.
+ */
+export async function hacerPortadaFoto(
+  propiedadId: string,
+  url: string,
+  posicion: number
+): Promise<{ success: true } | { success: false; error: string }> {
+  if (!(await esAdmin())) {
+    return { success: false, error: "No autorizado." };
+  }
+
+  if (!idPropiedadValido(propiedadId)) {
+    return { success: false, error: "Cabaña inválida." };
+  }
+
+  if (!textoNoVacio(url) || url.length > LONGITUD_MAXIMA_URL) {
+    return { success: false, error: "Foto inválida." };
+  }
+
+  if (!Number.isInteger(posicion) || posicion < 0) {
+    return { success: false, error: "Foto inválida." };
+  }
+
+  try {
+    const resultado = await prisma.$transaction(async (tx) => {
+      const propiedad = await tx.propiedad.findUnique({
+        where: { id: propiedadId },
+        select: { fotos: true },
+      });
+
+      if (!propiedad) {
+        return { estado: "inexistente" as const };
+      }
+
+      const orden = hacerPortada(propiedad.fotos, posicion, url);
+
+      if (!orden.ok) {
+        return {
+          estado: "rechazada" as const,
+          error: mensajeFalloPortada(orden.motivo),
+        };
+      }
+
+      await tx.propiedad.update({
+        where: { id: propiedadId },
+        data: { fotos: { set: orden.fotos } },
+      });
+
+      return { estado: "actualizada" as const };
+    });
+
+    if (resultado.estado === "inexistente") {
+      return { success: false, error: "La cabaña no existe." };
+    }
+
+    if (resultado.estado === "rechazada") {
+      return { success: false, error: resultado.error };
+    }
+
+    revalidarFotos(propiedadId);
+
+    return { success: true };
+  } catch (error) {
+    registrarError("Error al cambiar la portada de la cabaña", error);
+    return { success: false, error: "No se pudo cambiar la portada." };
   }
 }

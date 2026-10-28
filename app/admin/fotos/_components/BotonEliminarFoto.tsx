@@ -9,16 +9,26 @@ import {
   type KeyboardEvent as EventoTecladoReact,
 } from "react";
 
-import { eliminarFoto } from "@/lib/actions/fotos";
+import { eliminarFoto, hacerPortadaFoto } from "@/lib/actions/fotos";
 import {
   construirAvisoConfirmacion,
   mensajeResultadoEliminacion,
 } from "@/lib/fotos/eliminacion";
+import { MENSAJE_PORTADA_OK, mensajeFalloPortada } from "@/lib/fotos/orden";
 
 import { useEliminacion } from "./EliminacionContexto";
 
 const MENSAJE_ERROR_INESPERADO =
   "Ocurrió un error inesperado. Probá de nuevo.";
+
+function opcionesHabilitadas(
+  opciones: Array<HTMLButtonElement | null>
+): HTMLButtonElement[] {
+  return opciones.filter(
+    (opcion): opcion is HTMLButtonElement =>
+      opcion !== null && opcion.getAttribute("aria-disabled") !== "true"
+  );
+}
 
 interface BotonEliminarFotoProps {
   propiedadId: string;
@@ -41,11 +51,13 @@ export default function BotonEliminarFoto({
   etiquetas,
 }: BotonEliminarFotoProps) {
   const router = useRouter();
-  const { ocupado, setOcupado, publicarAviso } = useEliminacion();
+  const { ocupado, setOcupado, publicarAviso, publicarAvisoPortada } =
+    useEliminacion();
 
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [eliminando, setEliminando] = useState(false);
+  const [cambiandoPortada, setCambiandoPortada] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const contenedorRef = useRef<HTMLDivElement | null>(null);
@@ -88,7 +100,7 @@ export default function BotonEliminarFoto({
   useEffect(() => {
     if (!menuAbierto) return;
 
-    opcionesRef.current[0]?.focus();
+    opcionesHabilitadas(opcionesRef.current)[0]?.focus();
 
     const manejarPointerDown = (evento: PointerEvent) => {
       const objetivo = evento.target;
@@ -154,9 +166,7 @@ export default function BotonEliminarFoto({
 
     evento.preventDefault();
 
-    const opciones = opcionesRef.current.filter(
-      (opcion): opcion is HTMLButtonElement => opcion !== null
-    );
+    const opciones = opcionesHabilitadas(opcionesRef.current);
 
     if (opciones.length === 0) return;
 
@@ -175,6 +185,38 @@ export default function BotonEliminarFoto({
   const elegirEliminar = () => {
     setMenuAbierto(false);
     abrirConfirmacion();
+  };
+
+  const elegirPortada = async () => {
+    if (esPortada || ocupado || cambiandoPortada) return;
+
+    setMenuAbierto(false);
+    setCambiandoPortada(true);
+    setOcupado(true);
+
+    try {
+      const respuesta = await hacerPortadaFoto(propiedadId, url, posicion);
+
+      if (!respuesta.success) {
+        publicarAvisoPortada(respuesta.error, "error");
+
+        // Si la lista cambió, se refresca para que se vea el estado real.
+        if (respuesta.error === mensajeFalloPortada("desactualizada")) {
+          router.refresh();
+        }
+
+        return;
+      }
+
+      publicarAvisoPortada(MENSAJE_PORTADA_OK, "exito");
+      router.refresh();
+    } catch {
+      // No se muestran detalles internos (tokens, paths ni mensajes del SDK).
+      publicarAvisoPortada(MENSAJE_ERROR_INESPERADO, "error");
+    } finally {
+      setOcupado(false);
+      setCambiandoPortada(false);
+    }
   };
 
   const cancelar = () => {
@@ -255,6 +297,23 @@ export default function BotonEliminarFoto({
             <button
               ref={(elemento) => {
                 opcionesRef.current[0] = elemento;
+              }}
+              type="button"
+              role="menuitem"
+              aria-disabled={esPortada || undefined}
+              onClick={elegirPortada}
+              className={`flex w-full items-center rounded-[var(--radius-sm)] px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-inset ${
+                esPortada
+                  ? "cursor-not-allowed text-[var(--color-ink)]/40"
+                  : "text-[var(--color-ink)] hover:bg-[var(--color-warm)]/20 focus-visible:bg-[var(--color-warm)]/20"
+              }`}
+            >
+              Hacer portada
+            </button>
+
+            <button
+              ref={(elemento) => {
+                opcionesRef.current[1] = elemento;
               }}
               type="button"
               role="menuitem"
