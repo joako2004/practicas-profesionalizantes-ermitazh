@@ -60,7 +60,7 @@ export default function Header({
           <Link href="/#contacto" className={CLASE_BOTON_SESION}>
             Contacto
           </Link>
-          {contexto === "publico" && (
+          {contexto === "publico" && !sesion?.esAdmin && (
             <Link href="/pre-reserva" className={CLASE_BOTON_PRIMARIO}>
               Reservar
             </Link>
