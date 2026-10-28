@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { buildReservaWhatsApp } from "@/lib/config";
+import { useRouter } from "next/navigation";
 
 function hoy(): string {
   return new Date().toISOString().split("T")[0];
@@ -14,6 +14,7 @@ function diaSiguiente(fecha: string): string {
 }
 
 export default function SearchCard() {
+  const router = useRouter();
   const [llegada, setLlegada] = useState("");
   const [salida, setSalida] = useState("");
   const [huespedes, setHuespedes] = useState(2);
@@ -31,14 +32,7 @@ export default function SearchCard() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const mensaje = buildReservaWhatsApp(
-      "", // nombreCabana - no específica aún
-      llegada || undefined,
-      salida || undefined,
-      huespedes,
-      true // esBusquedaGeneral
-    );
-    window.open(mensaje, "_blank");
+    router.push("/pre-reserva");
   }
 
   return (

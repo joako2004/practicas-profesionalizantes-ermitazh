@@ -1,6 +1,5 @@
 import CabinCard from "./CabinCard";
 import { serializarPropiedad, PropiedadSerializer } from "@/lib/serializers";
-import { buildReservaWhatsApp } from "@/lib/config";
 
 interface CabinsSectionProps {
   propiedades: PropiedadSerializer[];
