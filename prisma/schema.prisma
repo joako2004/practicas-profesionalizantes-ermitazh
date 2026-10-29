@@ -63,10 +63,22 @@ model Propiedad {
   creadaEn    DateTime @default(now()) @map("creada_en")
   actualizadaEn DateTime @updatedAt @map("actualizada_en")
 
-  reservas Reserva[]
-  resenas  Resena[]
+  reservas         Reserva[]
+  resenas          Resena[]
+  nochesBloqueadas NocheBloqueada[]
 
   @@map("propiedades")
+}
+
+model NocheBloqueada {
+  propiedadId String   @map("propiedad_id")
+  fecha       DateTime @db.Date
+
+  propiedad Propiedad @relation(fields: [propiedadId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([propiedadId, fecha])
+  @@index([fecha])
+  @@map("noches_bloqueadas")
 }
 
 model Reserva {
