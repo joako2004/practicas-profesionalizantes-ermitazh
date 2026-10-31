@@ -31,7 +31,7 @@ const sidebarItems: SidebarItem[] = [
   { key: "resenas", label: "Reseñas", icon: "reviews", href: "/admin/resenas" },
   { key: "reservas", label: "Reservas", icon: "reservations" },
   { key: "fotos", label: "Fotos", icon: "photos", href: "/admin/fotos" },
-  { key: "disponibilidad", label: "Disponibilidad", icon: "availability" },
+  { key: "disponibilidad", label: "Disponibilidad", icon: "availability", href: "/admin/disponibilidad" },
   { key: "consultas", label: "Consultas", icon: "inquiries" },
   { key: "reportes", label: "Reportes", icon: "reports" },
 ];
