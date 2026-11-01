@@ -22,6 +22,14 @@
  *   ejemplo como fecha de salida de una estadía.
  * - Los casilleros de relleno (`delMes: false`, días de otro mes) van vacíos:
  *   no muestran número ni reciben clics, así no hay días repetidos.
+ * - `tamano` ("normal" | "grande") solo cambia las medidas. "normal" conserva
+ *   el tamaño de siempre; "grande" aprovecha todo el ancho disponible en la
+ *   pantalla de administración.
+ * - El estado `ocupado` no depende solo del color: fondo suave de la familia
+ *   danger, texto legible y tachado. Así se distingue del día pasado, que va
+ *   apagado, sin fondo y sin tachar.
+ * - `LeyendaCalendario` reutiliza las MISMAS constantes de estado que los días
+ *   reales, para que la referencia visual nunca se desfase del calendario.
  */
 
 import { useState } from "react";
@@ -42,13 +50,16 @@ export type SeleccionDia = "inicio" | "medio" | "fin" | "unico";
 
 /** Cómo se ve y cómo se comporta un día concreto. */
 export type InfoDia = {
-  /** Noche bloqueada: se ve apagada y tachada. No impide elegir el día. */
+  /** Noche bloqueada: se ve con fondo suave y tachada. No impide elegir el día. */
   ocupado?: boolean;
   /** No se puede elegir: sin clic y sin foco. Independiente de `ocupado`. */
   deshabilitado?: boolean;
   /** Parte de la selección actual, si corresponde. */
   seleccion?: SeleccionDia;
 };
+
+/** Tamaño visual del calendario. "normal" es el de siempre. */
+export type TamanoCalendario = "normal" | "grande";
 
 /** Props del calendario. El componente no conoce nada más que esto. */
 export type PropsCalendarioMes = {
@@ -64,6 +75,8 @@ export type PropsCalendarioMes = {
   hasta?: string;
   /** Clave "AAAA-MM-DD" de hoy, para marcarlo. Si falta, no se marca nada. */
   hoy?: string;
+  /** Tamaño visual. Por defecto "normal". */
+  tamano?: TamanoCalendario;
 };
 
 /** Nombres completos de los días, en el mismo orden que la grilla (lunes primero). */
@@ -81,19 +94,74 @@ const NOMBRES_DIAS_SEMANA = [
 const ANIO_MINIMO = 2000;
 const ANIO_MAXIMO = 2100;
 
-/** Clases comunes de los botones de navegación del encabezado. */
-const CLASES_BOTON_NAVEGACION = [
-  "flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)]",
-  "border border-[var(--color-border)] text-[var(--color-ink)] transition-colors",
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]",
-  "focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]",
-].join(" ");
+/**
+ * Clases de estado compartidas por los días reales y por las muestras de
+ * `LeyendaCalendario`. Son cadenas completas y literales para que Tailwind las
+ * detecte y para que la leyenda nunca se desfase del calendario.
+ */
+const ESTADO_LIBRE = "text-[var(--color-ink)] hover:bg-[var(--color-warm)]/40";
 
-/** Clases comunes del botón de cada día. */
-const CLASES_BOTON_DIA = [
-  "block h-10 w-full rounded-[var(--radius-sm)] text-sm font-medium transition-colors",
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset",
-].join(" ");
+const ESTADO_OCUPADO =
+  "bg-[var(--color-danger-bg)] text-[var(--color-danger)] enabled:hover:brightness-95";
+
+const ESTADO_SELECCIONADO =
+  "bg-[var(--color-accent)] font-semibold text-white enabled:hover:brightness-95";
+
+const ESTADO_HOY = "ring-1 ring-inset ring-[var(--color-accent)]";
+
+const ESTADO_HOY_SELECCIONADO = "ring-1 ring-inset ring-white/80";
+
+const ESTADO_PASADO = "text-[var(--color-ink)]/55";
+
+const ESTADO_OCUPADO_APAGADO = "opacity-75";
+
+/** El cursor de "no se puede" solo aplica a los botones, no a la leyenda. */
+const CLASE_DESHABILITADO = "cursor-not-allowed";
+
+/** El tachado no depende del color: se entiende también en blanco y negro. */
+const CLASE_TACHADO = "line-through";
+
+/** Medidas de cada tamaño del calendario. */
+type EstiloTamano = {
+  contenedor: string;
+  barra: string;
+  titulo: string;
+  botonNavegacion: string;
+  iconoNavegacion: string;
+  encabezadoDia: string;
+  botonDia: string;
+};
+
+const ESTILOS_TAMANO: Record<TamanoCalendario, EstiloTamano> = {
+  normal: {
+    contenedor:
+      "w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3",
+    barra: "mb-2 flex items-center justify-between gap-2",
+    titulo:
+      "min-w-0 text-center text-base font-semibold text-[var(--color-ink)]",
+    botonNavegacion:
+      "flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-ink)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]",
+    iconoNavegacion: "h-4 w-4",
+    encabezadoDia:
+      "pb-1 text-center text-xs font-medium text-[var(--color-ink)]/60",
+    botonDia:
+      "block h-10 w-full rounded-[var(--radius-sm)] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset",
+  },
+  grande: {
+    contenedor:
+      "w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:p-4",
+    barra: "mb-3 flex items-center justify-between gap-3",
+    titulo:
+      "min-w-0 text-center text-base font-semibold leading-tight text-[var(--color-ink)] sm:text-lg md:text-xl",
+    botonNavegacion:
+      "flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] text-[var(--color-ink)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]",
+    iconoNavegacion: "h-5 w-5",
+    encabezadoDia:
+      "pb-1.5 text-center text-sm font-medium text-[var(--color-ink)]/70",
+    botonDia:
+      "block h-11 w-full rounded-[var(--radius-sm)] text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset sm:h-12 md:h-14 md:text-lg lg:h-16",
+  },
+};
 
 /** Clases de la celda que forma la banda continua del rango seleccionado. */
 const CLASES_CELDA_EN_RANGO = "p-0 align-middle bg-[var(--color-accent)]/15";
@@ -156,53 +224,71 @@ function esSeleccionSolida(info: InfoDia): boolean {
 }
 
 /** Combina las clases del botón del día según ocupado/deshabilitado/selección. */
-function clasesBotonDia(info: InfoDia, esHoy: boolean): string {
-  const clases = [CLASES_BOTON_DIA];
+function clasesBotonDia(
+  info: InfoDia,
+  esHoy: boolean,
+  tamano: TamanoCalendario,
+): string {
+  const clases = [ESTILOS_TAMANO[tamano].botonDia];
   const solida = esSeleccionSolida(info);
 
+  // Foco visible: blanco sobre el fondo de acento, acento sobre el resto.
+  clases.push(
+    solida
+      ? "focus-visible:ring-white/80"
+      : "focus-visible:ring-[var(--color-accent)]",
+  );
+
   if (solida) {
-    // Extremos y día único: forma sólida con el acento y texto de contraste.
-    clases.push("bg-[var(--color-accent)] text-white focus-visible:ring-white/80");
-    if (info.deshabilitado !== true) {
-      clases.push("hover:bg-[var(--color-accent)]/90");
+    // Extremos y día único: gana la forma sólida, pero el tachado se mantiene.
+    clases.push(ESTADO_SELECCIONADO);
+    if (esHoy) {
+      clases.push(ESTADO_HOY_SELECCIONADO);
+    }
+  } else if (info.deshabilitado === true && info.ocupado === true) {
+    // Pasado y bloqueado: conserva el fondo suave y el tachado, más apagado.
+    clases.push(ESTADO_OCUPADO, ESTADO_OCUPADO_APAGADO);
+    if (esHoy) {
+      clases.push(ESTADO_HOY);
+    }
+  } else if (info.deshabilitado === true) {
+    // Pasado y libre: sin fondo ni tachado, para no confundirlo con "ocupado".
+    clases.push(ESTADO_PASADO);
+    if (esHoy) {
+      clases.push(ESTADO_HOY);
+    }
+  } else if (info.ocupado === true) {
+    clases.push(ESTADO_OCUPADO);
+    if (esHoy) {
+      clases.push(ESTADO_HOY);
     }
   } else {
-    clases.push("focus-visible:ring-[var(--color-accent)]");
-    if (info.deshabilitado === true) {
-      clases.push("text-[var(--color-ink)]/50");
-    } else if (info.ocupado === true) {
-      clases.push("text-[var(--color-ink)]/45 hover:bg-[var(--color-warm)]/40");
-    } else {
-      clases.push("text-[var(--color-ink)] hover:bg-[var(--color-warm)]/40");
+    clases.push(ESTADO_LIBRE);
+    if (esHoy) {
+      clases.push(ESTADO_HOY);
     }
   }
 
-  // El tachado no depende del color: se entiende también en blanco y negro.
   if (info.ocupado === true) {
-    clases.push("line-through");
+    clases.push(CLASE_TACHADO);
   }
 
   if (info.deshabilitado === true) {
-    clases.push("cursor-not-allowed opacity-40");
-  }
-
-  // "Hoy" se marca con un borde fino y se combina con el resto de los estados.
-  if (esHoy) {
-    clases.push(
-      solida
-        ? "border border-white/80"
-        : "border border-[var(--color-accent)]",
-    );
+    clases.push(CLASE_DESHABILITADO);
   }
 
   return clases.join(" ");
 }
 
 /** Clases del botón de navegación según esté habilitado o no. */
-function clasesBotonNavegacion(habilitado: boolean): string {
+function clasesBotonNavegacion(
+  habilitado: boolean,
+  tamano: TamanoCalendario,
+): string {
+  const base = ESTILOS_TAMANO[tamano].botonNavegacion;
   return habilitado
-    ? `${CLASES_BOTON_NAVEGACION} hover:bg-[var(--color-warm)]/40`
-    : `${CLASES_BOTON_NAVEGACION} cursor-not-allowed opacity-40`;
+    ? `${base} hover:bg-[var(--color-warm)]/40`
+    : `${base} cursor-not-allowed opacity-40`;
 }
 
 /** Comprueba que el mes destino esté dentro de los límites soportados. */
@@ -227,6 +313,7 @@ export function CalendarioMes({
   desde,
   hasta,
   hoy,
+  tamano = "normal",
 }: PropsCalendarioMes) {
   // Mes visible: estado interno, inicializado una sola vez desde las props.
   const [mesVisto, setMesVisto] = useState<AnioMes>(() => ({
@@ -244,6 +331,7 @@ export function CalendarioMes({
     );
   }
 
+  const estilos = ESTILOS_TAMANO[tamano];
   const destinoAnterior = mesAnterior(mesVisto.anio, mesVisto.mes);
   const destinoSiguiente = mesSiguiente(mesVisto.anio, mesVisto.mes);
   const puedeRetroceder = destinoPermitido(destinoAnterior, desde, hasta);
@@ -252,14 +340,14 @@ export function CalendarioMes({
   const tituloMes = etiquetaMes(mesVisto.anio, mesVisto.mes);
 
   return (
-    <div className="w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
-      <div className="mb-2 flex items-center justify-between gap-2">
+    <div className={estilos.contenedor}>
+      <div className={estilos.barra}>
         <button
           type="button"
           aria-label="Mes anterior"
           onClick={() => setMesVisto(destinoAnterior)}
           disabled={!puedeRetroceder}
-          className={clasesBotonNavegacion(puedeRetroceder)}
+          className={clasesBotonNavegacion(puedeRetroceder, tamano)}
         >
           <svg
             aria-hidden="true"
@@ -269,16 +357,13 @@ export function CalendarioMes({
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-4 w-4"
+            className={estilos.iconoNavegacion}
           >
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
 
-        <p
-          aria-live="polite"
-          className="min-w-0 text-center text-base font-semibold text-[var(--color-ink)]"
-        >
+        <p aria-live="polite" className={estilos.titulo}>
           {tituloMes}
         </p>
 
@@ -287,7 +372,7 @@ export function CalendarioMes({
           aria-label="Mes siguiente"
           onClick={() => setMesVisto(destinoSiguiente)}
           disabled={!puedeAvanzar}
-          className={clasesBotonNavegacion(puedeAvanzar)}
+          className={clasesBotonNavegacion(puedeAvanzar, tamano)}
         >
           <svg
             aria-hidden="true"
@@ -297,7 +382,7 @@ export function CalendarioMes({
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-4 w-4"
+            className={estilos.iconoNavegacion}
           >
             <path d="M9 18l6-6-6-6" />
           </svg>
@@ -313,7 +398,7 @@ export function CalendarioMes({
                 key={diaCorto}
                 scope="col"
                 aria-label={NOMBRES_DIAS_SEMANA[indice]}
-                className="pb-1 text-center text-xs font-medium text-[var(--color-ink)]/60"
+                className={estilos.encabezadoDia}
               >
                 {diaCorto}
               </th>
@@ -349,7 +434,7 @@ export function CalendarioMes({
                           onElegirDia(dia.clave);
                         }
                       }}
-                      className={clasesBotonDia(info, esHoy)}
+                      className={clasesBotonDia(info, esHoy, tamano)}
                     >
                       {dia.dia}
                     </button>
@@ -361,5 +446,100 @@ export function CalendarioMes({
         </tbody>
       </table>
     </div>
+  );
+}
+
+/** Estados que puede mostrar la leyenda del calendario. */
+type EstadoLeyenda = "libre" | "ocupado" | "seleccionado" | "hoy" | "pasado";
+
+/** Estados que se muestran cuando no se pasa `estados`. */
+const ESTADOS_LEYENDA: ReadonlyArray<EstadoLeyenda> = [
+  "libre",
+  "ocupado",
+  "seleccionado",
+  "hoy",
+  "pasado",
+];
+
+/** Número de ejemplo de cada muestra de la leyenda. */
+const NUMERO_MUESTRA: Record<EstadoLeyenda, string> = {
+  libre: "5",
+  ocupado: "12",
+  seleccionado: "8",
+  hoy: "21",
+  pasado: "3",
+};
+
+/** Marco común de las muestras: un cuadradito del tamaño de un día chico. */
+const CLASES_MUESTRA_LEYENDA =
+  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-xs font-medium";
+
+/** Clases de cada muestra: reutilizan los estados de los días reales. */
+function clasesMuestraLeyenda(estado: EstadoLeyenda): string {
+  switch (estado) {
+    case "libre":
+      return `${CLASES_MUESTRA_LEYENDA} ${ESTADO_LIBRE}`;
+    case "ocupado":
+      return `${CLASES_MUESTRA_LEYENDA} ${ESTADO_OCUPADO} ${CLASE_TACHADO}`;
+    case "seleccionado":
+      return `${CLASES_MUESTRA_LEYENDA} ${ESTADO_SELECCIONADO}`;
+    case "hoy":
+      return `${CLASES_MUESTRA_LEYENDA} ${ESTADO_LIBRE} ${ESTADO_HOY}`;
+    case "pasado":
+      return `${CLASES_MUESTRA_LEYENDA} ${ESTADO_PASADO}`;
+  }
+}
+
+/** Texto visible de cada estado. */
+function etiquetaLeyenda(
+  estado: EstadoLeyenda,
+  etiquetaOcupado: string,
+): string {
+  switch (estado) {
+    case "libre":
+      return "Libre";
+    case "ocupado":
+      return etiquetaOcupado;
+    case "seleccionado":
+      return "Elegida";
+    case "hoy":
+      return "Hoy";
+    case "pasado":
+      return "Ya pasó";
+  }
+}
+
+/** Props de la leyenda del calendario. */
+type PropsLeyendaCalendario = {
+  /** Estados a mostrar. Por defecto, los cinco. */
+  estados?: ReadonlyArray<EstadoLeyenda>;
+  /** Etiqueta del estado ocupado. Por defecto, "Bloqueada". */
+  etiquetaOcupado?: string;
+};
+
+/**
+ * LeyendaCalendario — referencia visual de los estados del calendario.
+ *
+ * Las muestras usan las mismas constantes de clases que los días reales, así
+ * que si cambia el aspecto de un estado la leyenda cambia con él. El texto va
+ * con color de tinta del proyecto para leerse sobre la tarjeta clara.
+ */
+export function LeyendaCalendario({
+  estados = ESTADOS_LEYENDA,
+  etiquetaOcupado = "Bloqueada",
+}: PropsLeyendaCalendario) {
+  return (
+    <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      {estados.map((estado) => (
+        <li key={estado} className="flex items-center gap-2">
+          <span aria-hidden="true" className={clasesMuestraLeyenda(estado)}>
+            {NUMERO_MUESTRA[estado]}
+          </span>
+          <span className="text-sm text-[var(--color-ink)]">
+            {etiquetaLeyenda(estado, etiquetaOcupado)}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
