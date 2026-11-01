@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { contarCaracteres } from "@/lib/utils";
+import { hoyEnArgentina } from "@/lib/disponibilidad/dto";
+import { leerCabanasParaRango } from "@/lib/disponibilidad/servidor";
+import { validarPreReserva } from "@/lib/pre-reserva/validar-disponibilidad";
 import { estimarEstadia } from "@/lib/precios/estimar-estadia";
 import { nochesEntre, type EstadiaCalculada } from "@/lib/precios/estadia";
 import {
@@ -136,9 +139,25 @@ export async function POST(request: Request): Promise<Response> {
       return respuestaMotivo("FECHAS_INVALIDAS");
     }
 
+    // Revalidación de disponibilidad: noches bloqueadas por el administrador, capacidad y fecha pasada.
+    const cabanas = await leerCabanasParaRango(fechaIn, fechaFin, id);
+    const validacion = validarPreReserva({
+      propiedadId: id,
+      ingreso: fechaIn,
+      salida: fechaFin,
+      personas,
+      hoy: hoyEnArgentina(new Date()),
+      cabanas,
+    });
+
+    if (!validacion.ok) {
+      return respuestaError(validacion.mensaje, validacion.estado);
+    }
+
     const snapshot = snapshotDesdeEstadia(estadia);
 
-    // Sin validación de conflicto de fechas: por decisión de producto el administrador gestiona las superposiciones entre pre-reservas.
+    // Se validan las noches bloqueadas, la capacidad y la fecha pasada, pero por decisión de producto
+    // NO se validan conflictos entre pre-reservas: el administrador gestiona las superposiciones.
     const reserva = await prisma.reserva.create({
       data: {
         propiedadId: id,
