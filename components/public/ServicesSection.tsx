@@ -22,7 +22,7 @@ export default function ServicesSection({ servicios }: ServicesSectionProps) {
             {servicios.map((servicio) => (
               <div
                 key={servicio}
-                className="flex items-center gap-2 rounded-[var(--radius-md)] bg-white px-5 py-3 ring-1 ring-[var(--color-border)] shadow-sm"
+                className="flex cursor-default select-none items-center gap-2 rounded-[var(--radius-md)] bg-white px-5 py-3 ring-1 ring-[var(--color-border)] shadow-sm transition-transform duration-300 ease-out hover:scale-105 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
               >
                 <ServiceIcon
                   servicio={servicio}
