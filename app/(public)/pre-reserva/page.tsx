@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import PreReservaForm from "@/app/pre-reserva/PreReservaForm";
+import { cabanaDesdeParametro } from "@/lib/pre-reserva/cabanas-para-estadia";
+
+interface PreReservaPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
 
 async function getPropiedades() {
   return prisma.propiedad.findMany({
@@ -9,8 +14,12 @@ async function getPropiedades() {
   });
 }
 
-export default async function PreReservaPage() {
+export default async function PreReservaPage({
+  searchParams,
+}: PreReservaPageProps) {
   const propiedades = await getPropiedades();
+  const parametros = await searchParams;
+  const cabanaInicialId = cabanaDesdeParametro(parametros.cabana, propiedades);
 
   return (
     <section className="pt-32 pb-16 md:pt-40 md:pb-24">
@@ -26,7 +35,11 @@ export default async function PreReservaPage() {
             Te enviaremos un mensaje de WhatsApp con el detalle para confirmar tu estadía.
           </p>
         </div>
-        <PreReservaForm propiedades={propiedades} />
+        <PreReservaForm
+          key={cabanaInicialId ?? "general"}
+          propiedades={propiedades}
+          cabanaInicialId={cabanaInicialId}
+        />
       </div>
     </section>
   );
