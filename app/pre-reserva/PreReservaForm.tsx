@@ -1,57 +1,53 @@
 "use client";
 
-import { useState, FormEvent } from "react";
-import { contarCaracteres } from "@/lib/utils";
-import { buildWhatsAppLink } from "@/lib/config";
-import { nochesEntre } from "@/lib/precios/estadia";
-import { NOCHES_MAX } from "@/lib/precios/calcular";
-import { mensajeErrorPreReserva } from "@/lib/pre-reserva/mensaje";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import Link from "next/link";
 
-interface Propiedad {
-  id: string;
-  nombre: string;
-  capacidad: number;
-}
+import { CalendarioEstadia } from "@/components/calendario/CalendarioEstadia";
+import { useDisponibilidad } from "@/components/calendario/useDisponibilidad";
+import { buildWhatsAppLink } from "@/lib/config";
+import {
+  ESTADIA_VACIA,
+  type SeleccionEstadia,
+} from "@/lib/disponibilidad/seleccion-estadia";
+import {
+  TITULO_CABANAS_DISPONIBLES,
+  mensajeHuespedesCabana,
+  opcionesParaEstadia,
+  type CabanaOpcion,
+  type ResultadoOpcionesEstadia,
+} from "@/lib/pre-reserva/cabanas-para-estadia";
+import { contarCaracteres } from "@/lib/utils";
 
 interface PreReservaFormProps {
-  propiedades: Propiedad[];
+  propiedades: CabanaOpcion[];
+  cabanaInicialId?: string | null;
 }
 
 const MAX_CARACTERES_SIN_ESPACIOS = 1000;
 const MAX_CARACTERES_TOTAL = 3000;
 const UMBRAL_ADVERTENCIA = 900;
 
-// El componente se renderiza en el servidor y en el cliente, por eso se usa una
-// zona fija y no la del navegador (evita desajustes de hidratación en el min).
-const FORMATEADOR_HOY = new Intl.DateTimeFormat("en-CA", {
-  timeZone: "America/Argentina/Buenos_Aires",
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
+/** Devuelve la cantidad de huéspedes si el texto es un entero >= 1. */
+function leerHuespedes(texto: string): number | null {
+  const recortado = texto.trim();
 
-function hoy(): string {
-  const partes = FORMATEADOR_HOY.formatToParts(new Date());
-  const anio = partes.find((parte) => parte.type === "year")?.value;
-  const mes = partes.find((parte) => parte.type === "month")?.value;
-  const dia = partes.find((parte) => parte.type === "day")?.value;
-
-  if (!anio || !mes || !dia) {
-    return "";
+  if (recortado === "") {
+    return null;
   }
 
-  return `${anio}-${mes}-${dia}`;
+  const numero = Number(recortado);
+
+  if (!Number.isInteger(numero) || numero < 1) {
+    return null;
+  }
+
+  return numero;
 }
 
-// Las fechas "YYYY-MM-DD" se tratan siempre en UTC para evitar corrimientos de un día.
-function diaSiguiente(fecha: string): string {
-  const ms = Date.parse(`${fecha}T00:00:00.000Z`);
-
-  if (Number.isNaN(ms)) {
-    return hoy();
-  }
-
-  return new Date(ms + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+/** Redirige al link de WhatsApp que devuelve el servidor. */
+function redirigirAWhatsApp(mensaje: string): void {
+  window.location.href = buildWhatsAppLink(mensaje);
 }
 
 function recortarAlLimite(texto: string): string {
@@ -74,33 +70,100 @@ function recortarAlLimite(texto: string): string {
   return resultado;
 }
 
-export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
-  const [propiedadId, setPropiedadId] = useState("");
-  const [llegada, setLlegada] = useState("");
-  const [salida, setSalida] = useState("");
-  const [huespedes, setHuespedes] = useState(2);
+export default function PreReservaForm({
+  propiedades,
+  cabanaInicialId = null,
+}: PreReservaFormProps) {
+  const [seleccion, setSeleccion] = useState<SeleccionEstadia>(ESTADIA_VACIA);
+  const [huespedesTexto, setHuespedesTexto] = useState("2");
+  const [cabanaElegidaId, setCabanaElegidaId] = useState("");
   const [nombre, setNombre] = useState("");
   const [informacionAdicional, setInformacionAdicional] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
-  const minSalida = llegada ? diaSiguiente(llegada) : hoy();
-  const propiedadSeleccionada = propiedades.find((p) => p.id === propiedadId);
-  const maxHuespedes = propiedadSeleccionada?.capacidad ?? 10;
+  const cabanaFija = cabanaInicialId
+    ? (propiedades.find((p) => p.id === cabanaInicialId) ?? null)
+    : null;
+
+  const { estado: estadoDisp, reintentar } = useDisponibilidad(cabanaFija?.id);
+
+  const huespedesNum = leerHuespedes(huespedesTexto);
+  const capacidadMax = propiedades.reduce(
+    (mayor, propiedad) => Math.max(mayor, propiedad.capacidad),
+    1,
+  );
+  const datosListos = estadoDisp.estado === "listo" ? estadoDisp.datos : null;
+  const resultado: ResultadoOpcionesEstadia =
+    cabanaFija === null && datosListos !== null && huespedesNum !== null
+      ? opcionesParaEstadia(
+          seleccion,
+          huespedesNum,
+          datosListos.cabanas,
+          propiedades,
+        )
+      : { estado: "INCOMPLETO" };
+  const cabanaId =
+    cabanaFija !== null
+      ? cabanaFija.id
+      : resultado.estado === "OK" &&
+          resultado.opciones.some((opcion) => opcion.id === cabanaElegidaId)
+        ? cabanaElegidaId
+        : "";
+  const errorHuespedes =
+    cabanaFija !== null
+      ? mensajeHuespedesCabana(
+          Number(huespedesTexto.trim()),
+          cabanaFija.capacidad,
+        )
+      : huespedesNum === null
+        ? "Indicá una cantidad de huéspedes válida."
+        : null;
+  const intervaloCompleto =
+    seleccion.ingreso !== null && seleccion.salida !== null;
+  const puedeEnviar =
+    !loading &&
+    datosListos !== null &&
+    intervaloCompleto &&
+    cabanaId !== "" &&
+    nombre.trim() !== "" &&
+    huespedesNum !== null &&
+    errorHuespedes === null;
+
   const caracteresSinEspacios = contarCaracteres(informacionAdicional);
   const cercaDelLimite = caracteresSinEspacios >= UMBRAL_ADVERTENCIA;
   const excedeLimite = caracteresSinEspacios > MAX_CARACTERES_SIN_ESPACIOS;
 
-  function handleLlegadaChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const nuevaLlegada = e.target.value;
-    setLlegada(nuevaLlegada);
-
-    if (salida && nuevaLlegada && salida <= nuevaLlegada) {
-      setSalida(diaSiguiente(nuevaLlegada));
+  let faltante: string | null = null;
+  if (!puedeEnviar && !loading && estadoDisp.estado === "listo") {
+    if (!intervaloCompleto) {
+      faltante = "Elegí tus fechas en el calendario.";
+    } else if (
+      cabanaFija === null &&
+      resultado.estado === "OK" &&
+      cabanaId === ""
+    ) {
+      faltante = "Elegí una cabaña de la lista.";
+    } else if (nombre.trim() === "") {
+      faltante = "Ingresá tu nombre.";
     }
   }
 
-  function handleInformacionAdicionalChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+  function cambiarSeleccion(nueva: SeleccionEstadia) {
+    if (
+      nueva.ingreso === seleccion.ingreso &&
+      nueva.salida === seleccion.salida
+    ) {
+      return;
+    }
+
+    setSeleccion(nueva);
+    setError("");
+  }
+
+  function handleInformacionAdicionalChange(
+    e: ChangeEvent<HTMLTextAreaElement>,
+  ) {
     const nuevoValor = e.target.value;
 
     if (nuevoValor.length > MAX_CARACTERES_TOTAL) {
@@ -114,34 +177,30 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setError(null);
 
-    if (!propiedadId || !llegada || !salida || !nombre.trim() || !huespedes) {
-      setError("Completá todos los campos obligatorios");
+    if (
+      !puedeEnviar ||
+      seleccion.ingreso === null ||
+      seleccion.salida === null
+    ) {
       return;
     }
 
     if (excedeLimite) {
-      setError(`La información adicional supera el límite de ${MAX_CARACTERES_SIN_ESPACIOS} caracteres (sin contar espacios)`);
+      setError(
+        `La información adicional supera el límite de ${MAX_CARACTERES_SIN_ESPACIOS} caracteres (sin contar espacios)`,
+      );
       return;
     }
 
     if (informacionAdicional.length > MAX_CARACTERES_TOTAL) {
-      setError(`La información adicional supera el límite de ${MAX_CARACTERES_TOTAL} caracteres totales`);
+      setError(
+        `La información adicional supera el límite de ${MAX_CARACTERES_TOTAL} caracteres totales`,
+      );
       return;
     }
 
-    const noches = nochesEntre(llegada, salida);
-    if (!noches.ok) {
-      setError(mensajeErrorPreReserva(noches.motivo));
-      return;
-    }
-
-    if (noches.noches > NOCHES_MAX) {
-      setError(mensajeErrorPreReserva("ESTADIA_MUY_LARGA"));
-      return;
-    }
-
+    setError("");
     setLoading(true);
 
     try {
@@ -149,18 +208,24 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          propiedad_id: propiedadId,
-          fecha_inicio: llegada,
-          fecha_fin: salida,
+          propiedad_id: cabanaId,
+          fecha_inicio: seleccion.ingreso,
+          fecha_fin: seleccion.salida,
           huesped_nombre: nombre.trim(),
-          personas: huespedes,
+          personas: huespedesNum,
           informacion_adicional: informacionAdicional.trim() || null,
         }),
       });
 
-      const data: { error?: string; mensaje?: string } | null = await res.json().catch(() => null);
+      const data: { error?: string; mensaje?: string } | null = await res
+        .json()
+        .catch(() => null);
 
       if (!res.ok) {
+        if (res.status === 409) {
+          reintentar();
+          setSeleccion(ESTADIA_VACIA);
+        }
         throw new Error(data?.error || "Error al crear la pre-reserva");
       }
 
@@ -168,93 +233,116 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
         throw new Error("Respuesta inesperada del servidor");
       }
 
-      window.location.href = buildWhatsAppLink(data.mensaje);
+      redirigirAWhatsApp(data.mensaje);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ocurrió un error inesperado");
+      setError(
+        err instanceof Error ? err.message : "Ocurrió un error inesperado",
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-[var(--radius-lg)] bg-white shadow-lg ring-1 ring-[var(--color-border)] p-6 md:p-8">
-      {error && (
-        <div className="mb-6 rounded-[var(--radius-md)] bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] px-4 py-3 text-sm text-[var(--color-danger)]">
-          {error}
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-[var(--radius-lg)] bg-white shadow-lg ring-1 ring-[var(--color-border)] p-6 md:p-8"
+    >
+      {cabanaFija !== null && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm">
+          <p className="font-medium text-[var(--color-ink)]">
+            Cabaña: {cabanaFija.nombre}
+          </p>
+          <Link
+            href="/pre-reserva"
+            className="font-medium text-[var(--color-accent)] underline-offset-4 hover:underline"
+          >
+            Ver otras cabañas
+          </Link>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label htmlFor="propiedad" className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]">
-            Cabaña
+      <div className="mb-4">
+        <CalendarioEstadia
+          estado={estadoDisp}
+          onReintentar={reintentar}
+          propiedadId={cabanaFija?.id}
+          seleccion={seleccion}
+          onCambiar={cambiarSeleccion}
+        />
+      </div>
+
+      <div className="mb-4">
+        <label
+          htmlFor="personas"
+          className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]"
+        >
+          Huéspedes
+        </label>
+        <input
+          id="personas"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          step={1}
+          max={cabanaFija !== null ? cabanaFija.capacidad : capacidadMax}
+          value={huespedesTexto}
+          onChange={(e) => {
+            setHuespedesTexto(e.target.value);
+            setError("");
+          }}
+          className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10"
+        />
+        {errorHuespedes !== null && (
+          <p className="mt-1.5 text-xs text-[var(--color-danger)]">
+            {errorHuespedes}
+          </p>
+        )}
+      </div>
+
+      {cabanaFija === null && resultado.estado === "OK" && (
+        <div className="mb-4">
+          <label
+            htmlFor="cabana"
+            className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]"
+          >
+            {TITULO_CABANAS_DISPONIBLES}
           </label>
           <select
-            id="propiedad"
-            value={propiedadId}
-            onChange={(e) => setPropiedadId(e.target.value)}
+            id="cabana"
+            value={cabanaId}
+            onChange={(e) => {
+              setCabanaElegidaId(e.target.value);
+              setError("");
+            }}
             className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10"
-            required
           >
-            <option value="">Seleccioná una cabaña</option>
-            {propiedades.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nombre} (hasta {p.capacidad} personas)
+            <option value="">Elegí una cabaña</option>
+            {resultado.opciones.map((opcion) => (
+              <option key={opcion.id} value={opcion.id}>
+                {opcion.nombre} (hasta {opcion.capacidad} huéspedes)
               </option>
             ))}
           </select>
         </div>
+      )}
 
-        <div>
-          <label htmlFor="personas" className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]">
-            Huéspedes
-          </label>
-          <input
-            id="personas"
-            type="number"
-            min={1}
-            max={maxHuespedes}
-            value={huespedes}
-            onChange={(e) => setHuespedes(Number(e.target.value))}
-            className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label htmlFor="llegada" className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]">
-            Llegada
-          </label>
-          <input
-            id="llegada"
-            type="date"
-            value={llegada}
-            min={hoy()}
-            onChange={handleLlegadaChange}
-            className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="salida" className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]">
-            Salida
-          </label>
-          <input
-            id="salida"
-            type="date"
-            value={salida}
-            min={minSalida}
-            onChange={(e) => setSalida(e.target.value)}
-            className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10"
-            required
-          />
-        </div>
-      </div>
+      {cabanaFija === null &&
+        (resultado.estado === "NINGUNA_LIBRE" ||
+          resultado.estado === "NINGUNA_CON_CAPACIDAD") && (
+          <p
+            role="status"
+            className="mb-4 rounded-[var(--radius-md)] border border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] p-3 text-sm text-[var(--color-ink)]"
+          >
+            {resultado.mensaje}
+          </p>
+        )}
 
       <div className="mb-4">
-        <label htmlFor="nombre" className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]">
+        <label
+          htmlFor="nombre"
+          className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]"
+        >
           Nombre completo
         </label>
         <input
@@ -269,7 +357,10 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
       </div>
 
       <div className="mb-6">
-        <label htmlFor="informacion-adicional" className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]">
+        <label
+          htmlFor="informacion-adicional"
+          className="mb-1.5 block text-sm font-medium text-[var(--color-ink)]"
+        >
           Información adicional
         </label>
         <textarea
@@ -279,7 +370,9 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
           placeholder="Contanos cualquier detalle que quieras que tengamos en cuenta"
           rows={4}
           className={`w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/10 resize-y ${
-            excedeLimite ? "border-[var(--color-danger)] focus:border-[var(--color-danger)]" : ""
+            excedeLimite
+              ? "border-[var(--color-danger)] focus:border-[var(--color-danger)]"
+              : ""
           }`}
         />
         <p
@@ -287,17 +380,28 @@ export default function PreReservaForm({ propiedades }: PreReservaFormProps) {
             excedeLimite
               ? "text-[var(--color-danger)]"
               : cercaDelLimite
-              ? "text-[var(--color-warning)]"
-              : "text-[var(--color-muted)]"
+                ? "text-[var(--color-warning)]"
+                : "text-[var(--color-muted)]"
           }`}
         >
-          {caracteresSinEspacios} / {MAX_CARACTERES_SIN_ESPACIOS} caracteres (sin contar espacios)
+          {caracteresSinEspacios} / {MAX_CARACTERES_SIN_ESPACIOS} caracteres
+          (sin contar espacios)
         </p>
       </div>
 
+      {faltante !== null && (
+        <p className="mb-4 text-sm text-[var(--color-ink)]/70">{faltante}</p>
+      )}
+
+      {error !== "" && (
+        <div className="mb-6 rounded-[var(--radius-md)] bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] px-4 py-3 text-sm text-[var(--color-danger)]">
+          {error}
+        </div>
+      )}
+
       <button
         type="submit"
-        disabled={loading}
+        disabled={!puedeEnviar}
         className="w-full rounded-[var(--radius-md)] bg-[var(--color-accent)] px-5 py-3 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/90 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {loading ? "Enviando..." : "Enviar pre-reserva por WhatsApp"}
