@@ -1,4 +1,4 @@
-import { COMPLEJO } from "@/lib/config";
+import Link from "next/link";
 
 interface CtaSectionProps {
   imagenFondo?: string;
@@ -22,12 +22,12 @@ export default function CtaSection({ imagenFondo }: CtaSectionProps) {
         <p className="mt-4 text-white/70">
           Consultá disponibilidad y reservá tu cabaña en segundos.
         </p>
-        <a
-          href="#buscador"
+        <Link
+          href="/pre-reserva"
           className="mt-8 inline-block rounded-[var(--radius-md)] bg-[var(--color-accent)] px-8 py-3.5 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/90 active:scale-[0.97]"
         >
           Consultar disponibilidad
-        </a>
+        </Link>
       </div>
     </section>
   );
