@@ -24,7 +24,7 @@ export default function HeroCarousel({ imagenes }: HeroCarouselProps) {
   }, [imagenes.length, imagenesValidas.length]);
 
   return (
-    <section className="relative min-h-[100dvh] flex items-end pt-32 pb-16 md:pb-24 overflow-hidden">
+    <section className="relative min-h-[100dvh] flex items-end pt-32 pb-28 md:pb-24 overflow-hidden">
       {imagenesValidas.map((img, i) => (
         <div
           key={i}
