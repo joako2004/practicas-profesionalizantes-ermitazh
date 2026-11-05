@@ -45,6 +45,11 @@ function leerHuespedes(texto: string): number | null {
   return numero;
 }
 
+/** Aviso cuando se piden más huéspedes que la mayor capacidad ofrecida. */
+function mensajeNingunaCabanaAdmite(capacidadMaxima: number): string {
+  return `Ninguna de nuestras cabañas admite más de ${capacidadMaxima} huéspedes.`;
+}
+
 /** Redirige al link de WhatsApp que devuelve el servidor. */
 function redirigirAWhatsApp(mensaje: string): void {
   window.location.href = buildWhatsAppLink(mensaje);
@@ -89,10 +94,14 @@ export default function PreReservaForm({
   const { estado: estadoDisp, reintentar } = useDisponibilidad(cabanaFija?.id);
 
   const huespedesNum = leerHuespedes(huespedesTexto);
-  const capacidadMax = propiedades.reduce(
-    (mayor, propiedad) => Math.max(mayor, propiedad.capacidad),
-    1,
-  );
+  // Sin propiedades no hay capacidad máxima que avisar.
+  const capacidadMax =
+    propiedades.length === 0
+      ? null
+      : propiedades.reduce(
+          (mayor, propiedad) => Math.max(mayor, propiedad.capacidad),
+          0,
+        );
   const datosListos = estadoDisp.estado === "listo" ? estadoDisp.datos : null;
   const resultado: ResultadoOpcionesEstadia =
     cabanaFija === null && datosListos !== null && huespedesNum !== null
@@ -121,6 +130,20 @@ export default function PreReservaForm({
         : null;
   const intervaloCompleto =
     seleccion.ingreso !== null && seleccion.salida !== null;
+  const avisoCapacidad =
+    cabanaFija === null &&
+    !intervaloCompleto &&
+    capacidadMax !== null &&
+    huespedesNum !== null &&
+    huespedesNum > capacidadMax
+      ? mensajeNingunaCabanaAdmite(capacidadMax)
+      : null;
+  const avisoHuespedes =
+    cabanaFija === null &&
+    (resultado.estado === "NINGUNA_LIBRE" ||
+      resultado.estado === "NINGUNA_CON_CAPACIDAD")
+      ? resultado.mensaje
+      : avisoCapacidad;
   const puedeEnviar =
     !loading &&
     datosListos !== null &&
@@ -285,7 +308,11 @@ export default function PreReservaForm({
           inputMode="numeric"
           min={1}
           step={1}
-          max={cabanaFija !== null ? cabanaFija.capacidad : capacidadMax}
+          max={
+            cabanaFija !== null
+              ? cabanaFija.capacidad
+              : (capacidadMax ?? undefined)
+          }
           value={huespedesTexto}
           onChange={(e) => {
             setHuespedesTexto(e.target.value);
@@ -327,16 +354,14 @@ export default function PreReservaForm({
         </div>
       )}
 
-      {cabanaFija === null &&
-        (resultado.estado === "NINGUNA_LIBRE" ||
-          resultado.estado === "NINGUNA_CON_CAPACIDAD") && (
-          <p
-            role="status"
-            className="mb-4 rounded-[var(--radius-md)] border border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] p-3 text-sm text-[var(--color-ink)]"
-          >
-            {resultado.mensaje}
-          </p>
-        )}
+      {avisoHuespedes !== null && (
+        <p
+          role="status"
+          className="mb-4 rounded-[var(--radius-md)] border border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] p-3 text-sm text-[var(--color-ink)]"
+        >
+          {avisoHuespedes}
+        </p>
+      )}
 
       <div className="mb-4">
         <label
