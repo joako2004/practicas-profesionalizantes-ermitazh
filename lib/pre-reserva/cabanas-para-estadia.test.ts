@@ -222,7 +222,7 @@ describe("opcionesParaEstadia", () => {
     );
   });
 
-  it("devuelve NINGUNA_CON_CAPACIDAD cuando hay libres pero ninguna alcanza los 7 huéspedes", () => {
+  it("devuelve NINGUNA_CON_CAPACIDAD con la mayor capacidad libre cuando ninguna alcanza los 7 huéspedes", () => {
     const deLaApi = [cabanaApi("cabana-a", 2), cabanaApi("cabana-b", 3)];
     const deLaPagina = [
       propiedad("cabana-a", "Cabaña A", 2),
@@ -238,35 +238,103 @@ describe("opcionesParaEstadia", () => {
       ),
       {
         estado: "NINGUNA_CON_CAPACIDAD",
-        mensaje: "Hay cabañas libres, pero ninguna para 7 huéspedes.",
+        mensaje:
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 3 personas.",
       },
     );
   });
 
-  it("usa el singular de NINGUNA_CON_CAPACIDAD para 1 huésped (capacidad 0, caso que la API no devuelve)", () => {
-    // La API valida capacidad entre 1 y 100, así que en producción toda cabaña
-    // admite al menos 1 huésped. Se fuerza capacidad 0 para cubrir el texto
-    // singular de la función pura.
-    const deLaApi = [cabanaApi("cabana-a", 0)];
-    const deLaPagina = [propiedad("cabana-a", "Cabaña A", 0)];
+  it("informa la capacidad de la única cabaña libre", () => {
+    const deLaApi = [cabanaApi("cabana-a", 2)];
+    const deLaPagina = [propiedad("cabana-a", "Cabaña A", 2)];
 
     assert.deepEqual(
       opcionesParaEstadia(
         seleccion("2026-11-10", "2026-11-13"),
-        1,
+        4,
         deLaApi,
         deLaPagina,
       ),
       {
         estado: "NINGUNA_CON_CAPACIDAD",
-        mensaje: "Hay cabañas libres, pero ninguna para 1 huésped.",
+        mensaje:
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 2 personas.",
       },
     );
   });
 
-  it("con una cabaña libre sin capacidad y otra ocupada con capacidad gana NINGUNA_CON_CAPACIDAD por el orden real de cabanasLibresParaRango", () => {
+  it("usa el singular cuando la mayor capacidad libre es 1", () => {
+    const deLaApi = [cabanaApi("cabana-a", 1)];
+    const deLaPagina = [propiedad("cabana-a", "Cabaña A", 1)];
+
+    assert.deepEqual(
+      opcionesParaEstadia(
+        seleccion("2026-11-10", "2026-11-13"),
+        2,
+        deLaApi,
+        deLaPagina,
+      ),
+      {
+        estado: "NINGUNA_CON_CAPACIDAD",
+        mensaje:
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 1 persona.",
+      },
+    );
+  });
+
+  it("toma la mayor capacidad entre las libres y no la capacidad global mayor", () => {
+    // Cabaña C tiene la capacidad más alta de la página, pero está ocupada.
+    const deLaApi = [
+      cabanaApi("cabana-a", 2),
+      cabanaApi("cabana-b", 3),
+      cabanaApi("cabana-c", 8, ["2026-11-11"]),
+    ];
+    const deLaPagina = [
+      propiedad("cabana-a", "Cabaña A", 2),
+      propiedad("cabana-b", "Cabaña B", 3),
+      propiedad("cabana-c", "Cabaña C", 8),
+    ];
+
+    assert.deepEqual(
+      opcionesParaEstadia(
+        seleccion("2026-11-10", "2026-11-13"),
+        5,
+        deLaApi,
+        deLaPagina,
+      ),
+      {
+        estado: "NINGUNA_CON_CAPACIDAD",
+        mensaje:
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 3 personas.",
+      },
+    );
+  });
+
+  it("da OK cuando los huéspedes igualan la mayor capacidad libre", () => {
+    const deLaApi = [cabanaApi("cabana-a", 2), cabanaApi("cabana-b", 3)];
+    const deLaPagina = [
+      propiedad("cabana-a", "Cabaña A", 2),
+      propiedad("cabana-b", "Cabaña B", 3),
+    ];
+
+    assert.deepEqual(
+      opcionesParaEstadia(
+        seleccion("2026-11-10", "2026-11-13"),
+        3,
+        deLaApi,
+        deLaPagina,
+      ),
+      {
+        estado: "OK",
+        opciones: [propiedad("cabana-b", "Cabaña B", 3)],
+      },
+    );
+  });
+
+  it("con una cabaña libre y otra ocupada de mayor capacidad informa solo la libre", () => {
     // Verificado en cabanas.ts: primero se filtran las libres y recién después
-    // la capacidad entre las libres. Como A queda libre, no es NINGUNA_LIBRE.
+    // la capacidad entre las libres. Como A queda libre, no es NINGUNA_LIBRE y
+    // la capacidad de B (ocupada) no cuenta para el mensaje.
     const deLaApi = [
       cabanaApi("cabana-a", 2),
       cabanaApi("cabana-b", 8, ["2026-11-11"]),
@@ -285,7 +353,8 @@ describe("opcionesParaEstadia", () => {
       ),
       {
         estado: "NINGUNA_CON_CAPACIDAD",
-        mensaje: "Hay cabañas libres, pero ninguna para 5 huéspedes.",
+        mensaje:
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 2 personas.",
       },
     );
   });
@@ -362,6 +431,33 @@ describe("opcionesParaEstadia", () => {
     );
   });
 
+  it("mantiene NINGUNA_LIBRE y OK igual que antes del cambio de mensaje", () => {
+    // NINGUNA_LIBRE: la única cabaña está ocupada en una noche del rango.
+    assert.deepEqual(
+      opcionesParaEstadia(
+        seleccion("2026-11-10", "2026-11-13"),
+        2,
+        [cabanaApi("cabana-a", 4, ["2026-11-10"])],
+        [propiedad("cabana-a", "Cabaña A", 4)],
+      ),
+      { estado: "NINGUNA_LIBRE", mensaje: MENSAJE_NINGUNA_LIBRE },
+    );
+
+    // OK: hay una cabaña libre con capacidad suficiente.
+    assert.deepEqual(
+      opcionesParaEstadia(
+        seleccion("2026-11-10", "2026-11-13"),
+        4,
+        [cabanaApi("cabana-a", 4)],
+        [propiedad("cabana-a", "Cabaña A", 4)],
+      ),
+      {
+        estado: "OK",
+        opciones: [propiedad("cabana-a", "Cabaña A", 4)],
+      },
+    );
+  });
+
   it("toma la capacidad de la API cuando difiere de propiedades", () => {
     const deLaApi = [cabanaApi("cabana-a", 6)];
     const deLaPagina = [propiedad("cabana-a", "Cabaña A", 2)];
@@ -389,7 +485,8 @@ describe("opcionesParaEstadia", () => {
       ),
       {
         estado: "NINGUNA_CON_CAPACIDAD",
-        mensaje: "Hay cabañas libres, pero ninguna para 4 huéspedes.",
+        mensaje:
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 2 personas.",
       },
     );
   });
@@ -454,11 +551,11 @@ describe("textos del desplegable", () => {
   it("concuerda el singular y el plural de mensajeNingunaConCapacidad", () => {
     assert.equal(
       mensajeNingunaConCapacidad(1),
-      "Hay cabañas libres, pero ninguna para 1 huésped.",
+      "Ninguno de los alojamientos disponibles tiene capacidad para más de 1 persona.",
     );
     assert.equal(
       mensajeNingunaConCapacidad(7),
-      "Hay cabañas libres, pero ninguna para 7 huéspedes.",
+      "Ninguno de los alojamientos disponibles tiene capacidad para más de 7 personas.",
     );
   });
 });

@@ -2,7 +2,7 @@ import {
   cabanasLibresParaRango,
   type CabanaDisponibilidad,
 } from "../disponibilidad/cabanas";
-import { deClaveFecha } from "../disponibilidad/noches";
+import { deClaveFecha, nochesDeRango } from "../disponibilidad/noches";
 import type { CabanaCliente } from "../disponibilidad/respuesta-api";
 import type { SeleccionEstadia } from "../disponibilidad/seleccion-estadia";
 
@@ -35,13 +35,16 @@ export const MENSAJE_NINGUNA_LIBRE =
 
 /**
  * Aviso cuando hay cabañas libres pero ninguna alcanza la cantidad de
- * huéspedes. Concorda el singular con un solo huésped.
+ * huéspedes. Informa la mayor capacidad entre esas cabañas libres y concuerda
+ * el singular cuando esa capacidad es 1.
  */
-export function mensajeNingunaConCapacidad(huespedes: number): string {
-  if (huespedes === 1) {
-    return "Hay cabañas libres, pero ninguna para 1 huésped.";
+export function mensajeNingunaConCapacidad(
+  capacidadMaximaLibre: number,
+): string {
+  if (capacidadMaximaLibre === 1) {
+    return "Ninguno de los alojamientos disponibles tiene capacidad para más de 1 persona.";
   }
-  return `Hay cabañas libres, pero ninguna para ${huespedes} huéspedes.`;
+  return `Ninguno de los alojamientos disponibles tiene capacidad para más de ${capacidadMaximaLibre} personas.`;
 }
 
 /** Resultado de armar las opciones del desplegable para una estadía. */
@@ -53,6 +56,31 @@ export type ResultadoOpcionesEstadia =
 
 /** Cabaña en común entre la API y la página, lista para cabanasLibresParaRango. */
 type CabanaConNombre = CabanaDisponibilidad & { nombre: string };
+
+/**
+ * Mayor capacidad entre las cabañas libres todas las noches del rango.
+ *
+ * `cabanasLibresParaRango` no devuelve las cabañas libres cuando el motivo es
+ * NINGUNA_CON_CAPACIDAD, así que se recalculan con las noches ya validadas del
+ * rango. Solo se llama después de un rango válido, por lo que `noches` nunca
+ * está vacío.
+ */
+function capacidadMaximaLibre(
+  ingreso: Date,
+  salida: Date,
+  cabanas: readonly CabanaConNombre[],
+): number {
+  const noches = nochesDeRango(ingreso, salida);
+  let maxima = 0;
+
+  for (const cabana of cabanas) {
+    if (noches.every((noche) => !cabana.bloqueadas.has(noche))) {
+      maxima = Math.max(maxima, cabana.capacidad);
+    }
+  }
+
+  return maxima;
+}
 
 /**
  * Arma las opciones del desplegable "Cabañas disponibles para tu estadía:".
@@ -141,7 +169,9 @@ export function opcionesParaEstadia(
     case "NINGUNA_CON_CAPACIDAD":
       return {
         estado: "NINGUNA_CON_CAPACIDAD",
-        mensaje: mensajeNingunaConCapacidad(huespedes),
+        mensaje: mensajeNingunaConCapacidad(
+          capacidadMaximaLibre(diaIngreso, diaSalida, comunes),
+        ),
       };
     case "RANGO_INVALIDO":
     case "EXCEDE_NOCHES_MAX":
