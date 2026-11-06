@@ -7,7 +7,6 @@ import {
   aCabanasDisponibilidad,
   armarDisponibilidad,
   calcularVentana,
-  hoyEnArgentina,
 } from "./dto";
 import { aClaveFecha, deClaveFecha, sumarDias } from "./noches";
 
@@ -42,47 +41,6 @@ function ventanaDe(
 ): { desde: Date; hasta: Date } {
   return { desde: fecha(desde), hasta: fecha(hasta) };
 }
-
-describe("hoyEnArgentina", () => {
-  it("devuelve el día calendario de Argentina, no el día UTC", () => {
-    const casos = [
-      { ahora: instante(2026, 10, 31, 2, 59, 59), clave: "2026-10-30" },
-      { ahora: instante(2026, 10, 31, 3, 0, 0), clave: "2026-10-31" },
-      { ahora: instante(2027, 1, 1, 0, 0, 0), clave: "2026-12-31" },
-      { ahora: instante(2026, 10, 31, 23, 59, 59), clave: "2026-10-31" },
-    ];
-
-    for (const caso of casos) {
-      assert.equal(
-        aClaveFecha(hoyEnArgentina(caso.ahora)),
-        caso.clave,
-        `El instante ${caso.ahora.toISOString()} debería caer en ${caso.clave}`,
-      );
-    }
-  });
-
-  it("devuelve siempre la medianoche UTC exacta del día", () => {
-    const instantes = [
-      instante(2026, 10, 31, 2, 59, 59, 999),
-      instante(2026, 10, 31, 3, 0, 0, 1),
-      instante(2026, 6, 15, 18, 45, 30, 500),
-    ];
-
-    for (const ahora of instantes) {
-      const hoy = hoyEnArgentina(ahora);
-      assert.equal(hoy.getUTCHours(), 0);
-      assert.equal(hoy.getUTCMinutes(), 0);
-      assert.equal(hoy.getUTCSeconds(), 0);
-      assert.equal(hoy.getUTCMilliseconds(), 0);
-      assert.equal(hoy.getTime(), fecha(aClaveFecha(hoy)).getTime());
-    }
-  });
-
-  it("lanza RangeError si la fecha es inválida", () => {
-    assert.throws(() => hoyEnArgentina(new Date(Number.NaN)), RangeError);
-    assert.throws(() => hoyEnArgentina(new Date("no-es-una-fecha")), RangeError);
-  });
-});
 
 describe("calcularVentana", () => {
   it("por defecto cubre VENTANA_DIAS noches con hasta inclusivo", () => {

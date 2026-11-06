@@ -21,17 +21,6 @@ import { aClaveFecha, sumarDias } from "./noches";
  */
 export const VENTANA_DIAS = 548;
 
-/** Zona horaria con la que se decide qué día es "hoy" para el huésped. */
-const ZONA_ARGENTINA = "America/Argentina/Mendoza";
-
-/** Formateador que devuelve los campos de la fecha calendario en Argentina. */
-const FORMATO_DIA_ARGENTINA = new Intl.DateTimeFormat("en-US", {
-  timeZone: ZONA_ARGENTINA,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
-
 /** Ventana del DTO: claves "AAAA-MM-DD", con "hasta" como última noche incluida. */
 export type VentanaDisponibilidad = {
   desde: string;
@@ -55,42 +44,6 @@ export type DisponibilidadDto = {
   ventana: VentanaDisponibilidad;
   cabanas: CabanaDisponibilidadDto[];
 };
-
-/** Devuelve el valor numérico de una parte del formateador, o NaN si falta. */
-function parteNumerica(
-  partes: Intl.DateTimeFormatPart[],
-  tipo: "year" | "month" | "day",
-): number {
-  const parte = partes.find((una) => una.type === tipo);
-  return parte === undefined ? Number.NaN : Number(parte.value);
-}
-
-/**
- * Devuelve la fecha calendario de "hoy" en America/Argentina/Mendoza, como
- * medianoche UTC de ese día.
- *
- * OJO: es la cuarta versión de "hoy" del proyecto; se unifica en D10.
- */
-export function hoyEnArgentina(ahora: Date): Date {
-  if (Number.isNaN(ahora.getTime())) {
-    throw new RangeError("La fecha de referencia es inválida");
-  }
-
-  const partes = FORMATO_DIA_ARGENTINA.formatToParts(ahora);
-  const anio = parteNumerica(partes, "year");
-  const mes = parteNumerica(partes, "month");
-  const dia = parteNumerica(partes, "day");
-
-  if (
-    !Number.isInteger(anio) ||
-    !Number.isInteger(mes) ||
-    !Number.isInteger(dia)
-  ) {
-    throw new RangeError("No se pudo obtener el día de Argentina");
-  }
-
-  return new Date(Date.UTC(anio, mes - 1, dia));
-}
 
 /**
  * Calcula la ventana pública que empieza en `hoy` y dura `dias` noches.
