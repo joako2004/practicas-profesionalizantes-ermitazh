@@ -1,3 +1,4 @@
+import { NOCHES_MAX } from "./calcular";
 import type { Temporada, TramoNoches } from "./calcular";
 
 export interface CotizacionUsadaInfo {
@@ -40,7 +41,7 @@ export const MENSAJES_ERROR_ESTADIA: Record<MotivoErrorEstadia, string> = {
   DATOS_INVALIDOS: "Los datos enviados no son válidos.",
   FECHAS_INVALIDAS: "Elegí fechas válidas de ingreso y salida.",
   SALIDA_NO_POSTERIOR: "La fecha de salida debe ser posterior a la de ingreso.",
-  ESTADIA_MUY_LARGA: "Para estadías de más de 30 noches, consultá por WhatsApp.",
+  ESTADIA_MUY_LARGA: `Para estadías de más de ${NOCHES_MAX} noches, consultá por WhatsApp.`,
   CABANA_NO_ENCONTRADA: "No encontramos la cabaña.",
   SIN_PRECIO:
     "No hay un precio cargado para esta cabaña en la temporada actual. Consultá por WhatsApp.",
