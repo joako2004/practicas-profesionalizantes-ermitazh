@@ -7,6 +7,13 @@ interface Resena {
   creadaEn: Date;
 }
 
+const fechaFmt = new Intl.DateTimeFormat("es-AR", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "America/Argentina/Buenos_Aires",
+});
+
 async function getResenasPublicadas(): Promise<Resena[]> {
   return prisma.resena.findMany({
     where: { publicada: true },
@@ -73,11 +80,7 @@ export default async function ResenasPage() {
                   className="mt-2 block text-xs text-[var(--color-ink)]/40"
                   dateTime={resena.creadaEn.toISOString()}
                 >
-                  {resena.creadaEn.toLocaleDateString("es-AR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  {fechaFmt.format(resena.creadaEn)}
                 </time>
               </article>
             ))}
