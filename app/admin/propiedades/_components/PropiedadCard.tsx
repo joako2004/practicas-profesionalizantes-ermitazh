@@ -7,6 +7,16 @@ import ConfirmDialog from "./ConfirmDialog";
 import { updatePropiedadAtributo } from "@/lib/actions/propiedades";
 import { esCampoUsd } from "@/lib/precios/validar";
 
+const fechaHoraFmt = new Intl.DateTimeFormat("es-AR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+  timeZone: "America/Argentina/Buenos_Aires",
+});
+
 interface PropiedadCardProps {
   propiedad: PropiedadSerializer;
 }
@@ -94,13 +104,7 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
     if (key === "servicios") return (value as string[]).join(", ") || "—";
     if (key === "activa") return value ? "Sí" : "No";
     if (key === "creadaEn" || key === "actualizadaEn") {
-      return new Date(value as string | Date).toLocaleDateString("es-AR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      return fechaHoraFmt.format(new Date(value as string | Date));
     }
     return String(value);
   };
