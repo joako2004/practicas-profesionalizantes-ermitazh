@@ -10,9 +10,9 @@ export default function AlbumCard({ album }: AlbumCardProps) {
   return (
     <Link
       href={`/galeria/${album.id}`}
-      className="group flex flex-col rounded-[var(--radius-lg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+      className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] bg-[var(--color-surface)] shadow-md ring-1 ring-[var(--color-border)] transition-transform duration-300 ease-[var(--ease-out-expo)] hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
     >
-      <div className="card-photo relative overflow-hidden rounded-[var(--radius-lg)] bg-[var(--color-warm)]/30 shadow-sm ring-1 ring-[var(--color-border)]">
+      <div className="card-photo relative overflow-hidden rounded-t-[var(--radius-lg)]">
         <Image
           src={album.portada}
           alt={`Foto de ${album.nombre}`}
@@ -23,12 +23,12 @@ export default function AlbumCard({ album }: AlbumCardProps) {
         />
       </div>
 
-      <div className="mt-3 px-1">
+      <div className="flex flex-1 flex-col justify-center p-5">
         <h2 className="text-lg font-semibold tracking-tight text-[var(--color-ink)]">
           {album.nombre}
         </h2>
         {album.capacidad !== null && (
-          <p className="mt-0.5 text-sm text-[var(--color-ink)]/60">
+          <p className="mt-1 text-sm text-[var(--color-ink)]/65">
             Hasta {album.capacidad} personas
           </p>
         )}
