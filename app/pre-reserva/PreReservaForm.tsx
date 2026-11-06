@@ -119,6 +119,15 @@ export default function PreReservaForm({
           resultado.opciones.some((opcion) => opcion.id === cabanaElegidaId)
         ? cabanaElegidaId
         : "";
+  const cabanaSeleccionada =
+    cabanaFija === null && resultado.estado === "OK" && cabanaId !== ""
+      ? (resultado.opciones.find((opcion) => opcion.id === cabanaId) ?? null)
+      : null;
+  const cabanaDescartada =
+    cabanaFija === null &&
+    resultado.estado === "OK" &&
+    cabanaElegidaId !== "" &&
+    cabanaId === "";
   const errorHuespedes =
     cabanaFija !== null
       ? mensajeHuespedesCabana(
@@ -351,6 +360,27 @@ export default function PreReservaForm({
               </option>
             ))}
           </select>
+          {cabanaSeleccionada !== null && (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm">
+              <p className="text-[var(--color-ink)]">
+                Cabaña seleccionada:{" "}
+                <span className="font-medium">{cabanaSeleccionada.nombre}</span>
+              </p>
+              <p className="text-[var(--color-ink)]/70">
+                Capacidad: {cabanaSeleccionada.capacidad}{" "}
+                {cabanaSeleccionada.capacidad === 1 ? "persona" : "personas"}
+              </p>
+            </div>
+          )}
+          {cabanaDescartada && (
+            <p
+              role="status"
+              className="mt-3 rounded-[var(--radius-md)] border border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] p-3 text-sm text-[var(--color-ink)]"
+            >
+              La cabaña que habías elegido ya no está disponible para esta
+              estadía. Elegí otra de la lista.
+            </p>
+          )}
         </div>
       )}
 
