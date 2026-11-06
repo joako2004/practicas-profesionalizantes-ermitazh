@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { COMPLEJO, IMAGENES_HERO_FALLBACK } from "@/lib/config";
 
 const INTERVALO_MS = 4000;
