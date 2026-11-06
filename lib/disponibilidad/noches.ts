@@ -1,3 +1,4 @@
+import { NOCHES_MAX } from "../precios/calcular";
 import { nochesEntre } from "../precios/estadia";
 
 /**
@@ -17,14 +18,6 @@ const MS_POR_DIA = 86_400_000;
 
 const FORMATO_CLAVE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const FORMATO_TEXTO = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-
-/**
- * Cantidad máxima de noches de una estadía.
- *
- * Se replica el valor de `lib/precios/calcular.ts` porque `lib/precios/estadia.ts`
- * no lo exporta y este módulo solo puede importar de `estadia.ts`.
- */
-export const NOCHES_MAX = 30;
 
 /** Indica si la fecha es un Date con un instante válido (no NaN). */
 function esFechaValida(fecha: Date): boolean {

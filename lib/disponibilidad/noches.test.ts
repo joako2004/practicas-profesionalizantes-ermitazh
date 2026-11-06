@@ -1,9 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { NOCHES_MAX as NOCHES_MAX_PROYECTO } from "../precios/calcular";
+import { NOCHES_MAX } from "../precios/calcular";
 import {
-  NOCHES_MAX,
   aClaveFecha,
   aTextoFecha,
   deClaveFecha,
@@ -240,10 +239,6 @@ describe("nochesDeRango", () => {
 });
 
 describe("validarRango", () => {
-  it("usa el mismo máximo de noches que el módulo de precios", () => {
-    assert.equal(NOCHES_MAX, NOCHES_MAX_PROYECTO);
-  });
-
   it("acepta un rango sin noches bloqueadas", () => {
     assert.deepEqual(validarRango(fecha("2026-10-10"), fecha("2026-10-13"), new Set()), {
       ok: true,

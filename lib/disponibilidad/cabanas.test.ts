@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { NOCHES_MAX } from "../precios/calcular";
 import {
   agruparNochesPorCabana,
   cabanasLibresParaRango,
@@ -9,7 +10,6 @@ import {
   type ResultadoCabanasLibres,
 } from "./cabanas";
 import {
-  NOCHES_MAX,
   deClaveFecha,
   deTextoFecha,
   nochesDeRango,
