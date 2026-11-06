@@ -1,8 +1,8 @@
 import { requireAdmin } from "@/lib/auth/perfil";
 import { prisma } from "@/lib/prisma";
-import { hoyEnArgentina } from "@/lib/disponibilidad/dto";
 import { aClaveFecha } from "@/lib/disponibilidad/noches";
 import { obtenerDisponibilidadPublica } from "@/lib/disponibilidad/servidor";
+import { hoyEnArgentina } from "@/lib/fechas";
 import DisponibilidadAdmin from "./_components/DisponibilidadAdmin";
 
 /**

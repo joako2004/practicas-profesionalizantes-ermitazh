@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { contarCaracteres } from "@/lib/utils";
-import { hoyEnArgentina } from "@/lib/disponibilidad/dto";
 import { leerCabanasParaRango } from "@/lib/disponibilidad/servidor";
+import { hoyEnArgentina } from "@/lib/fechas";
 import { validarPreReserva } from "@/lib/pre-reserva/validar-disponibilidad";
 import { estimarEstadia } from "@/lib/precios/estimar-estadia";
 import { nochesEntre, type EstadiaCalculada } from "@/lib/precios/estadia";

@@ -4,9 +4,9 @@ import { agruparNochesPorCabana, type CabanaDisponibilidad } from "./cabanas";
 import {
   armarDisponibilidad,
   calcularVentana,
-  hoyEnArgentina,
   type DisponibilidadDto,
 } from "./dto";
+import { hoyEnArgentina } from "../fechas";
 
 /**
  * Lectura de disponibilidad contra la base de datos.
