@@ -29,7 +29,7 @@ export default function TestimonialsSection({
           {testimonios.map((t, i) => (
             <div
               key={i}
-              className="rounded-[var(--radius-lg)] bg-white p-6 ring-1 ring-[var(--color-border)]"
+              className="cursor-default select-none rounded-[var(--radius-lg)] bg-white p-6 ring-1 ring-[var(--color-border)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.02] hover:shadow-md active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
             >
               <div className="mb-3 flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, j) => (
