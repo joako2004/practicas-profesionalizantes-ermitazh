@@ -42,9 +42,9 @@ export function mensajeNingunaConCapacidad(
   capacidadMaximaLibre: number,
 ): string {
   if (capacidadMaximaLibre === 1) {
-    return "Ninguno de los alojamientos disponibles tiene capacidad para más de 1 persona.";
+    return "Ninguno de los alojamientos disponibles tiene capacidad para más de 1 huésped.";
   }
-  return `Ninguno de los alojamientos disponibles tiene capacidad para más de ${capacidadMaximaLibre} personas.`;
+  return `Ninguno de los alojamientos disponibles tiene capacidad para más de ${capacidadMaximaLibre} huéspedes.`;
 }
 
 /** Resultado de armar las opciones del desplegable para una estadía. */

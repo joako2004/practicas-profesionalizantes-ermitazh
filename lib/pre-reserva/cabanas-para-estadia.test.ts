@@ -239,7 +239,7 @@ describe("opcionesParaEstadia", () => {
       {
         estado: "NINGUNA_CON_CAPACIDAD",
         mensaje:
-          "Ninguno de los alojamientos disponibles tiene capacidad para más de 3 personas.",
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 3 huéspedes.",
       },
     );
   });
@@ -258,7 +258,7 @@ describe("opcionesParaEstadia", () => {
       {
         estado: "NINGUNA_CON_CAPACIDAD",
         mensaje:
-          "Ninguno de los alojamientos disponibles tiene capacidad para más de 2 personas.",
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 2 huéspedes.",
       },
     );
   });
@@ -277,7 +277,7 @@ describe("opcionesParaEstadia", () => {
       {
         estado: "NINGUNA_CON_CAPACIDAD",
         mensaje:
-          "Ninguno de los alojamientos disponibles tiene capacidad para más de 1 persona.",
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 1 huésped.",
       },
     );
   });
@@ -305,7 +305,7 @@ describe("opcionesParaEstadia", () => {
       {
         estado: "NINGUNA_CON_CAPACIDAD",
         mensaje:
-          "Ninguno de los alojamientos disponibles tiene capacidad para más de 3 personas.",
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 3 huéspedes.",
       },
     );
   });
@@ -354,7 +354,7 @@ describe("opcionesParaEstadia", () => {
       {
         estado: "NINGUNA_CON_CAPACIDAD",
         mensaje:
-          "Ninguno de los alojamientos disponibles tiene capacidad para más de 2 personas.",
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 2 huéspedes.",
       },
     );
   });
@@ -486,7 +486,7 @@ describe("opcionesParaEstadia", () => {
       {
         estado: "NINGUNA_CON_CAPACIDAD",
         mensaje:
-          "Ninguno de los alojamientos disponibles tiene capacidad para más de 2 personas.",
+          "Ninguno de los alojamientos disponibles tiene capacidad para más de 2 huéspedes.",
       },
     );
   });
@@ -551,11 +551,11 @@ describe("textos del desplegable", () => {
   it("concuerda el singular y el plural de mensajeNingunaConCapacidad", () => {
     assert.equal(
       mensajeNingunaConCapacidad(1),
-      "Ninguno de los alojamientos disponibles tiene capacidad para más de 1 persona.",
+      "Ninguno de los alojamientos disponibles tiene capacidad para más de 1 huésped.",
     );
     assert.equal(
       mensajeNingunaConCapacidad(7),
-      "Ninguno de los alojamientos disponibles tiene capacidad para más de 7 personas.",
+      "Ninguno de los alojamientos disponibles tiene capacidad para más de 7 huéspedes.",
     );
   });
 });

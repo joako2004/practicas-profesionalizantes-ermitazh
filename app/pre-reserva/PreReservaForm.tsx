@@ -368,7 +368,7 @@ export default function PreReservaForm({
               </p>
               <p className="text-[var(--color-ink)]/70">
                 Capacidad: {cabanaSeleccionada.capacidad}{" "}
-                {cabanaSeleccionada.capacidad === 1 ? "persona" : "personas"}
+                {cabanaSeleccionada.capacidad === 1 ? "huésped" : "huéspedes"}
               </p>
             </div>
           )}
