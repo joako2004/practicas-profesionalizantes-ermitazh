@@ -12,9 +12,12 @@ import type {
   ModoEstadoReporte,
   ReservaReporte,
 } from "@/lib/reportes/tipos";
+import DuracionEstadias from "./_components/DuracionEstadias";
 import EncabezadoReportes from "./_components/EncabezadoReportes";
 import EstadoVacio from "./_components/EstadoVacio";
+import EvolucionMensual from "./_components/EvolucionMensual";
 import FiltrosReportes from "./_components/FiltrosReportes";
+import OcupacionSemana from "./_components/OcupacionSemana";
 import ResumenKpis from "./_components/ResumenKpis";
 import UsoPorCabana from "./_components/UsoPorCabana";
 
@@ -184,6 +187,11 @@ export default async function PaginaReportes({
         cabanas={reporte.usoPorCabana}
         incluyeFuturo={reporte.resumen.incluyeFuturo}
       />
+      <EvolucionMensual meses={reporte.evolucionMensual} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DuracionEstadias tramos={reporte.duracion} />
+        <OcupacionSemana dias={reporte.diasSemana} />
+      </div>
     </div>
   );
 }
