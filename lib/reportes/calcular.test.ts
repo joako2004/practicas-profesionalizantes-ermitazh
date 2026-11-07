@@ -85,13 +85,6 @@ function filtros(
   };
 }
 
-function cerca(actual: number, esperado: number): void {
-  assert.ok(
-    Math.abs(actual - esperado) < 1e-9,
-    `${actual} no es igual a ${esperado}`,
-  );
-}
-
 describe("calcularReporte", () => {
   it("cuenta noches únicas y excluye el checkout", () => {
     const reporte = calcularReporte(
