@@ -12,12 +12,16 @@ import type {
   ModoEstadoReporte,
   ReservaReporte,
 } from "@/lib/reportes/tipos";
+import CalidadDatos from "./_components/CalidadDatos";
+import ComoSeCalcula from "./_components/ComoSeCalcula";
 import DuracionEstadias from "./_components/DuracionEstadias";
 import EncabezadoReportes from "./_components/EncabezadoReportes";
 import EstadoVacio from "./_components/EstadoVacio";
 import EvolucionMensual from "./_components/EvolucionMensual";
 import FiltrosReportes from "./_components/FiltrosReportes";
+import NotaTemporada from "./_components/NotaTemporada";
 import OcupacionSemana from "./_components/OcupacionSemana";
+import PersonasCapacidad from "./_components/PersonasCapacidad";
 import ResumenKpis from "./_components/ResumenKpis";
 import UsoPorCabana from "./_components/UsoPorCabana";
 
@@ -191,6 +195,12 @@ export default async function PaginaReportes({
       <div className="grid gap-6 lg:grid-cols-2">
         <DuracionEstadias tramos={reporte.duracion} />
         <OcupacionSemana dias={reporte.diasSemana} />
+      </div>
+      <PersonasCapacidad personas={reporte.personas} />
+      <CalidadDatos calidad={reporte.calidad} />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <ComoSeCalcula />
+        <NotaTemporada temporada={reporte.temporada} />
       </div>
     </div>
   );
