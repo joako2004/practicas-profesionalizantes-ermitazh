@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 
 type TonoValor = "neutral" | "danger" | "success";
+type TinteTarjeta = "accent" | "warning";
 
 interface TarjetaKpiProps {
   etiqueta: string;
   valor: string;
   detalle: ReactNode;
   destacada?: boolean;
+  tinte?: TinteTarjeta;
   tono?: TonoValor;
   children?: ReactNode;
 }
@@ -23,11 +25,17 @@ const TONOS_VALOR_DESTACADA: Record<TonoValor, string> = {
   success: "text-[var(--color-success-bg)]",
 };
 
+const TINTES_DESTACADA: Record<TinteTarjeta, string> = {
+  accent: "bg-[var(--color-accent)]/20",
+  warning: "bg-[var(--color-warning)]/15",
+};
+
 export default function TarjetaKpi({
   etiqueta,
   valor,
   detalle,
   destacada = false,
+  tinte = "accent",
   tono = "neutral",
   children,
 }: TarjetaKpiProps) {
@@ -35,7 +43,7 @@ export default function TarjetaKpi({
     <article
       className={`relative overflow-hidden rounded-[var(--radius-lg)] p-5 ${
         destacada
-          ? "border-2 border-[var(--color-surface)]/60 bg-[var(--color-accent)]/20 shadow-md backdrop-blur-md backdrop-brightness-75"
+          ? `border-2 border-[var(--color-surface)]/60 shadow-md backdrop-blur-md backdrop-brightness-75 ${TINTES_DESTACADA[tinte]}`
           : "border border-[var(--color-border)] bg-[var(--color-surface)]"
       }`}
     >
