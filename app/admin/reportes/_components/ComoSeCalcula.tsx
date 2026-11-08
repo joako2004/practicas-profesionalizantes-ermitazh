@@ -3,7 +3,7 @@ export default function ComoSeCalcula() {
     <details className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
       <summary className="cursor-pointer list-none text-lg font-semibold text-[var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]">
         Cómo se calcula
-        <span className="ml-2 text-sm font-normal text-[var(--color-ink)]/55">
+        <span className="ml-2 text-sm font-normal text-[var(--color-ink)]/70">
           Ver criterios
         </span>
       </summary>

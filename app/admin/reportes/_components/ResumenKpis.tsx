@@ -49,7 +49,7 @@ export default function ResumenKpis({
                 </span>
               ) : null}
               {ocupacionExcedida ? (
-                <span className="mt-2 block font-medium text-[var(--color-danger)]">
+                <span className="mt-2 inline-flex rounded-[var(--radius-sm)] border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-ink)]">
                   Dato inconsistente: el cálculo crudo es{" "}
                   {formatearPorcentaje(resumen.ocupacionCruda)}.
                 </span>
@@ -65,6 +65,7 @@ export default function ResumenKpis({
               resumen.ocupacion,
             )}`}
             tono={ocupacionExcedida ? "danger" : "accent"}
+            sobreOscuro
           />
         </TarjetaKpi>
         <TarjetaKpi
