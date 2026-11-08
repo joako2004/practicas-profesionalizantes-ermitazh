@@ -5,6 +5,7 @@ import {
   claveFecha,
   diasSemanaDelPeriodo,
   esMesFuturo,
+  filtroReservasDelPeriodo,
   finExclusivo,
   indiceDiaSemana,
   mesesDelPeriodo,
@@ -124,6 +125,18 @@ describe("fechas del período", () => {
       "2027-01-01",
       "2027-01-02",
     ]);
+  });
+});
+
+describe("filtro de reservas del período", () => {
+  it("usa el fin exclusivo de hasta como límite de ingreso", () => {
+    const filtro = filtroReservasDelPeriodo(
+      fecha("2026-01-01"),
+      fecha("2026-12-31"),
+    );
+
+    assert.equal(claveFecha(filtro.fechaIngreso.lt), "2027-01-01");
+    assert.equal(claveFecha(filtro.fechaSalida.gt), "2026-01-01");
   });
 });
 

@@ -100,6 +100,19 @@ export function nochesDelPeriodo(desde: Date, hasta: Date): number {
   return Math.round((hasta.getTime() - desde.getTime()) / MS_POR_DIA) + 1;
 }
 
+export function filtroReservasDelPeriodo(
+  desde: Date,
+  hasta: Date,
+): {
+  fechaIngreso: { lt: Date };
+  fechaSalida: { gt: Date };
+} {
+  return {
+    fechaIngreso: { lt: finExclusivo(hasta) },
+    fechaSalida: { gt: desde },
+  };
+}
+
 export function reservaSolapaPeriodo(
   fechaIngreso: Date,
   fechaSalida: Date,

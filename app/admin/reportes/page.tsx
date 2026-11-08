@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { calcularReporte, periodoDeHistorial } from "@/lib/reportes/calcular";
 import {
   claveFecha,
-  finExclusivo,
+  filtroReservasDelPeriodo,
   parsearFechaReporte,
   textoFecha,
 } from "@/lib/reportes/fechas";
@@ -112,10 +112,7 @@ export default async function PaginaReportes({
 
   const whereReservas = historial
     ? {}
-    : {
-        fechaIngreso: { lt: finExclusivo(desde) },
-        fechaSalida: { gt: desde },
-      };
+    : filtroReservasDelPeriodo(desde, hasta);
   const [propiedades, reservas] = await Promise.all([
     propiedadesPromise,
     prisma.reserva.findMany({
