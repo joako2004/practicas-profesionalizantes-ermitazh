@@ -92,14 +92,14 @@ export default function ResenaFila({
       <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
         {confirmando ? (
           <>
-            <span className="text-sm text-dark-pine/70">
+            <span className="text-sm text-dark-pine">
               ¿Eliminar esta reseña?
             </span>
             <button
               type="button"
               onClick={() => setConfirmando(false)}
               disabled={isPending}
-              className="rounded-btn border border-desert-sand/40 px-4 py-2 text-sm font-medium text-dark-pine/70 transition-all hover:border-desert-sand hover:text-dark-pine disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md bg-white/5 backdrop-blur-md border border-desert-sand/20 px-4 py-2 text-sm font-medium text-dark-pine transition-all hover:border-desert-sand hover:text-dark-pine disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancelar
             </button>
@@ -107,7 +107,7 @@ export default function ResenaFila({
               type="button"
               onClick={() => ejecutar(rechazarResena)}
               disabled={isPending}
-              className="rounded-btn bg-danger px-4 py-2 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md bg-danger/5 backdrop-blur-md border border-danger/20 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-danger/10 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPending ? "Eliminando..." : "Eliminar"}
             </button>
@@ -119,7 +119,7 @@ export default function ResenaFila({
                 type="button"
                 onClick={() => ejecutar(despublicarResena)}
                 disabled={isPending}
-                className="rounded-btn border border-desert-sand/40 px-4 py-2 text-sm font-medium text-dark-pine/70 transition-all hover:border-desert-sand hover:text-dark-pine disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-white/5 backdrop-blur-md border border-desert-sand/20 px-4 py-2 text-sm font-medium text-dark-pine transition-all hover:border-desert-sand hover:text-dark-pine disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isPending ? "Guardando..." : "Despublicar"}
               </button>
@@ -128,7 +128,7 @@ export default function ResenaFila({
                 type="button"
                 onClick={() => ejecutar(aprobarResena)}
                 disabled={isPending}
-                className="rounded-btn bg-toasted-brown px-4 py-2 text-sm font-medium text-white transition-all hover:bg-toasted-brown/90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-toasted-brown/10 backdrop-blur-md border border-toasted-brown/20 px-4 py-2 text-sm font-medium text-black transition-all hover:bg-toasted-brown/15 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isPending ? "Guardando..." : "Aprobar"}
               </button>
@@ -140,7 +140,7 @@ export default function ResenaFila({
                 setConfirmando(true);
               }}
               disabled={isPending}
-              className="rounded-btn border border-danger px-4 py-2 text-sm font-medium text-danger transition-all hover:bg-danger-bg disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md bg-danger/10 backdrop-blur-md border border-danger/20 px-4 py-2 text-sm font-medium text-black transition-all hover:bg-danger/15 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Rechazar
             </button>

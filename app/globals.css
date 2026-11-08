@@ -318,8 +318,10 @@
    7. ESTILOS GLOBALES — Selección de body
    ========================================================================== */
 
+html,
 body {
   background-color: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  scroll-behavior: smooth;
 }

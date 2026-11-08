@@ -65,14 +65,14 @@ export default function ConfirmDialog({
           <button
             onClick={onCancel}
             disabled={disabled}
-            className="rounded-btn border border-desert-sand/40 px-4 py-2 text-sm font-medium text-dark-pine/70 transition-all hover:border-desert-sand hover:text-dark-pine disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-white/5 backdrop-blur-md border border-desert-sand/20 px-4 py-2 text-sm font-medium text-dark-pine/70 transition-all hover:border-desert-sand hover:text-dark-pine disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
             disabled={disabled}
-            className="rounded-btn bg-toasted-brown px-4 py-2 text-sm font-medium text-white transition-all hover:bg-toasted-brown/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-white/5 backdrop-blur-md border border-toasted-brown/20 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {disabled ? "Guardando..." : "Confirmar"}
           </button>

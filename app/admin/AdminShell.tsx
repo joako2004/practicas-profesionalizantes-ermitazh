@@ -92,7 +92,7 @@ export default function AdminShell({
         aria-expanded={sidebarOpen}
         aria-controls="admin-sidebar"
         aria-label={sidebarOpen ? "Cerrar menú" : "Abrir menú"}
-        className="absolute left-4 top-[calc(var(--admin-header-h)_+_0.75rem)] z-[60] inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-medium text-[var(--color-ink)] shadow-md transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] active:scale-[0.97]"
+        className="absolute left-4 top-8 z-[60] inline-flex min-h-11 items-center gap-2 rounded-md bg-white/5 backdrop-blur-md border border-desert-sand/20 px-4 py-2 text-sm font-medium text-white transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] active:scale-[0.97]"
       >
         <svg
           viewBox="0 0 24 24"
@@ -123,7 +123,7 @@ export default function AdminShell({
           }`}
         >
           <section className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            <main className="relative z-10 flex-1 overflow-y-auto">
+            <main className="relative z-10 flex-1 overflow-y-auto" data-admin-scroll>
               <div className="min-h-[calc(100dvh_-_var(--admin-header-h))] px-6 pb-16 pt-6">
                 {children}
               </div>

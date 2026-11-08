@@ -51,7 +51,7 @@ export default async function RecuperarPage({ searchParams }: Props) {
                     type="email"
                     required
                     autoComplete="email"
-                    className="w-full rounded-btn border border-desert-sand/40 bg-white px-4 py-2.5 text-sm text-dark-pine placeholder:text-dark-pine/30 focus:border-toasted-brown focus:outline-none focus:ring-2 focus:ring-toasted-brown/10"
+                    className="w-full rounded-md bg-white/5 backdrop-blur-md border border-desert-sand/20 px-4 py-2.5 text-sm text-dark-pine placeholder:text-dark-pine/30 focus:border-toasted-brown focus:outline-none focus:ring-2 focus:ring-toasted-brown/10"
                     placeholder="tu@email.com"
                   />
                 </div>
@@ -64,7 +64,7 @@ export default async function RecuperarPage({ searchParams }: Props) {
 
                 <button
                   type="submit"
-                  className="w-full rounded-btn bg-toasted-brown px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-toasted-brown/90 active:scale-[0.97]"
+                  className="w-full rounded-md bg-white/5 backdrop-blur-md border border-toasted-brown/20 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-white/10 active:scale-[0.97]"
                 >
                   Enviar enlace
                 </button>

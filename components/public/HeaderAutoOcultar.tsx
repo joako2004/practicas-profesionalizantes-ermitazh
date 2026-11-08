@@ -3,14 +3,17 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 const MARGEN_PX = 100;
+const MARGEN_ADMIN_PX = 80;
 const DELTA_MINIMO_PX = 6;
 
 export default function HeaderAutoOcultar({
   activo,
   children,
+  selectorScroll,
 }: {
   activo: boolean;
   children: ReactNode;
+  selectorScroll?: string;
 }) {
   const [oculto, setOculto] = useState(false);
   const ultimoY = useRef(0);
@@ -20,12 +23,15 @@ export default function HeaderAutoOcultar({
   useEffect(() => {
     if (!activo) return;
 
-    ultimoY.current = window.scrollY;
+    const contenedor = selectorScroll ? document.querySelector<HTMLElement>(selectorScroll) : null;
+    if (selectorScroll && !contenedor) return;
+
+    const objetivo: HTMLElement | Window = contenedor ?? window;
 
     const actualizar = () => {
       pendiente.current = false;
-      const y = window.scrollY;
-      const umbral = window.innerHeight - MARGEN_PX;
+      const y = contenedor ? contenedor.scrollTop : window.scrollY;
+      const umbral = contenedor ? MARGEN_ADMIN_PX : window.innerHeight - MARGEN_PX;
 
       if (y <= umbral) {
         setOculto(false);
@@ -50,9 +56,9 @@ export default function HeaderAutoOcultar({
       window.requestAnimationFrame(actualizar);
     };
 
-    window.addEventListener("scroll", alScrollear, { passive: true });
-    return () => window.removeEventListener("scroll", alScrollear);
-  }, [activo]);
+    objetivo.addEventListener("scroll", alScrollear, { passive: true });
+    return () => objetivo.removeEventListener("scroll", alScrollear);
+  }, [activo, selectorScroll]);
 
   const escondido = activo && oculto;
 

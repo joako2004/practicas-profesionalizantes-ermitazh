@@ -2,6 +2,7 @@
 
 import type { ReactNode, SVGProps } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { logout } from "@/app/login/actions";
 
 type IconName =
@@ -54,8 +55,16 @@ function SidebarIcon({
     ),
     reservations: (
       <>
-        <rect x="4" y="5" width="16" height="15" rx="2" />
-        <path d="M8 3v4M16 3v4M4 10h16M8 14h2M12 14h4M8 17h5" />
+        <path d="M8 2v4" />
+        <path d="M16 2v4" />
+        <rect width="18" height="18" x="3" y="4" rx="2" />
+        <path d="M3 10h18" />
+        <path d="M8 14h.01" />
+        <path d="M12 14h.01" />
+        <path d="M16 14h.01" />
+        <path d="M8 18h.01" />
+        <path d="M12 18h.01" />
+        <path d="M16 18h.01" />
       </>
     ),
     photos: (
@@ -73,8 +82,7 @@ function SidebarIcon({
     ),
     inquiries: (
       <>
-        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z" />
-        <path d="M8 8h8M8 11h5" />
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </>
     ),
     reports: (
@@ -94,7 +102,6 @@ function SidebarIcon({
       </>
     ),
   };
-
   return (
     <svg
       viewBox="0 0 24 24"
@@ -111,8 +118,52 @@ function SidebarIcon({
   );
 }
 
+function useIsActive(href: string): boolean {
+  const pathname = usePathname();
+  // Si el href es exactamente "/admin", solo coincidencia exacta
+  if (href === "/admin") return pathname === href;
+  // Caso activo: pathname exacto o empieza con href + "/"
+  return pathname === href || pathname.startsWith(href + "/");
+}
+
+function SidebarActiveLink({
+  href,
+  onClose,
+  icon,
+  children,
+}: {
+  href: string;
+  onClose: () => void;
+  icon: Exclude<IconName, "logout">;
+  children: ReactNode;
+}) {
+  const isActive = useIsActive(href);
+  // Clases del enlace en su estado normal
+  const normalClasses =
+    "group flex items-center gap-3 rounded-[var(--radius-md)] border border-transparent px-4 py-2.5 text-sm font-medium text-white/80 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white";
+  // Clases del enlace activo: pastilla clara de vidrio
+  const activeClasses =
+    "group flex items-center gap-3 rounded-[var(--radius-md)] border border-transparent px-4 py-2.5 text-sm font-medium text-white bg-white/20 aria-current=\"page\" transition-all hover:border-white/20 hover:bg-white/10 hover:text-white";
+
+  return (
+    <Link
+      href={href}
+      onClick={onClose}
+      className={isActive ? activeClasses : normalClasses}
+    >
+      <SidebarIcon
+        name={icon}
+        className={isActive
+          ? "h-5 w-5 shrink-0 transition-colors"
+          : "h-5 w-5 shrink-0 transition-colors"}
+      />
+      <span>{children}</span>
+    </Link>
+  );
+}
+
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const sidebarClasses = `fixed bottom-0 left-0 top-[var(--admin-header-h)] z-50 flex w-[var(--admin-sidebar-width)] max-w-[80vw] -translate-x-full flex-col border-r border-[var(--color-border)] bg-[var(--color-clay-cream)]/80 shadow-xl backdrop-blur-md transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : ""}`;
+  const sidebarClasses = `fixed bottom-0 left-0 top-0 z-40 flex w-[var(--admin-sidebar-width)] max-w-[80vw] -translate-x-full flex-col border-r border-white/20 bg-white/10 shadow-xl backdrop-blur-md transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : ""}`;
 
   return (
     <aside
@@ -122,7 +173,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     >
       <button
         onClick={onClose}
-        className="absolute right-4 top-4 rounded-[var(--radius-sm)] p-2 text-[var(--color-ink)]/60 transition-colors hover:bg-[var(--color-warm)]/30 hover:text-[var(--color-ink)] lg:hidden"
+        className="absolute right-4 top-4 rounded-[var(--radius-sm)] p-2 text-white transition-colors hover:bg-white/10 hover:text-white lg:hidden border border-white/20"
         aria-controls="admin-sidebar"
         aria-expanded={isOpen}
         aria-label="Cerrar menú"
@@ -130,46 +181,39 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <span aria-hidden="true">×</span>
       </button>
 
-      <nav className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-6 pt-16" aria-label="Secciones de administración">
-        {sidebarItems.map((item) => (
-          item.href ? (
-            <Link
-              key={item.key}
-              href={item.href}
-              onClick={onClose}
-              className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-transparent px-4 py-2.5 text-sm font-medium text-[var(--color-ink)]/75 transition-all hover:border-[var(--color-border)]/70 hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-ink)]"
-            >
-              <SidebarIcon
-                name={item.icon}
-                className="h-5 w-5 shrink-0 text-[var(--color-accent)] transition-colors group-hover:text-[var(--color-ink)]"
-              />
-              <span>{item.label}</span>
-            </Link>
-          ) : (
+      <nav className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-6 pt-48" aria-label="Secciones de administración">
+        {sidebarItems.map((item) => {
+          if (item.href) {
+            return (
+              <SidebarActiveLink
+                key={item.key}
+                href={item.href}
+                onClose={onClose}
+                icon={item.icon}
+              >
+                <span>{item.label}</span>
+              </SidebarActiveLink>
+            );
+          }
+          return (
             <div
               key={item.key}
-              className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-transparent px-4 py-2.5 text-sm font-medium text-[var(--color-ink)]/75 transition-all hover:border-[var(--color-border)]/70 hover:bg-[var(--color-accent)]/10 hover:text-[var(--color-ink)]"
+              className="group flex items-center gap-3 rounded-[var(--radius-md)] border border-transparent px-4 py-2.5 text-sm font-medium text-white/80 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
             >
-              <SidebarIcon
-                name={item.icon}
-                className="h-5 w-5 shrink-0 text-[var(--color-accent)] transition-colors group-hover:text-[var(--color-ink)]"
-              />
+              <span className="h-5 w-5 shrink-0" />
               <span>{item.label}</span>
             </div>
-          )
-        ))}
+          );
+        })}
       </nav>
 
-      <div className="shrink-0 border-t border-[var(--color-border)]/70 px-4 pb-16 pt-4">
+      <div className="shrink-0 border-t border-white/20 px-4 pb-16 pt-4">
         <form action={logout}>
           <button
             type="submit"
-            className="group flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-danger)]/40 px-4 py-2.5 text-sm font-medium text-[var(--color-danger)] transition-all hover:bg-[var(--color-danger-bg)] hover:text-[var(--color-danger)] focus:outline-none focus:ring-2 focus:ring-[var(--color-danger)]/40"
+            className="group flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-white/20 px-4 py-2.5 text-sm font-medium text-white/60 transition-all bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40"
           >
-            <SidebarIcon
-              name="logout"
-              className="h-5 w-5 shrink-0 text-[var(--color-danger)] transition-colors group-hover:text-[var(--color-ink)]"
-            />
+            <span className="h-5 w-5 shrink-0" />
             <span>Cerrar sesión</span>
           </button>
         </form>
