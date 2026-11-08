@@ -15,10 +15,10 @@ interface EstadoMenu {
 }
 
 const CLASE_DISPARADOR =
-  "inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-ink)]/70 transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] active:scale-[0.97]";
+  "inline-flex items-center gap-1.5 rounded-full border border-[var(--color-surface)]/40 px-4 py-1.5 text-sm font-medium text-[var(--color-surface)]/85 transition-all hover:bg-[var(--color-surface)]/15 hover:text-[var(--color-surface)] active:scale-[0.97]";
 
 const CLASE_OPCION =
-  "block w-full rounded-[var(--radius-sm)] px-3 py-2 text-left text-sm text-[var(--color-ink)]/80 transition-colors hover:bg-[var(--color-clay-cream)] hover:text-[var(--color-ink)] focus:bg-[var(--color-clay-cream)] focus:text-[var(--color-ink)]";
+  "block w-full rounded-[var(--radius-sm)] px-3 py-2 text-left text-sm text-[var(--color-surface)]/90 transition-colors hover:bg-[var(--color-surface)]/15 hover:text-[var(--color-surface)] focus:bg-[var(--color-surface)]/15 focus:text-[var(--color-surface)]";
 
 export default function UserMenu({ esAdmin }: UserMenuProps) {
   const pathname = usePathname();
@@ -93,7 +93,7 @@ export default function UserMenu({ esAdmin }: UserMenuProps) {
         <div
           role="menu"
           aria-label="Opciones de cuenta"
-          className="absolute right-0 top-full z-50 mt-2 min-w-44 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-1.5 shadow-lg animate-slide-down"
+          className="absolute right-0 top-full z-50 mt-3 min-w-44 rounded-[var(--radius-lg)] border border-[var(--color-surface)]/30 bg-[var(--color-ink)]/85 p-1.5 shadow-lg animate-slide-down"
         >
           {esAdmin && (
             <Link
