@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { COMPLEJO } from "@/lib/config";
 import UserMenu from "./UserMenu";
+import HeaderAutoOcultar from "./HeaderAutoOcultar";
 
 const NAV_LINKS = [
   { label: "Inicio", href: "/" },
@@ -17,13 +18,13 @@ const CLASE_VIDRIO =
   "border border-[var(--color-surface)]/50 bg-[var(--color-ink)]/30 shadow-md backdrop-blur-md backdrop-brightness-75";
 
 const CLASE_ENLACE =
-  "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium text-[var(--color-surface)]/85 transition-colors hover:bg-[var(--color-surface)]/15 hover:text-[var(--color-surface)] active:scale-[0.97]";
+  "whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium text-[var(--color-surface)]/85 transition-colors hover:bg-[var(--color-surface)]/15 hover:text-[var(--color-surface)] active:scale-[0.97] lg:px-4 lg:text-[15px]";
 
 const CLASE_BOTON_SESION =
-  "whitespace-nowrap rounded-full border border-[var(--color-surface)]/40 px-4 py-1.5 text-sm font-medium text-[var(--color-surface)]/85 transition-all hover:bg-[var(--color-surface)]/15 hover:text-[var(--color-surface)] active:scale-[0.97]";
+  "whitespace-nowrap rounded-full border border-[var(--color-surface)]/40 px-4 py-2 text-sm font-medium text-[var(--color-surface)]/85 transition-all hover:bg-[var(--color-surface)]/15 hover:text-[var(--color-surface)] active:scale-[0.97] lg:px-5 lg:text-[15px]";
 
 const CLASE_BOTON_PRIMARIO =
-  "whitespace-nowrap rounded-full border border-[var(--color-accent)] bg-[var(--color-accent)] px-5 py-1.5 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/80 hover:border-[var(--color-accent)]/80 active:scale-[0.97]";
+  "whitespace-nowrap rounded-full border border-[var(--color-accent)] bg-[var(--color-accent)] px-5 py-2 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/80 hover:border-[var(--color-accent)]/80 active:scale-[0.97] lg:px-6 lg:text-[15px]";
 
 function SesionControles({ sesion }: { sesion: Sesion }) {
   if (!sesion) {
@@ -45,23 +46,23 @@ export default function Header({
   contexto?: HeaderContexto;
 }) {
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-4 z-50 px-4">
+    <HeaderAutoOcultar activo={contexto === "publico"}>
       <nav
         aria-label="Navegación principal"
-        className={`pointer-events-auto relative mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-full px-5 py-2 ${CLASE_VIDRIO}`}
+        className={`pointer-events-auto relative mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-full px-5 py-2.5 md:px-6 md:py-3 lg:gap-6 lg:px-8 lg:py-3.5 ${CLASE_VIDRIO}`}
       >
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[var(--color-surface)]/70 to-transparent"
+          className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[var(--color-surface)]/70 to-transparent lg:inset-x-14"
         />
         <Link
           href="/"
-          className="whitespace-nowrap text-xl font-semibold tracking-wide text-[var(--color-surface)]"
+          className="whitespace-nowrap text-xl font-semibold tracking-wide text-[var(--color-surface)] lg:text-2xl"
         >
           {COMPLEJO.nombre}
         </Link>
 
-        <div className="hidden items-center gap-1.5 md:flex">
+        <div className="hidden items-center gap-1.5 md:flex lg:gap-2">
           {NAV_LINKS.map((link) => (
             <Link key={link.href} href={link.href} className={CLASE_ENLACE}>
               {link.label}
@@ -78,6 +79,6 @@ export default function Header({
           <SesionControles sesion={sesion} />
         </div>
       </nav>
-    </header>
+    </HeaderAutoOcultar>
   );
 }

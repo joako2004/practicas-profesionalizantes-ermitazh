@@ -15,7 +15,7 @@ interface EstadoMenu {
 }
 
 const CLASE_DISPARADOR =
-  "inline-flex items-center gap-1.5 rounded-full border border-[var(--color-surface)]/40 px-4 py-1.5 text-sm font-medium text-[var(--color-surface)]/85 transition-all hover:bg-[var(--color-surface)]/15 hover:text-[var(--color-surface)] active:scale-[0.97]";
+  "inline-flex items-center gap-1.5 rounded-full border border-[var(--color-surface)]/40 px-4 py-2 text-sm font-medium text-[var(--color-surface)]/85 transition-all hover:bg-[var(--color-surface)]/15 hover:text-[var(--color-surface)] active:scale-[0.97] lg:px-5 lg:text-[15px]";
 
 const CLASE_OPCION =
   "block w-full rounded-[var(--radius-sm)] px-3 py-2 text-left text-sm text-[var(--color-surface)]/90 transition-colors hover:bg-[var(--color-surface)]/15 hover:text-[var(--color-surface)] focus:bg-[var(--color-surface)]/15 focus:text-[var(--color-surface)]";

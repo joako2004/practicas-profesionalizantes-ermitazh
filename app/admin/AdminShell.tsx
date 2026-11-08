@@ -74,7 +74,16 @@ export default function AdminShell({
   };
 
   return (
-    <div className="relative flex h-dvh flex-col overflow-hidden bg-[var(--color-bg)] [--admin-header-h:69px] [--admin-sidebar-width:15rem]">
+    <div className="relative flex h-dvh flex-col overflow-hidden bg-[var(--color-bg)] [--admin-header-h:72px] lg:[--admin-header-h:88px] [--admin-sidebar-width:15rem]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroImage})` }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[var(--color-ink)]/65"
+      />
       {header}
 
       <button
@@ -114,15 +123,6 @@ export default function AdminShell({
           }`}
         >
           <section className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${heroImage})` }}
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 bg-[var(--color-ink)]/65"
-            />
             <main className="relative z-10 flex-1 overflow-y-auto">
               <div className="min-h-[calc(100dvh_-_var(--admin-header-h))] px-6 pb-16 pt-6">
                 {children}
