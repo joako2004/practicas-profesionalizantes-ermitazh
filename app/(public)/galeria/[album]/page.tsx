@@ -78,7 +78,11 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
             )}
           </header>
 
-          <PhotoGrid fotos={album.fotos} variante="album" />
+          <PhotoGrid
+            fotos={album.fotos}
+            imagenFondo={imagenFondo}
+            variante="album"
+          />
         </div>
       </div>
     </section>

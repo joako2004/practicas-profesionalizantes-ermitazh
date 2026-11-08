@@ -62,7 +62,9 @@ export default async function GaleriaPage() {
                 ))}
               </div>
 
-              {todasLasFotos.length > 0 && <VerTodas fotos={todasLasFotos} />}
+              {todasLasFotos.length > 0 && (
+                <VerTodas fotos={todasLasFotos} imagenFondo={imagenFondo} />
+              )}
             </>
           )}
         </div>
