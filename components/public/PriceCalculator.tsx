@@ -104,7 +104,7 @@ export default function PriceCalculator({
   );
 
   return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6">
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white/85 p-6 backdrop-blur-sm">
       <h2 className="mb-4 text-lg font-semibold text-[var(--color-ink)]">
         Consultar precio
       </h2>

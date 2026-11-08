@@ -1,7 +1,12 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { obtenerAlbumPorId, obtenerAlbumes } from "@/lib/galeria";
+import {
+  obtenerAlbumPorId,
+  obtenerAlbumes,
+  obtenerImagenFondoHero,
+} from "@/lib/galeria";
+import BlurredBackground from "@/components/public/BlurredBackground";
 import PhotoGrid from "../PhotoGrid";
 
 interface AlbumPageProps {
@@ -27,7 +32,10 @@ export async function generateMetadata({
 
 export default async function AlbumPage({ params }: AlbumPageProps) {
   const { album: id } = await params;
-  const albumes = await obtenerAlbumes();
+  const [albumes, imagenFondo] = await Promise.all([
+    obtenerAlbumes(),
+    obtenerImagenFondoHero(),
+  ]);
   const album = obtenerAlbumPorId(albumes, id);
 
   if (!album) {
@@ -35,8 +43,9 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
   }
 
   return (
-    <section className="min-h-screen bg-[var(--color-bg)]">
-      <div className="pt-24 pb-16 md:pb-24">
+    <section className="relative min-h-screen overflow-hidden">
+      <BlurredBackground src={imagenFondo} />
+      <div className="relative pt-24 pb-16 md:pb-24">
         <div className="mx-auto max-w-7xl px-6">
           <Link
             href="/galeria"

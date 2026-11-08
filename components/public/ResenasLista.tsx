@@ -79,7 +79,7 @@ export default function ResenasLista({
           {resenas.map((r) => (
             <li
               key={r.id}
-              className="rounded-[var(--radius-lg)] bg-white p-6 ring-1 ring-[var(--color-border)]"
+              className="rounded-[var(--radius-lg)] bg-white/85 p-6 ring-1 ring-[var(--color-border)] backdrop-blur-sm"
             >
               <div className="mb-3 flex items-center justify-between gap-3">
                 <Estrellas puntuacion={r.puntuacion} />

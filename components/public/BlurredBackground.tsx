@@ -6,7 +6,10 @@ interface BlurredBackgroundProps {
 
 export default function BlurredBackground({ src }: BlurredBackgroundProps) {
   return (
-    <div aria-hidden="true" className="fixed inset-0 -z-10 overflow-hidden">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+    >
       <Image
         src={src}
         alt=""

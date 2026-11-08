@@ -278,7 +278,7 @@ export default function PreReservaForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-[var(--radius-lg)] bg-white shadow-lg ring-1 ring-[var(--color-border)] p-6 md:p-8"
+      className="rounded-[var(--radius-lg)] bg-white/85 shadow-lg ring-1 ring-[var(--color-border)] p-6 md:p-8 backdrop-blur-sm"
     >
       {cabanaFija !== null && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm">

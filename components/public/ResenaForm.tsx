@@ -40,7 +40,7 @@ export default function ResenaForm({
 
   if (!autenticado) {
     return (
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white/85 p-6 backdrop-blur-sm">
         <h2 className="mb-1.5 text-lg font-semibold text-[var(--color-ink)]">
           Dejá tu reseña
         </h2>
@@ -66,7 +66,7 @@ export default function ResenaForm({
 
   if (enviada) {
     return (
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white/85 p-6 backdrop-blur-sm">
         <h2 className="mb-1.5 text-lg font-semibold text-[var(--color-ink)]">
           ¡Gracias!
         </h2>
@@ -78,7 +78,7 @@ export default function ResenaForm({
   }
 
   return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-6">
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white/85 p-6 backdrop-blur-sm">
       <h2 className="mb-4 text-lg font-semibold text-[var(--color-ink)]">
         Dejá tu reseña
       </h2>
