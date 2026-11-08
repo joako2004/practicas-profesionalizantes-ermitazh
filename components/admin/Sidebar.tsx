@@ -33,7 +33,7 @@ const sidebarItems: SidebarItem[] = [
   { key: "fotos", label: "Fotos", icon: "photos", href: "/admin/fotos" },
   { key: "disponibilidad", label: "Disponibilidad", icon: "availability", href: "/admin/disponibilidad" },
   { key: "consultas", label: "Consultas", icon: "inquiries" },
-  { key: "reportes", label: "Reportes", icon: "reports" },
+  { key: "reportes", label: "Reportes", icon: "reports", href: "/admin/reportes" },
 ];
 
 interface SidebarProps {
