@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { COMPLEJO, IMAGENES_HERO_FALLBACK } from "@/lib/config";
 
 const INTERVALO_MS = 4000;
@@ -50,6 +51,12 @@ export default function HeroCarousel({ imagenes }: HeroCarouselProps) {
             Cabañas rodeadas de bosque, donde el silencio y el paisaje te
             invitan a dejar el mundo atrás.
           </p>
+          <Link
+            href="/pre-reserva"
+            className="mt-8 inline-flex items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-accent)] px-6 py-3 text-sm font-medium text-white shadow-lg transition-all hover:bg-[var(--color-accent)]/90 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Ver disponibilidad
+          </Link>
         </div>
       </div>
 

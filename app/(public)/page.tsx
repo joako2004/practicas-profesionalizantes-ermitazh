@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { serializarPropiedad, obtenerPreciosUsd } from "@/lib/serializers";
 import { obtenerContextoPrecios, precioUnaNocheArs } from "@/lib/precios/contexto";
 import HeroCarousel from "@/components/public/HeroCarousel";
-import SearchCard from "@/components/public/SearchCard";
 import WelcomeSection from "@/components/public/WelcomeSection";
 import CabinsSection from "@/components/public/CabinsSection";
 import ServicesSection from "@/components/public/ServicesSection";
@@ -112,7 +111,6 @@ export default async function HomePage() {
   return (
     <>
       <HeroCarousel imagenes={heroImages} />
-      <SearchCard />
       <WelcomeSection />
       <CabinsSection
         propiedades={propiedadesSerializadas}

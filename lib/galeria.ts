@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { IMAGENES_HERO_FALLBACK } from "@/lib/config";
 
 export const CATEGORIA_EXTERIORES = "exteriores";
 export const ALBUM_EXTERIORES_ID = "parque-pileta-juegos";
@@ -17,6 +18,15 @@ export interface AlbumGaleria {
   capacidad: number | null;
   portada: string;
   fotos: FotoGaleria[];
+}
+
+export async function obtenerImagenFondoHero(): Promise<string> {
+  const imagen = await prisma.imagen.findFirst({
+    where: { categoria: "hero", activa: true },
+    orderBy: { orden: "asc" },
+    select: { url: true },
+  });
+  return imagen?.url ?? IMAGENES_HERO_FALLBACK[0].url;
 }
 
 function extraerNumeroCabana(nombre: string): number | null {
