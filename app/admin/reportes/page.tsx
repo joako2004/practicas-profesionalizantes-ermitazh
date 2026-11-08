@@ -194,11 +194,11 @@ export default async function PaginaReportes({
         <OcupacionSemana dias={reporte.diasSemana} />
       </div>
       <PersonasCapacidad personas={reporte.personas} />
-      <CalidadDatos calidad={reporte.calidad} />
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <ComoSeCalcula />
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+        <CalidadDatos calidad={reporte.calidad} />
         <NotaTemporada temporada={reporte.temporada} />
       </div>
+      <ComoSeCalcula />
     </div>
   );
 }

@@ -66,7 +66,7 @@ export default function CalidadDatos({ calidad }: CalidadDatosProps) {
   return (
     <section
       aria-labelledby="calidad-datos-titulo"
-      className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+      className="h-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
     >
       <div className="mb-4">
         <h2
