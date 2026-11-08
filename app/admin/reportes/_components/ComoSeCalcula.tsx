@@ -19,12 +19,20 @@ export default function ComoSeCalcula() {
         </div>
         <div>
           <dt className="font-medium text-[var(--color-ink)]">
+            Noches disponibles
+          </dt>
+          <dd className="text-[var(--color-ink)]/70">
+            Los días del período por la cantidad de cabañas activas.
+          </dd>
+        </div>
+        <div>
+          <dt className="font-medium text-[var(--color-ink)]">
             Ocupación
           </dt>
           <dd className="text-[var(--color-ink)]/70">
-            Noches ocupadas dividido por las noches del período multiplicadas
-            por las cabañas activas. El valor visual tiene un tope del 100%; si
-            el cálculo crudo lo supera, se muestra una alerta.
+            Noches ocupadas dividido por las noches disponibles. El valor visual
+            tiene un tope del 100%; si el cálculo crudo lo supera, se muestra
+            una alerta.
           </dd>
         </div>
         <div>

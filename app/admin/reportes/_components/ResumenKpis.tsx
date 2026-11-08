@@ -30,7 +30,7 @@ export default function ResumenKpis({
           valor={formatearNumero(resumen.nochesOcupadas)}
           detalle={`de ${formatearNumero(
             resumen.nochesDisponibles,
-          )} cabaña-noches disponibles`}
+          )} noches disponibles`}
         />
         <TarjetaKpi
           etiqueta="Reservas"
