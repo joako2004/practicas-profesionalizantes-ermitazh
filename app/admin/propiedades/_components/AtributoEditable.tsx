@@ -8,6 +8,10 @@ interface AtributoEditableProps {
   tipo: "text" | "number" | "decimal" | "boolean" | "array" | "usd";
   valorActual: unknown;
   onEditRequest: (atributo: string, nuevoValor: unknown) => void;
+  /** Nombre legible del campo para el aria-label del botón de edición. */
+  etiqueta?: string;
+  /** Usa un recuadro más alto para valores de varias líneas (Descripción). */
+  multilinea?: boolean;
 }
 
 export default function AtributoEditable({
@@ -16,6 +20,8 @@ export default function AtributoEditable({
   tipo,
   valorActual,
   onEditRequest,
+  etiqueta,
+  multilinea = false,
 }: AtributoEditableProps) {
   const [editando, setEditando] = useState(false);
   const [valorEditado, setValorEditado] = useState("");
@@ -190,9 +196,18 @@ export default function AtributoEditable({
 
   if (editando) {
     const inputType = "text";
+    const alturaCampo = multilinea || tipo === "array" ? "h-24" : "h-11";
+    const vacio = tipo === "usd" && valorEditado.trim() === "";
+    const clasesCampo = `w-full ${alturaCampo} rounded-sm border px-3 text-[15px] font-medium transition-colors placeholder:text-muted-dark focus:outline-none focus:ring-2 focus:ring-dark-pine focus:ring-offset-2 focus:ring-offset-white ${
+      error
+        ? "border-danger bg-danger-bg text-danger focus:ring-danger"
+        : vacio
+          ? "border-dashed border-dark-pine bg-desert-sand/10 text-dark-pine"
+          : "border-dark-pine bg-white text-dark-pine"
+    }`;
 
     return (
-      <div className="flex-1 w-full">
+      <div className="w-full">
         {tipo === "array" ? (
           <textarea
             ref={textareaRef}
@@ -201,11 +216,8 @@ export default function AtributoEditable({
             onBlur={manejarBlur}
             onKeyDown={manejarKeyDown}
             onClick={(e) => e.stopPropagation()}
-            className={`w-full rounded-btn border px-3 py-1.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-toasted-brown/40 ${
-              error
-                ? "border-danger text-danger bg-danger-bg"
-                : "border-desert-sand/40 bg-white"
-            }`}
+            className={`${clasesCampo} resize-none`}
+            aria-label={etiqueta ?? atributo}
             placeholder="Un servicio por línea"
             rows={3}
           />
@@ -218,26 +230,52 @@ export default function AtributoEditable({
             onBlur={manejarBlur}
             onKeyDown={manejarKeyDown}
             onClick={(e) => e.stopPropagation()}
-            className={`w-full rounded-btn border px-3 py-1.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-toasted-brown/40 ${
-              error
-                ? "border-danger text-danger bg-danger-bg"
-                : "border-desert-sand/40 bg-white"
-            }`}
+            className={clasesCampo}
+            aria-label={etiqueta ?? atributo}
             placeholder={tipo === "usd" ? "US$ (vacío = sin precio)" : `Nuevo ${atributo}`}
             inputMode={tipo === "usd" ? "decimal" : undefined}
             step={tipo === "decimal" ? "0.01" : undefined}
             min={tipo === "number" ? "0" : tipo === "decimal" ? "0" : undefined}
           />
         )}
-        {error && <p className="mt-1 text-xs text-danger">{error}</p>}
+        {error && <p className="mt-1.5 text-xs font-medium text-danger">{error}</p>}
       </div>
     );
   }
 
+  const sinPrecio = tipo === "usd" && (valorActual === null || valorActual === undefined);
+  const alturaCampo = multilinea ? "h-24" : "h-11";
+  const clasesEstado = sinPrecio
+    ? "border-dashed border-[color:var(--prop-field-border-empty)] bg-[color:var(--prop-field-bg-empty)] hover:border-[color:var(--prop-field-border-hover)] hover:bg-[color:var(--prop-field-bg-empty-hover)]"
+    : "border-[color:var(--prop-field-border)] bg-white hover:border-[color:var(--prop-field-border-hover)] hover:bg-[color:var(--prop-field-hover-bg)]";
+
   return (
-    <div className="flex-1 w-full" onClick={manejarClick}>
-      <span className="text-dark-pine/70">{formatearMostrar(valorActual)}</span>
-      <span className="ml-2 text-xs text-dark-pine/40 hover:text-toasted-brown cursor-pointer">✏️</span>
-    </div>
+    <button
+      type="button"
+      onClick={manejarClick}
+      aria-label={`Editar ${etiqueta ?? atributo}`}
+      className={`group flex ${alturaCampo} w-full cursor-pointer items-center gap-2 rounded-sm border px-3 text-left text-[15px] font-medium text-dark-pine transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dark-pine focus-visible:ring-offset-2 focus-visible:ring-offset-white ${clasesEstado}`}
+    >
+      <span
+        className={`min-w-0 flex-1 ${
+          multilinea ? "line-clamp-3 break-words" : "truncate"
+        } ${sinPrecio ? "italic text-muted-dark" : ""}`}
+      >
+        {formatearMostrar(valorActual)}
+      </span>
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-3.5 w-3.5 flex-shrink-0 text-muted-dark/80 transition-opacity opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-visible:opacity-100"
+      >
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+      </svg>
+    </button>
   );
 }
