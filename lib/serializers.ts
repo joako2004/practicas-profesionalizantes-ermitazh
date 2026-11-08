@@ -27,24 +27,46 @@ export function numeroOpcional(valor: unknown): number | null {
   return Number.isFinite(numero) ? numero : null;
 }
 
-export function serializarPropiedad(raw: any): PropiedadSerializer {
+interface PropiedadCruda {
+  id: string;
+  nombre?: string | null;
+  descripcion?: string | null;
+  capacidad?: number | null;
+  promoSemanalAlta?: unknown;
+  promoSemanalBaja?: unknown;
+  precioNocheAltaUsd?: unknown;
+  precioNocheBajaUsd?: unknown;
+  precio2a6AltaUsd?: unknown;
+  precio2a6BajaUsd?: unknown;
+  fotos?: string[] | null;
+  servicios?: string[] | null;
+  activa?: boolean | null;
+  orden?: number | null;
+  creadaEn?: Date | string | null;
+  actualizadaEn?: Date | string | null;
+}
+
+export function serializarPropiedad(raw: unknown): PropiedadSerializer {
+  const propiedad = raw as PropiedadCruda;
   return {
-    id: raw.id,
-    nombre: raw.nombre ?? "",
-    descripcion: raw.descripcion ?? "",
-    capacidad: raw.capacidad ?? 0,
-    promoSemanalAlta: numeroOpcional(raw.promoSemanalAlta) ?? 0,
-    promoSemanalBaja: numeroOpcional(raw.promoSemanalBaja) ?? 0,
-    precioNocheAltaUsd: numeroOpcional(raw.precioNocheAltaUsd),
-    precioNocheBajaUsd: numeroOpcional(raw.precioNocheBajaUsd),
-    precio2a6AltaUsd: numeroOpcional(raw.precio2a6AltaUsd),
-    precio2a6BajaUsd: numeroOpcional(raw.precio2a6BajaUsd),
-    fotos: raw.fotos ?? [],
-    servicios: raw.servicios ?? [],
-    activa: raw.activa ?? false,
-    orden: raw.orden ?? 0,
-    creadaEn: raw.creadaEn ? new Date(raw.creadaEn) : new Date(),
-    actualizadaEn: raw.actualizadaEn ? new Date(raw.actualizadaEn) : new Date(),
+    id: propiedad.id,
+    nombre: propiedad.nombre ?? "",
+    descripcion: propiedad.descripcion ?? "",
+    capacidad: propiedad.capacidad ?? 0,
+    promoSemanalAlta: numeroOpcional(propiedad.promoSemanalAlta) ?? 0,
+    promoSemanalBaja: numeroOpcional(propiedad.promoSemanalBaja) ?? 0,
+    precioNocheAltaUsd: numeroOpcional(propiedad.precioNocheAltaUsd),
+    precioNocheBajaUsd: numeroOpcional(propiedad.precioNocheBajaUsd),
+    precio2a6AltaUsd: numeroOpcional(propiedad.precio2a6AltaUsd),
+    precio2a6BajaUsd: numeroOpcional(propiedad.precio2a6BajaUsd),
+    fotos: propiedad.fotos ?? [],
+    servicios: propiedad.servicios ?? [],
+    activa: propiedad.activa ?? false,
+    orden: propiedad.orden ?? 0,
+    creadaEn: propiedad.creadaEn ? new Date(propiedad.creadaEn) : new Date(),
+    actualizadaEn: propiedad.actualizadaEn
+      ? new Date(propiedad.actualizadaEn)
+      : new Date(),
   };
 }
 
