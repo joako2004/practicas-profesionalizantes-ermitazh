@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 
 import { CalendarioEstadia } from "@/components/calendario/CalendarioEstadia";
@@ -87,6 +87,22 @@ export default function PreReservaForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [datosPrecio, setDatosPrecio] = useState<
+    | {
+        totalEstimadoUsd: number | null;
+        totalEstimadoArs: number | null;
+        precioNocheUsdAplicado: number | null;
+        tipoDolarUsado: string | null;
+        cotizacionUsada: number | null;
+        temporadaAplicada: string | null;
+        tramoAplicado: string | null;
+        propiedad_nombre: string | null;
+        noches: number;
+        promoAplicadaPct: number;
+      }
+    | null
+  >(null);
+
   const cabanaFija = cabanaInicialId
     ? (propiedades.find((p) => p.id === cabanaInicialId) ?? null)
     : null;
@@ -161,6 +177,42 @@ export default function PreReservaForm({
     nombre.trim() !== "" &&
     huespedesNum !== null &&
     errorHuespedes === null;
+
+  // Obtener precio de la estadía cuando tanto las fechas como la cabaña estén seleccionadas
+  const precioListo =
+    seleccion.ingreso !== null &&
+    seleccion.salida !== null &&
+    cabanaId !== "";
+
+
+function fetchPrecioEstadia() {
+    if (!precioListo) return;
+
+    setDatosPrecio(null);
+
+    fetch("/api/pre-reserva/precio?propiedad_id=" + cabanaId + "&fecha_inicio=" + seleccion.ingreso + "&fecha_fin=" + seleccion.salida, {
+      method: "GET",
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Error al obtener precio");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setDatosPrecio(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching precio:", err);
+      });
+  }
+
+  // Ejecutar fetch de precio cuando la selección cambia a "listo"
+  useEffect(() => {
+    if (precioListo) {
+      fetchPrecioEstadia();
+    }
+  }, [precioListo]);
 
   const caracteresSinEspacios = contarCaracteres(informacionAdicional);
   const cercaDelLimite = caracteresSinEspacios >= UMBRAL_ADVERTENCIA;
@@ -451,6 +503,35 @@ export default function PreReservaForm({
       {error !== "" && (
         <div className="mb-6 rounded-[var(--radius-md)] bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] px-4 py-3 text-sm text-[var(--color-danger)]">
           {error}
+        </div>
+      )}
+
+      {/* Sección de precio integrada - aparece después de seleccionar cabaña y fechas */}
+      {precioListo && datosPrecio && (
+        <div className="mb-6 p-4 rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-border">
+          <h4 className="font-medium text-[var(--color-ink)] mb-3">
+            Precio estimado para {datosPrecio.noches} noches
+          </h4>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-[var(--color-ink)]/60 text-xs">Precio por noche</p>
+              <p className="text-accent font-medium">${datosPrecio.precioNocheUsdAplicado}</p>
+            </div>
+            <div>
+              <p className="text-[var(--color-ink)]/60 text-xs">Total estimado</p>
+              <p className="font-bold text-[var(--color-ink)]">${datosPrecio.totalEstimadoArs}</p>
+            </div>
+          </div>
+          {datosPrecio.promoAplicadaPct > 0 && (
+            <p className="mt-2 text-green-600 text-sm">
+              🎉 Promoción de semana: -{datosPrecio.promoAplicadaPct}% para estancias de 7 noches o más
+            </p>
+          )}
+          {datosPrecio.cotizacionUsada !== null && datosPrecio.tipoDolarUsado && (
+            <p className="mt-2 text-[var(--color-ink)]/60 text-xs">
+              Dólar: {datosPrecio.tipoDolarUsado} (cotización: {datosPrecio.cotizacionUsada})
+            </p>
+          )}
         </div>
       )}
 
