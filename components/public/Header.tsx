@@ -72,7 +72,10 @@ export default function Header({
             </Link>
           ))}
           {contexto === "publico" && !sesion?.esAdmin && (
-            <Link href="/pre-reserva" className={CLASE_BOTON_PRIMARIO}>
+            <Link
+              href={sesion ? "/pre-reserva" : `/login?next=${encodeURIComponent("/pre-reserva")}`}
+              className={CLASE_BOTON_PRIMARIO}
+            >
               Reservar
             </Link>
           )}

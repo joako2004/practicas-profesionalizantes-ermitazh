@@ -175,7 +175,10 @@ export default async function CabanaDetallePage({
           <aside className="space-y-4 lg:self-start">
             {propiedad.activa && (
               <Link
-                href={`/pre-reserva?cabana=${encodeURIComponent(propiedad.id)}`}
+                href={autenticado
+                  ? `/pre-reserva?cabana=${encodeURIComponent(propiedad.id)}`
+                  : `/login?next=${encodeURIComponent(`/pre-reserva?cabana=${encodeURIComponent(propiedad.id)}`)}`
+                }
                 className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-accent)] px-5 py-3 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent)]/90 active:scale-[0.97]"
               >
                 Pre-reservar esta cabaña

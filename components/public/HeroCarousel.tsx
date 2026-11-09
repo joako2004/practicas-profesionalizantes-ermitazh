@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { COMPLEJO, IMAGENES_HERO_FALLBACK } from "@/lib/config";
 
 const INTERVALO_MS = 4000;
@@ -12,17 +13,21 @@ interface HeroCarouselProps {
 
 export default function HeroCarousel({ imagenes }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [preReservaHref, setPreReservaHref] = useState<string>("/pre-reserva");
 
   const imagenesValidas =
     imagenes.length > 0 ? imagenes : IMAGENES_HERO_FALLBACK;
 
   useEffect(() => {
-    if (imagenes.length > 0) return;
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % imagenesValidas.length);
-    }, INTERVALO_MS);
-    return () => clearInterval(timer);
-  }, [imagenes.length, imagenesValidas.length]);
+    async function checkAuth() {
+      const supabase = await createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setPreReservaHref(!!session ? "/pre-reserva" : "/login?next=%2Fpre-reserva");
+    }
+    checkAuth();
+  }, [imagenes]);
 
   return (
     <section className="relative min-h-[100dvh] flex items-end pt-32 pb-28 md:pb-24 overflow-hidden">
@@ -52,7 +57,7 @@ export default function HeroCarousel({ imagenes }: HeroCarouselProps) {
             invitan a dejar el mundo atrás.
           </p>
           <Link
-            href="/pre-reserva"
+            href={preReservaHref}
             className="mt-8 inline-flex items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-accent)] px-6 py-3 text-sm font-medium text-white shadow-lg transition-all hover:bg-[var(--color-accent)]/90 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             Ver disponibilidad

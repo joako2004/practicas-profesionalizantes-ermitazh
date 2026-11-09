@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
 
 interface CabinCardProps {
   id: string;
@@ -15,7 +19,7 @@ const precioFormatter = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 0,
 });
 
-export default function CabinCard({
+function CabinCard({
   id,
   nombre,
   descripcion,
@@ -23,6 +27,19 @@ export default function CabinCard({
   precioDesdeArs,
   fotos,
 }: CabinCardProps) {
+  const [reservaHref, setReservaHref] = useState<string>("/pre-reserva");
+
+  useEffect(() => {
+    async function checkAuth() {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setReservaHref(!!session ? "/pre-reserva" : "/login?next=%2Fpre-reserva");
+    }
+    checkAuth();
+  }, []);
+
   const tieneFotos = fotos.length > 0;
 
   return (
@@ -66,12 +83,6 @@ export default function CabinCard({
               <span className="block text-lg font-semibold text-[var(--color-accent)] whitespace-nowrap">
                 {precioFormatter.format(precioDesdeArs)}
               </span>
-              <Link
-                href={`/cabanas/${id}`}
-                className="mt-1 inline-block text-xs font-medium text-[var(--color-ink)]/60 underline underline-offset-2 transition-colors hover:text-[var(--color-ink)]"
-              >
-                Conocé nuestras promociones
-              </Link>
             </div>
           )}
           <div className="flex items-center gap-2">
@@ -82,7 +93,7 @@ export default function CabinCard({
               Ver más
             </Link>
             <Link
-              href="/pre-reserva"
+              href={reservaHref}
               className="whitespace-nowrap rounded-[var(--radius-md)] bg-[var(--color-accent)] px-3 py-2 text-xs font-medium text-white transition-all hover:bg-[var(--color-accent)]/90 active:scale-[0.97]"
             >
               Reservar
@@ -93,3 +104,5 @@ export default function CabinCard({
     </article>
   );
 }
+
+export default CabinCard;
