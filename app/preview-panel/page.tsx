@@ -1,5 +1,7 @@
 import PanelConfiguracionPrecios from "@/app/admin/propiedades/_components/PanelConfiguracionPrecios";
 import type { OpcionTipoDolar } from "@/app/admin/propiedades/_components/PanelConfiguracionPrecios";
+import { esAdmin } from "@/lib/auth/perfil";
+import { redirect } from "next/navigation";
 
 const OPCIONES: OpcionTipoDolar[] = [
   { tipo: "blue", etiqueta: "Dólar blue", ventaTexto: "$1.555", desactualizada: false, fechaTexto: "8/11/26, 9:00" },
@@ -11,7 +13,12 @@ const OPCIONES: OpcionTipoDolar[] = [
   { tipo: "tarjeta", etiqueta: "Dólar tarjeta", ventaTexto: "$1.848", desactualizada: false, fechaTexto: "8/11/26, 9:00" },
 ];
 
-export default function PreviewPanelPage() {
+export default async function PreviewPanelPage() {
+  const esAdministrador = await esAdmin();
+  if (!esAdministrador) {
+    redirect("/");
+  }
+
   return (
     <div className="min-h-dvh bg-dark-pine/65 p-4 sm:p-6">
       <div className="mx-auto max-w-5xl">
