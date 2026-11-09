@@ -1,7 +1,7 @@
-export const WHATSAPP_NUMBER = "5492604510202";
+export const WHATSAPP_NUMBER = "5492604814785";
 
-export const CONTACT_PHONE_DISPLAY = "+54 9 260 451-0202";
-export const CONTACT_PHONE_TEL = "+5492604510202";
+export const CONTACT_PHONE_DISPLAY = "+54 9 260 481-4785";
+export const CONTACT_PHONE_TEL = "+5492604814785";
 
 export const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/complejoermitazh/?hl=es",
