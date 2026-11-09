@@ -133,7 +133,7 @@ export default async function CabanaDetallePage({
         <CabinGallery fotos={propiedad.fotos} nombre={propiedad.nombre} />
 
         <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
-          <div className="min-w-0 space-y-6 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white/80 p-6 shadow-sm backdrop-blur">
+          <div className="min-w-0 space-y-6 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white/85 p-6 shadow-sm backdrop-blur-sm">
             <div>
               <h2 className="mb-1.5 text-lg font-semibold text-[var(--color-ink)]">
                 Sobre esta cabaña

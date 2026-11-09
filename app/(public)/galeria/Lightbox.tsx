@@ -8,11 +8,12 @@ import type { FotoGaleria } from "@/lib/galeria";
 interface LightboxProps {
   fotos: FotoGaleria[];
   indice: number;
+  imagenFondo: string;
   onClose: () => void;
   onNavigate: (direction: "prev" | "next") => void;
 }
 
-function LightboxContent({ fotos, indice, onClose, onNavigate }: LightboxProps) {
+function LightboxContent({ fotos, indice, imagenFondo, onClose, onNavigate }: LightboxProps) {
   const foto = fotos[indice];
   const touchStartX = useRef<number | null>(null);
   const hayVarias = fotos.length > 1;
@@ -70,7 +71,7 @@ function LightboxContent({ fotos, indice, onClose, onNavigate }: LightboxProps) 
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-[var(--color-ink)]/95"
+      className="fixed inset-0 z-[100] overflow-hidden"
       role="dialog"
       aria-modal="true"
       aria-label={`Foto ${indice + 1} de ${fotos.length}: ${foto.album}`}
@@ -78,6 +79,18 @@ function LightboxContent({ fotos, indice, onClose, onNavigate }: LightboxProps) 
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <Image
+          src={imagenFondo}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="scale-110 object-cover blur-xl"
+        />
+        <div className="absolute inset-0 bg-black/50" />
+      </div>
+
       <span className="pointer-events-none absolute left-4 top-4 z-20 rounded-full bg-black/40 px-3 py-1 text-sm font-medium tabular-nums text-white/90 md:left-6 md:top-6">
         {indice + 1} / {fotos.length}
       </span>
@@ -156,7 +169,7 @@ function LightboxContent({ fotos, indice, onClose, onNavigate }: LightboxProps) 
         </>
       )}
 
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-4 pb-20 md:p-16 md:pb-24">
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-4 pb-20 md:p-16 md:pb-24">
         <div className="relative h-full w-full">
           <Image
             src={foto.url}

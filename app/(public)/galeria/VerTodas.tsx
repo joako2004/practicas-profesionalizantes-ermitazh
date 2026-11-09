@@ -6,9 +6,10 @@ import PhotoGrid from "./PhotoGrid";
 
 interface VerTodasProps {
   fotos: FotoGaleria[];
+  imagenFondo: string;
 }
 
-export default function VerTodas({ fotos }: VerTodasProps) {
+export default function VerTodas({ fotos, imagenFondo }: VerTodasProps) {
   const [abierto, setAbierto] = useState(false);
   const panelId = useId();
 
@@ -42,7 +43,7 @@ export default function VerTodas({ fotos }: VerTodasProps) {
 
       {abierto && (
         <div id={panelId} className="mt-8 animate-fade-in md:mt-10">
-          <PhotoGrid fotos={fotos} variante="densa" />
+          <PhotoGrid fotos={fotos} imagenFondo={imagenFondo} variante="densa" />
         </div>
       )}
     </div>

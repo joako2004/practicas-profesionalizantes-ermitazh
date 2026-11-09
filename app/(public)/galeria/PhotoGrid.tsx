@@ -7,6 +7,7 @@ import Lightbox from "./Lightbox";
 
 interface PhotoGridProps {
   fotos: FotoGaleria[];
+  imagenFondo: string;
   variante?: "album" | "densa";
 }
 
@@ -21,7 +22,7 @@ const SIZES = {
   densa: "(max-width: 420px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16vw",
 };
 
-export default function PhotoGrid({ fotos, variante = "album" }: PhotoGridProps) {
+export default function PhotoGrid({ fotos, imagenFondo, variante = "album" }: PhotoGridProps) {
   const [abierto, setAbierto] = useState(false);
   const [indice, setIndice] = useState(0);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -86,6 +87,7 @@ export default function PhotoGrid({ fotos, variante = "album" }: PhotoGridProps)
         <Lightbox
           fotos={fotos}
           indice={indice}
+          imagenFondo={imagenFondo}
           onClose={cerrar}
           onNavigate={navegar}
         />

@@ -1,7 +1,9 @@
 import { Metadata } from "next";
-import { IMAGENES_HERO_FALLBACK } from "@/lib/config";
-import { obtenerAlbumes, obtenerTodasLasFotos } from "@/lib/galeria";
-import { prisma } from "@/lib/prisma";
+import {
+  obtenerAlbumes,
+  obtenerImagenFondoHero,
+  obtenerTodasLasFotos,
+} from "@/lib/galeria";
 import AlbumCard from "./AlbumCard";
 import VerTodas from "./VerTodas";
 
@@ -12,16 +14,11 @@ export const metadata: Metadata = {
 };
 
 export default async function GaleriaPage() {
-  const [albumes, heroImagen] = await Promise.all([
+  const [albumes, imagenFondo] = await Promise.all([
     obtenerAlbumes(),
-    prisma.imagen.findFirst({
-      where: { categoria: "hero", activa: true },
-      orderBy: { orden: "asc" },
-      select: { url: true },
-    }),
+    obtenerImagenFondoHero(),
   ]);
   const todasLasFotos = obtenerTodasLasFotos(albumes);
-  const imagenFondo = heroImagen?.url ?? IMAGENES_HERO_FALLBACK[0].url;
 
   return (
     <section className="relative min-h-screen overflow-hidden">
@@ -65,7 +62,9 @@ export default async function GaleriaPage() {
                 ))}
               </div>
 
-              {todasLasFotos.length > 0 && <VerTodas fotos={todasLasFotos} />}
+              {todasLasFotos.length > 0 && (
+                <VerTodas fotos={todasLasFotos} imagenFondo={imagenFondo} />
+              )}
             </>
           )}
         </div>

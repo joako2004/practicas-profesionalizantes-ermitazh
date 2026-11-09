@@ -20,13 +20,16 @@ export interface AlbumGaleria {
   fotos: FotoGaleria[];
 }
 
+/** Imagen de fondo compartida por la galería y las pantallas de reserva. */
+export const IMAGEN_FONDO_GALERIA = IMAGENES_HERO_FALLBACK[0].url;
+
 export async function obtenerImagenFondoHero(): Promise<string> {
   const imagen = await prisma.imagen.findFirst({
     where: { categoria: "hero", activa: true },
     orderBy: { orden: "asc" },
     select: { url: true },
   });
-  return imagen?.url ?? IMAGENES_HERO_FALLBACK[0].url;
+  return imagen?.url ?? IMAGEN_FONDO_GALERIA;
 }
 
 function extraerNumeroCabana(nombre: string): number | null {

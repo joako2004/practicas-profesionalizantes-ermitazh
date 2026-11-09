@@ -318,9 +318,13 @@
    7. ESTILOS GLOBALES — Selección de body
    ========================================================================== */
 
-html,
-body {
+/* El fondo vive solo en <html> para no crear una capa opaca en <body>
+   que tape los elementos `fixed` con z-index negativo (fotos de fondo). */
+html {
   background-color: var(--color-bg);
+}
+
+body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   scroll-behavior: smooth;
