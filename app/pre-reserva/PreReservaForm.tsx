@@ -523,9 +523,14 @@ function fetchPrecioEstadia() {
             </div>
           </div>
           {datosPrecio.promoAplicadaPct > 0 && (
-            <p className="mt-2 text-green-600 text-sm">
-              🎉 Promoción de semana: -{datosPrecio.promoAplicadaPct}% para estancias de 7 noches o más
-            </p>
+            <>
+              <div className="mb-2 text-green-600 text-xs">
+                promoción aplicada: descuento del {datosPrecio.promoAplicadaPct}%
+              </div>
+              <p className="text-[var(--color-ink)]/60 text-xs mt-1">
+                Promoción sujeta a disponibilidad y condiciones del administrador
+              </p>
+            </>
           )}
           {datosPrecio.cotizacionUsada !== null && datosPrecio.tipoDolarUsado && (
             <p className="mt-2 text-[var(--color-ink)]/60 text-xs">
