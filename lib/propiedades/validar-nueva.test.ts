@@ -132,11 +132,36 @@ describe("validarNuevaPropiedad", () => {
     assert.ok(!resultado.ok, "Debería haber error");
   });
 
-  it("debe aceptar capacidad vacía (null automático)", () => {
+  it("debe rechazar capacidad vacía (obligatoria)", () => {
     const resultado = validarNuevaPropiedad({ nombre: "Nom", descripcion: "Desc", capacidad: "" });
+    assert.ok(!resultado.ok, "Debería haber error");
+    assert.strictEqual(resultado.errores?.capacidad, "La capacidad es obligatoria.");
+  });
+
+  it("debe rechazar capacidad ausente (undefined)", () => {
+    const resultado = validarNuevaPropiedad({ nombre: "Nom", descripcion: "Desc" });
+    assert.ok(!resultado.ok, "Debería haber error");
+    assert.strictEqual(resultado.errores?.capacidad, "La capacidad es obligatoria.");
+  });
+
+  it("debe rechazar capacidad null", () => {
+    const resultado = validarNuevaPropiedad({ nombre: "Nom", descripcion: "Desc", capacidad: null });
+    assert.ok(!resultado.ok, "Debería haber error");
+    assert.strictEqual(resultado.errores?.capacidad, "La capacidad es obligatoria.");
+  });
+
+  it("debe rechazar capacidad con solo espacios", () => {
+    const resultado = validarNuevaPropiedad({ nombre: "Nom", descripcion: "Desc", capacidad: "   " });
+    assert.ok(!resultado.ok, "Debería haber error");
+    assert.strictEqual(resultado.errores?.capacidad, "La capacidad es obligatoria.");
+  });
+
+  it("debe devolver capacidad numérica cuando llega '4'", () => {
+    const resultado = validarNuevaPropiedad({ nombre: "Nom", descripcion: "Desc", capacidad: "4" });
     assert.ok(resultado.ok, "Debería haber éxito");
     if (resultado.ok) {
-      assert.strictEqual(resultado.valor.capacidad, null);
+      assert.strictEqual(resultado.valor.capacidad, 4);
+      assert.strictEqual(typeof resultado.valor.capacidad, "number");
     }
   });
 

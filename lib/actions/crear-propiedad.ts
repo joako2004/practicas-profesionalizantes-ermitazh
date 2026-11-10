@@ -40,17 +40,6 @@ export async function crearPropiedadNueva(
     }
 
     const valor = validacion.valor;
-    const capacidad = valor.capacidad;
-
-    // La columna capacidad es obligatoria en la base; el validador permite
-    // dejarla vacía (null), así que se rechaza acá con el mismo formato.
-    if (capacidad === null) {
-      return {
-        success: false,
-        error: "Revisá los campos marcados.",
-        errores: { capacidad: "La capacidad es obligatoria." },
-      };
-    }
 
     const claveNueva = claveNombre(valor.nombre);
 
@@ -82,7 +71,7 @@ export async function crearPropiedadNueva(
           data: {
             nombre: valor.nombre,
             descripcion: valor.descripcion,
-            capacidad: capacidad,
+            capacidad: valor.capacidad,
             orden: ordenFinal,
             activa: valor.activa,
             servicios: valor.servicios,

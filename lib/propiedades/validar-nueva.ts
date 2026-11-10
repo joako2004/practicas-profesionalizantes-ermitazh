@@ -52,10 +52,20 @@ function validarDescripcion(texto: string): { ok: boolean; mensaje?: string } {
   return { ok: true };
 }
 
-function validarCapacidad(texto: string): { ok: boolean; mensaje?: string } {
-  const trimm = texto.trim();
+type ResultadoCapacidad =
+  | { ok: true; valor: number }
+  | { ok: false; mensaje: string };
+
+function validarCapacidad(entrada: unknown): ResultadoCapacidad {
+  if (entrada === undefined || entrada === null) {
+    return { ok: false, mensaje: "La capacidad es obligatoria." };
+  }
+  if (typeof entrada !== "string") {
+    return { ok: false, mensaje: "La capacidad debe ser un número entero" };
+  }
+  const trimm = entrada.trim();
   if (trimm.length === 0) {
-    return { ok: true, mensaje: undefined };
+    return { ok: false, mensaje: "La capacidad es obligatoria." };
   }
   // Rechazar decimales: solo dígitos enteros permitidos
   if (!/^\d+$/.test(trimm)) {
@@ -65,7 +75,7 @@ function validarCapacidad(texto: string): { ok: boolean; mensaje?: string } {
   if (valor < LIMITES_PROPIEDAD.capacidadMin || valor > LIMITES_PROPIEDAD.capacidadMax) {
     return { ok: false, mensaje: `La capacidad debe ser un número entero entre ${LIMITES_PROPIEDAD.capacidadMin} y ${LIMITES_PROPIEDAD.capacidadMax}` };
   }
-  return { ok: true };
+  return { ok: true, valor };
 }
 
 function validarOrden(texto: string): { ok: boolean; mensaje?: string; valor: number | null } {
@@ -177,7 +187,7 @@ export function validarNuevaPropiedad(entrada: unknown): {
   valor: {
     nombre: string;
     descripcion: string;
-    capacidad: number | null;
+    capacidad: number;
     orden: number | null;
     activa: boolean;
     servicios: string[];
@@ -239,15 +249,10 @@ export function validarNuevaPropiedad(entrada: unknown): {
     }
   }
 
-  // 4. Validar capacidad (opcional, entero 1-20, vacío = null)
-  const capacidadRaw = obj.capacidad as string;
-  if (typeof capacidadRaw !== "string") {
-    errores.capacidad = "La capacidad debe ser un número entero";
-  } else {
-    const res = validarCapacidad(capacidadRaw);
-    if (!res.ok) {
-      errores.capacidad = res.mensaje!;
-    }
+  // 4. Validar capacidad (obligatoria, entero 1-20)
+  const capacidadRes = validarCapacidad(obj.capacidad);
+  if (!capacidadRes.ok) {
+    errores.capacidad = capacidadRes.mensaje;
   }
 
   // 5. Validar orden (opcional, entero 0-9999, vacío = null)
@@ -305,15 +310,18 @@ export function validarNuevaPropiedad(entrada: unknown): {
     return { ok: false, errores };
   }
 
+  // La capacidad es obligatoria: si no hay errores, ya está validada como
+  // entero dentro del rango, pero TypeScript necesita el estrechamiento.
+  if (!capacidadRes.ok) {
+    return { ok: false, errores: { capacidad: capacidadRes.mensaje } };
+  }
+
   // 10. Construir el valor limpio (solo si no hay errores)
   // Nombre: colapsar espacios
   const nombreProcesado = colapsarEspacios(nombreRaw.trim());
 
   // Descripción: colapsar espacios
   const descripcionProcesada = colapsarEspacios(descRaw.trim());
-
-  // Capacidad: parsear entero (ya validado que es entero y en rango 1-20)
-  const capacidadNum = capacidadRaw.trim() === "" ? null : parseInt(capacidadRaw.trim(), 10);
 
   // Orden: si viene vacío string, null; si viene número string válido, el número; si es undefined, null
   let ordenFinal: number | null = null;
@@ -353,7 +361,7 @@ export function validarNuevaPropiedad(entrada: unknown): {
     valor: {
       nombre: nombreProcesado,
       descripcion: descripcionProcesada,
-      capacidad: capacidadNum,
+      capacidad: capacidadRes.valor,
       orden: ordenFinal,
       activa: activaBool,
       servicios: serviciosLimpios,
