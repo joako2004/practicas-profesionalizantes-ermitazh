@@ -14,6 +14,9 @@ import {
   type TipoDolar,
 } from "@/lib/cotizacion";
 
+const CLASES_BOTON_NUEVA_PROPIEDAD =
+  "inline-flex items-center gap-2 rounded-md bg-white/5 backdrop-blur-md border border-desert-sand/20 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-white/10 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-toasted-brown";
+
 export default async function PropiedadesPage() {
   await requireAdmin();
   const [propiedades, configuracion, cotizaciones] = await Promise.all([
@@ -76,7 +79,7 @@ export default async function PropiedadesPage() {
         </div>
         <a
           href="/admin/propiedades/new"
-          className="inline-flex items-center gap-2 rounded-md bg-white/5 backdrop-blur-md border border-desert-sand/20 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-white/10 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-toasted-brown"
+          className={CLASES_BOTON_NUEVA_PROPIEDAD}
         >
           <span>+</span> Nueva propiedad
         </a>
@@ -106,6 +109,14 @@ export default async function PropiedadesPage() {
               propiedad={serializarPropiedad(propiedad)}
             />
           ))}
+          <div className="flex justify-end">
+            <a
+              href="/admin/propiedades/new"
+              className={CLASES_BOTON_NUEVA_PROPIEDAD}
+            >
+              <span>+</span> Nueva propiedad
+            </a>
+          </div>
         </div>
       )}
     </div>
