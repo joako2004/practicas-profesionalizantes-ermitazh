@@ -4,6 +4,7 @@ import { useState, useTransition, type CSSProperties } from "react";
 import { PropiedadSerializer } from "@/lib/serializers";
 import AtributoEditable from "./AtributoEditable";
 import ConfirmDialog from "./ConfirmDialog";
+import InterruptorActiva from "./InterruptorActiva";
 import { updatePropiedadAtributo } from "@/lib/actions/propiedades";
 import { esCampoUsd } from "@/lib/precios/validar";
 
@@ -304,6 +305,12 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
               </div>
             </div>
           </section>
+
+          <InterruptorActiva
+            propiedadId={propiedad.id}
+            nombre={propiedad.nombre}
+            activa={propiedad.activa}
+          />
 
           <section className="rounded-md border border-[color:var(--prop-panel-border-soft)] bg-[color:var(--prop-panel-bg-soft)] p-4 sm:p-5">
             <h4 className="flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-[0.08em] text-dark-pine">

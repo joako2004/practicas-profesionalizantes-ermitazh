@@ -25,11 +25,42 @@ interface UpdatePropiedadResult {
   };
 }
 
+/** Valor ya validado que corresponde a cada atributo editable. */
+export interface ValorAtributoPropiedad {
+  nombre: string;
+  descripcion: string;
+  capacidad: number;
+  orden: number;
+  servicios: string[];
+  activa: boolean;
+  promoSemanalAlta: number;
+  promoSemanalBaja: number;
+  precioNocheAltaUsd: number | null;
+  precioNocheBajaUsd: number | null;
+  precio2a6AltaUsd: number | null;
+  precio2a6BajaUsd: number | null;
+}
+
+/** Atributos que se pueden editar desde la tarjeta del panel. */
+export type AtributoPropiedad = keyof ValorAtributoPropiedad;
+
 // Convierte el Decimal de Prisma (o null/undefined) a number | null, nunca a 0.
 function decimalANumero(valor: { toNumber: () => number } | null | undefined): number | null {
   return valor == null ? null : valor.toNumber();
 }
 
+// `activa` exige un booleano en el punto de llamada; el resto de los atributos
+// se validan en tiempo de ejecución porque el valor llega desde el cliente.
+export async function updatePropiedadAtributo(
+  propiedadId: string,
+  campo: "activa",
+  valor: ValorAtributoPropiedad["activa"]
+): Promise<UpdatePropiedadResult>;
+export async function updatePropiedadAtributo(
+  propiedadId: string,
+  campo: AtributoPropiedad | string,
+  valor: unknown
+): Promise<UpdatePropiedadResult>;
 export async function updatePropiedadAtributo(
   propiedadId: string,
   campo: string,
@@ -101,7 +132,7 @@ export async function updatePropiedadAtributo(
       }
       case "activa": {
         if (typeof valor !== "boolean") {
-          return { success: false, error: "El campo activa debe ser un booleano" };
+          return { success: false, error: "El estado debe ser activa o inactiva" };
         }
         dataToUpdate.activa = valor;
         break;
@@ -150,6 +181,12 @@ export async function updatePropiedadAtributo(
     revalidatePath("/admin/propiedades");
     revalidatePath("/");
     revalidatePath("/cabanas/[id]", "page");
+
+    if (campo === "activa") {
+      revalidatePath("/pre-reserva");
+      revalidatePath("/admin/disponibilidad");
+      revalidatePath("/admin/fotos");
+    }
 
     return {
       success: true,
