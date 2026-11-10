@@ -109,7 +109,7 @@ export default async function PropiedadesPage() {
               propiedad={serializarPropiedad(propiedad)}
             />
           ))}
-          <div className="flex justify-end">
+          <div className="flex justify-center">
             <a
               href="/admin/propiedades/new"
               className={CLASES_BOTON_NUEVA_PROPIEDAD}
