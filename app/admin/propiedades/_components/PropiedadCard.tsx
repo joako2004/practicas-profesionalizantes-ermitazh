@@ -3,6 +3,7 @@
 import { useState, useTransition, type CSSProperties } from "react";
 import { PropiedadSerializer } from "@/lib/serializers";
 import AtributoEditable from "./AtributoEditable";
+import BotonEliminarPropiedad from "./BotonEliminarPropiedad";
 import ConfirmDialog from "./ConfirmDialog";
 import InterruptorActiva from "./InterruptorActiva";
 import { updatePropiedadAtributo } from "@/lib/actions/propiedades";
@@ -328,6 +329,11 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
               ))}
             </dl>
           </section>
+
+          <BotonEliminarPropiedad
+            propiedadId={propiedad.id}
+            nombre={propiedad.nombre}
+          />
         </div>
       )}
 
