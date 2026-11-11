@@ -7,10 +7,12 @@ import { eliminarPropiedadCompleta } from "@/lib/actions/eliminar-propiedad";
 interface BotonEliminarPropiedadProps {
   propiedadId: string;
   nombre: string;
+  cantidadFotos?: number;
 }
 
 interface ConfirmDialogEliminarProps {
   nombre: string;
+  cantidadFotos: number;
   idTitulo: string;
   idDescripcion: string;
   error: string | null;
@@ -21,6 +23,7 @@ interface ConfirmDialogEliminarProps {
 
 function ConfirmDialogEliminar({
   nombre,
+  cantidadFotos,
   idTitulo,
   idDescripcion,
   error,
@@ -59,6 +62,12 @@ function ConfirmDialogEliminar({
           asociadas.
         </p>
 
+        {cantidadFotos > 0 && (
+          <p className="mt-4 rounded-sm border border-[color:var(--color-danger-border)] bg-danger-bg px-3 py-2 text-sm text-danger">
+            {`Esta cabaña tiene ${cantidadFotos} ${cantidadFotos === 1 ? "foto" : "fotos"}. También se borrarán del almacenamiento las fotos que no use otra cabaña.`}
+          </p>
+        )}
+
         {error && (
           <p
             role="alert"
@@ -95,6 +104,7 @@ function ConfirmDialogEliminar({
 export default function BotonEliminarPropiedad({
   propiedadId,
   nombre,
+  cantidadFotos = 0,
 }: BotonEliminarPropiedadProps) {
   const idTitulo = useId();
   const idDescripcion = useId();
@@ -189,6 +199,7 @@ export default function BotonEliminarPropiedad({
       {confirmando && (
         <ConfirmDialogEliminar
           nombre={nombre}
+          cantidadFotos={cantidadFotos}
           idTitulo={idDialogo}
           idDescripcion={idDescripcion}
           error={error}

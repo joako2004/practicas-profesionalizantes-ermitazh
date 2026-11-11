@@ -333,6 +333,7 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
           <BotonEliminarPropiedad
             propiedadId={propiedad.id}
             nombre={propiedad.nombre}
+            cantidadFotos={propiedad.fotos.length}
           />
         </div>
       )}
