@@ -4,6 +4,9 @@ import PanelConfiguracionPrecios, {
   type OpcionTipoDolar,
 } from "./_components/PanelConfiguracionPrecios";
 import { serializarPropiedad } from "@/lib/serializers";
+import { IMAGENES_HERO_FALLBACK } from "@/lib/config";
+import { clasificarFoto } from "@/lib/fotos/etiquetas";
+import { obtenerPathsProtegidos } from "@/lib/fotos/rutas";
 import { requireAdmin } from "@/lib/auth/perfil";
 import { obtenerConfiguracionPrecios } from "@/lib/configuracion-precios";
 import {
@@ -19,13 +22,17 @@ const CLASES_BOTON_NUEVA_PROPIEDAD =
 
 export default async function PropiedadesPage() {
   await requireAdmin();
-  const [propiedades, configuracion, cotizaciones] = await Promise.all([
-    prisma.propiedad.findMany({
-      orderBy: { orden: "asc" },
-    }),
-    obtenerConfiguracionPrecios(),
-    obtenerCotizaciones(),
-  ]);
+  const [propiedades, imagenes, configuracion, cotizaciones] =
+    await Promise.all([
+      prisma.propiedad.findMany({
+        orderBy: { orden: "asc" },
+      }),
+      prisma.imagen.findMany({
+        select: { url: true },
+      }),
+      obtenerConfiguracionPrecios(),
+      obtenerCotizaciones(),
+    ]);
 
   // Fechas, montos y etiquetas se formatean en el servidor: al cliente solo llegan strings
   const cotizacionesPorTipo = new Map<TipoDolar, CotizacionDolar>();
@@ -68,6 +75,13 @@ export default async function PropiedadesPage() {
     };
   });
 
+  // GaleriaFotos necesita las etiquetas de cada foto (compartida, en galería,
+  // protegida). Se calculan acá con el mismo helper puro que usa /admin/fotos.
+  const protegidos = obtenerPathsProtegidos(
+    IMAGENES_HERO_FALLBACK.map((imagen) => imagen.url)
+  );
+  const urlsImagenes = imagenes.map((imagen) => imagen.url);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -107,6 +121,16 @@ export default async function PropiedadesPage() {
             <PropiedadCard
               key={propiedad.id}
               propiedad={serializarPropiedad(propiedad)}
+              fotosConEtiquetas={propiedad.fotos.map((url) => ({
+                url,
+                etiquetas: clasificarFoto({
+                  url,
+                  propiedadIdActual: propiedad.id,
+                  propiedades,
+                  urlsImagenes,
+                  protegidos,
+                }),
+              }))}
             />
           ))}
           <div className="flex justify-center">

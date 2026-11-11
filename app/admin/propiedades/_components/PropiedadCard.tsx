@@ -6,6 +6,9 @@ import AtributoEditable from "./AtributoEditable";
 import BotonEliminarPropiedad from "./BotonEliminarPropiedad";
 import ConfirmDialog from "./ConfirmDialog";
 import InterruptorActiva from "./InterruptorActiva";
+import SeccionFotosPropiedad, {
+  type FotoConEtiquetas,
+} from "./SeccionFotosPropiedad";
 import { updatePropiedadAtributo } from "@/lib/actions/propiedades";
 import { esCampoUsd } from "@/lib/precios/validar";
 
@@ -21,6 +24,7 @@ const fechaHoraFmt = new Intl.DateTimeFormat("es-AR", {
 
 interface PropiedadCardProps {
   propiedad: PropiedadSerializer;
+  fotosConEtiquetas: FotoConEtiquetas[];
 }
 
 type TipoAtributo = "text" | "number" | "decimal" | "boolean" | "array" | "usd";
@@ -118,7 +122,10 @@ const AVISOS_AL_VACIAR: Record<string, string> = {
     "Al dejarlo sin precio, en temporada BAJA se usará el precio de 1 noche para estadías de 2 o más noches (la promo de 7 o más noches se aplica sobre ese valor).",
 };
 
-export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
+export default function PropiedadCard({
+  propiedad,
+  fotosConEtiquetas,
+}: PropiedadCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
@@ -329,6 +336,12 @@ export default function PropiedadCard({ propiedad }: PropiedadCardProps) {
               ))}
             </dl>
           </section>
+
+          <SeccionFotosPropiedad
+            propiedadId={propiedad.id}
+            nombreCabana={propiedad.nombre}
+            fotos={fotosConEtiquetas}
+          />
 
           <BotonEliminarPropiedad
             propiedadId={propiedad.id}
