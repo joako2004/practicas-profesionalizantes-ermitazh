@@ -9,12 +9,17 @@ import {
 } from "react";
 
 import { crearPropiedadNueva } from "@/lib/actions/crear-propiedad";
+import { subirFotoDeCabana } from "@/lib/fotos/subir-archivo";
 import {
   LIMITES_PROPIEDAD,
   validarNuevaPropiedad,
 } from "@/lib/propiedades/validar-nueva";
 
 import CampoServicios from "./CampoServicios";
+import SelectorFotosNuevaPropiedad, {
+  liberarMiniaturas,
+  type FotoSeleccionada,
+} from "./SelectorFotosNuevaPropiedad";
 
 type CampoPrecio =
   | "precioNocheAltaUsd"
@@ -54,6 +59,11 @@ interface FilaPrecio {
   campoAlta: CampoPrecio;
   campoBaja: CampoPrecio;
   placeholder: string;
+}
+
+interface ResultadoSubidaFotos {
+  subidas: number;
+  fallidas: number;
 }
 
 const PRECIOS_INICIALES: PreciosFormulario = {
@@ -184,6 +194,10 @@ export default function FormularioNuevaPropiedad() {
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
   const [creada, setCreada] = useState<{ id: string; nombre: string } | null>(null);
+  const [fotos, setFotos] = useState<FotoSeleccionada[]>([]);
+  const [progresoFotos, setProgresoFotos] = useState<string | null>(null);
+  const [resultadoFotos, setResultadoFotos] =
+    useState<ResultadoSubidaFotos | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function limpiarError(campo: string): void {
@@ -232,6 +246,8 @@ export default function FormularioNuevaPropiedad() {
     if (isPending) return;
 
     setErrorGeneral(null);
+    setProgresoFotos(null);
+    setResultadoFotos(null);
 
     const entrada = construirEntrada();
     const validacion = validarNuevaPropiedad(entrada);
@@ -255,22 +271,51 @@ export default function FormularioNuevaPropiedad() {
     startTransition(async () => {
       const resultado = await crearPropiedadNueva(entrada);
 
-      if (resultado.success) {
-        setCreada({ id: resultado.id, nombre: resultado.nombre });
+      if (!resultado.success) {
+        // Las fotos elegidas se conservan para reintentar el alta.
+        if (resultado.errores) {
+          setErrores(resultado.errores);
+          setErrorGeneral(resultado.errores.general ?? null);
+          enfocarPrimerError(resultado.errores);
+        } else {
+          setErrorGeneral(resultado.error);
+        }
         return;
       }
 
-      if (resultado.errores) {
-        setErrores(resultado.errores);
-        setErrorGeneral(resultado.errores.general ?? null);
-        enfocarPrimerError(resultado.errores);
-      } else {
-        setErrorGeneral(resultado.error);
+      if (fotos.length > 0) {
+        let subidas = 0;
+        let fallidas = 0;
+
+        // Secuencial a propósito: una subida por vez, sin saturar el almacén.
+        for (let indice = 0; indice < fotos.length; indice += 1) {
+          setProgresoFotos(
+            `Subiendo foto ${indice + 1} de ${fotos.length}…`
+          );
+
+          const subida = await subirFotoDeCabana(
+            resultado.id,
+            fotos[indice].archivo
+          );
+
+          if (subida.ok) {
+            subidas += 1;
+          } else {
+            fallidas += 1;
+          }
+        }
+
+        setProgresoFotos(null);
+        setResultadoFotos({ subidas, fallidas });
       }
+
+      setCreada({ id: resultado.id, nombre: resultado.nombre });
     });
   }
 
   function reiniciar(): void {
+    liberarMiniaturas(fotos);
+    setFotos([]);
     setNombre("");
     setDescripcion("");
     setCapacidad("");
@@ -281,6 +326,8 @@ export default function FormularioNuevaPropiedad() {
     setErrores({});
     setErrorGeneral(null);
     setCreada(null);
+    setProgresoFotos(null);
+    setResultadoFotos(null);
   }
 
   return (
@@ -299,6 +346,34 @@ export default function FormularioNuevaPropiedad() {
             <p className="mt-1 text-sm leading-relaxed text-dark-pine/75">
               Ya forma parte del catálogo. Podés cargar sus fotos o volver al listado.
             </p>
+
+            {resultadoFotos ? (
+              resultadoFotos.fallidas === 0 ? (
+                <p className="mt-2 text-sm font-medium text-dark-pine">
+                  {resultadoFotos.subidas === 1
+                    ? "Se subió 1 foto."
+                    : `Se subieron ${resultadoFotos.subidas} fotos.`}
+                </p>
+              ) : (
+                <div
+                  role="alert"
+                  className="mt-3 rounded-md border border-danger-border bg-danger-bg px-4 py-3 text-sm text-danger"
+                >
+                  <p>
+                    {resultadoFotos.fallidas === 1
+                      ? "La cabaña se creó, pero 1 foto no se pudo subir."
+                      : `La cabaña se creó, pero ${resultadoFotos.fallidas} fotos no se pudieron subir.`}
+                  </p>
+                  {resultadoFotos.subidas > 0 ? (
+                    <p className="mt-1">
+                      {resultadoFotos.subidas === 1
+                        ? "Se subió 1 foto."
+                        : `Se subieron ${resultadoFotos.subidas} fotos.`}
+                    </p>
+                  ) : null}
+                </div>
+              )
+            ) : null}
           </div>
 
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
@@ -314,7 +389,11 @@ export default function FormularioNuevaPropiedad() {
           </div>
         </div>
       ) : (
-        <form onSubmit={manejarEnvio} noValidate className="space-y-4 sm:space-y-5">
+        <form onSubmit={manejarEnvio} noValidate aria-busy={isPending}>
+          <fieldset
+            disabled={isPending}
+            className="min-w-0 space-y-4 sm:space-y-5"
+          >
           <section
             aria-labelledby="propiedad-info-general"
             className="rounded-md border border-[color:var(--form-panel-border)] bg-[color:var(--form-panel-bg)] p-4 sm:p-5"
@@ -465,6 +544,24 @@ export default function FormularioNuevaPropiedad() {
                   error={errores.servicios}
                 />
               </div>
+            </div>
+          </section>
+
+          <section
+            aria-labelledby="propiedad-fotos"
+            className="rounded-md border border-[color:var(--form-panel-border)] bg-[color:var(--form-panel-bg)] p-4 sm:p-5"
+          >
+            <h4 id="propiedad-fotos" className={CLASE_TITULO_SECCION}>
+              <span aria-hidden="true" className={CLASE_BARRA_SECCION} />
+              Fotos
+            </h4>
+
+            <div className="mt-4">
+              <SelectorFotosNuevaPropiedad
+                fotos={fotos}
+                onChange={setFotos}
+                deshabilitado={isPending}
+              />
             </div>
           </section>
 
@@ -650,6 +747,16 @@ export default function FormularioNuevaPropiedad() {
             </div>
           ) : null}
 
+          {progresoFotos ? (
+            <p
+              role="status"
+              aria-live="polite"
+              className="rounded-md border border-[color:var(--form-panel-border)] bg-white px-4 py-3 text-sm text-dark-pine"
+            >
+              {progresoFotos}
+            </p>
+          ) : null}
+
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <Link href="/admin/propiedades" className={CLASE_BOTON_SECUNDARIO}>
               Cancelar
@@ -659,9 +766,14 @@ export default function FormularioNuevaPropiedad() {
               disabled={isPending}
               className={CLASE_BOTON_PRIMARIO}
             >
-              {isPending ? "Creando…" : "Crear propiedad"}
+              {isPending
+                ? progresoFotos
+                  ? "Subiendo fotos…"
+                  : "Creando…"
+                : "Crear propiedad"}
             </button>
           </div>
+          </fieldset>
         </form>
       )}
     </div>
