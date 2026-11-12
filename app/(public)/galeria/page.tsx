@@ -21,18 +21,20 @@ export default async function GaleriaPage() {
   const todasLasFotos = obtenerTodasLasFotos(albumes);
 
   return (
-    <section className="relative min-h-screen overflow-hidden">
+    <section className="relative min-h-screen">
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${imagenFondo})` }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/[0.8] via-[var(--color-bg)]/[0.58] to-[var(--color-bg)]/[0.3]"
-      />
+        className="pointer-events-none absolute inset-0 [clip-path:inset(0)]"
+      >
+        {/* Blur actual: blur-md. Usar blur-sm para una imagen más nítida o blur-lg para suavizarla más. */}
+        <div
+          className="fixed inset-0 h-dvh w-screen scale-105 bg-cover bg-center blur-md motion-reduce:absolute motion-reduce:inset-0 motion-reduce:h-full motion-reduce:w-full motion-reduce:scale-100"
+          style={{ backgroundImage: `url(${imagenFondo})` }}
+        />
+        <div className="absolute inset-0 bg-[var(--color-bg)]/[0.2]" />
+      </div>
 
-      <div className="relative pt-24 pb-16 md:pb-24">
+      <div className="relative z-10 pt-24 pb-16 md:pb-24">
         <div className="mx-auto max-w-7xl px-6">
           <header className="mb-10 flex flex-col gap-4 md:mb-14 md:flex-row md:items-start md:justify-between">
             <div>
