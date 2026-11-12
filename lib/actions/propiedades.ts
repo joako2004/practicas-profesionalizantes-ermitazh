@@ -178,14 +178,13 @@ export async function updatePropiedadAtributo(
     });
 
     revalidatePath("/admin/propiedades");
+    revalidatePath("/admin/fotos");
+    revalidatePath("/admin/disponibilidad");
     revalidatePath("/");
+    revalidatePath("/pre-reserva");
     revalidatePath("/cabanas/[id]", "page");
-
-    if (campo === "activa") {
-      revalidatePath("/pre-reserva");
-      revalidatePath("/admin/disponibilidad");
-      revalidatePath("/admin/fotos");
-    }
+    revalidatePath("/galeria");
+    revalidatePath("/galeria/[album]", "page");
 
     return {
       success: true,
@@ -207,99 +206,5 @@ export async function updatePropiedadAtributo(
   } catch (error) {
     console.error("Error al actualizar propiedad:", error);
     return { success: false, error: "Error interno del servidor al actualizar la propiedad" };
-  }
-}
-
-export async function crearPropiedad(data: {
-  nombre: string;
-  descripcion: string;
-  capacidad: number;
-  servicios?: string[];
-}): Promise<UpdatePropiedadResult> {
-  if (!(await esAdmin())) {
-    return { success: false, error: "No autorizado." };
-  }
-  try {
-    if (!data.nombre?.trim()) {
-      return { success: false, error: "El nombre es obligatorio" };
-    }
-    if (!data.descripcion?.trim()) {
-      return { success: false, error: "La descripción es obligatoria" };
-    }
-    if (!Number.isInteger(data.capacidad) || data.capacidad <= 0) {
-      return { success: false, error: "La capacidad debe ser un número entero mayor a 0" };
-    }
-
-    const propiedad = await prisma.propiedad.create({
-      data: {
-        nombre: data.nombre.trim(),
-        descripcion: data.descripcion.trim(),
-        capacidad: data.capacidad,
-        fotos: [],
-        servicios: data.servicios?.map((s) => s.trim()).filter(Boolean) || [],
-        activa: true,
-      },
-    });
-
-    revalidatePath("/admin/propiedades");
-
-    return {
-      success: true,
-      propiedad: {
-        id: propiedad.id,
-        nombre: propiedad.nombre,
-        descripcion: propiedad.descripcion,
-        capacidad: propiedad.capacidad,
-        promoSemanalAlta: Number(propiedad.promoSemanalAlta) ?? 0,
-        promoSemanalBaja: Number(propiedad.promoSemanalBaja) ?? 0,
-        precioNocheAltaUsd: decimalANumero(propiedad.precioNocheAltaUsd),
-        precioNocheBajaUsd: decimalANumero(propiedad.precioNocheBajaUsd),
-        precio2a6AltaUsd: decimalANumero(propiedad.precio2a6AltaUsd),
-        precio2a6BajaUsd: decimalANumero(propiedad.precio2a6BajaUsd),
-        servicios: propiedad.servicios,
-        activa: propiedad.activa,
-      },
-    };
-  } catch (error) {
-    console.error("Error al crear propiedad:", error);
-    return { success: false, error: "Error interno del servidor al crear la propiedad" };
-  }
-}
-
-export async function eliminarPropiedad(propiedadId: string): Promise<UpdatePropiedadResult> {
-  if (!(await esAdmin())) {
-    return { success: false, error: "No autorizado." };
-  }
-  try {
-    const propiedad = await prisma.propiedad.findUnique({
-      where: { id: propiedadId },
-      include: {
-        reservas: {
-          where: {
-            estado: { not: "CANCELADA" },
-          },
-        },
-      },
-    });
-
-    if (!propiedad) {
-      return { success: false, error: "Propiedad no encontrada" };
-    }
-
-    if (propiedad.reservas.length > 0) {
-      return {
-        success: false,
-        error: `No se puede eliminar: tiene ${propiedad.reservas.length} reserva(s) activa(s)`,
-      };
-    }
-
-    await prisma.propiedad.delete({ where: { id: propiedadId } });
-
-    revalidatePath("/admin/propiedades");
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error al eliminar propiedad:", error);
-    return { success: false, error: "Error interno del servidor al eliminar la propiedad" };
   }
 }
