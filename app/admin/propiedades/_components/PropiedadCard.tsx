@@ -245,7 +245,6 @@ export default function PropiedadCard({
                   </dt>
                   <dd>
                     <AtributoEditable
-                      propiedadId={propiedad.id}
                       atributo={key}
                       tipo={tipo}
                       valorActual={propiedad[key]}
@@ -286,7 +285,6 @@ export default function PropiedadCard({
                           Temporada alta
                         </span>
                         <AtributoEditable
-                          propiedadId={propiedad.id}
                           atributo={fila.alta.key}
                           tipo={fila.alta.tipo}
                           valorActual={propiedad[fila.alta.key]}
@@ -299,7 +297,6 @@ export default function PropiedadCard({
                           Temporada baja
                         </span>
                         <AtributoEditable
-                          propiedadId={propiedad.id}
                           atributo={fila.baja.key}
                           tipo={fila.baja.tipo}
                           valorActual={propiedad[fila.baja.key]}

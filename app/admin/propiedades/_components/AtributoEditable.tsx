@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 
 interface AtributoEditableProps {
-  propiedadId: string;
   atributo: string;
   tipo: "text" | "number" | "decimal" | "boolean" | "array" | "usd";
   valorActual: unknown;
@@ -15,7 +14,6 @@ interface AtributoEditableProps {
 }
 
 export default function AtributoEditable({
-  propiedadId,
   atributo,
   tipo,
   valorActual,

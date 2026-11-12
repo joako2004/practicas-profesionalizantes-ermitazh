@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 import { esAdmin } from "@/lib/auth/perfil";
 import { esCampoUsd, validarPrecioUsd } from "@/lib/precios/validar";
 
