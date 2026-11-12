@@ -9,8 +9,7 @@ import {
   type KeyboardEvent,
 } from "react";
 
-import { prepararSubidaFoto, registrarFoto } from "@/lib/actions/fotos";
-import { BUCKET_FOTOS, MAX_ARCHIVOS_POR_TANDA } from "@/lib/fotos/rutas";
+import { MAX_ARCHIVOS_POR_TANDA } from "@/lib/fotos/rutas";
 import {
   actualizarEstado,
   claveArchivo,
@@ -23,13 +22,12 @@ import {
   type EstadoSubida,
   type ItemSubida,
 } from "@/lib/fotos/subida";
-import { createClient } from "@/lib/supabase/client";
+import {
+  MENSAJE_ERROR_INESPERADO,
+  subirFotoDeCabana,
+} from "@/lib/fotos/subir-archivo";
 
 const ID_PANEL = "subida-fotos-panel";
-
-const MENSAJE_ERROR_SUBIDA = "No se pudo subir el archivo. Probá de nuevo.";
-const MENSAJE_ERROR_INESPERADO =
-  "Ocurrió un error inesperado. Probá de nuevo.";
 
 interface SubidaFotosProps {
   propiedadId: string;
@@ -250,49 +248,14 @@ export default function SubidaFotos({ propiedadId }: SubidaFotosProps) {
       reemplazarItems(siguiente);
 
       try {
-        const preparada = await prepararSubidaFoto(propiedadId, {
-          nombre: item.nombre,
-          tipo: item.tipo,
-          tamano: item.tamano,
-        });
+        const resultado = await subirFotoDeCabana(propiedadId, archivo);
 
-        if (!preparada.success) {
+        if (!resultado.ok) {
           siguiente = actualizarEstado(
             siguiente,
             item.clave,
             "error",
-            preparada.error
-          );
-          reemplazarItems(siguiente);
-          continue;
-        }
-
-        const supabase = createClient();
-        const { error } = await supabase.storage
-          .from(BUCKET_FOTOS)
-          .uploadToSignedUrl(preparada.path, preparada.token, archivo, {
-            contentType: archivo.type,
-          });
-
-        if (error) {
-          siguiente = actualizarEstado(
-            siguiente,
-            item.clave,
-            "error",
-            MENSAJE_ERROR_SUBIDA
-          );
-          reemplazarItems(siguiente);
-          continue;
-        }
-
-        const registrada = await registrarFoto(propiedadId, preparada.path);
-
-        if (!registrada.success) {
-          siguiente = actualizarEstado(
-            siguiente,
-            item.clave,
-            "error",
-            registrada.error
+            resultado.error
           );
           reemplazarItems(siguiente);
           continue;
