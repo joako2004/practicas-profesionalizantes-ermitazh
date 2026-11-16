@@ -1,16 +1,27 @@
-# .github/workflows/keep-supabase-alive.yml
 name: Keep Supabase Alive
+
 on:
   schedule:
-    - cron: '0 12 */5 * *'  # cada 5 días
-  workflow_dispatch:  # para poder correrlo manual también
+    - cron: "0 12 */3 * *"
+  workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase
+      - name: Consulta liviana a Supabase (función keep_alive)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/propiedades?select=id&limit=1" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          status=$(curl --silent --show-error --max-time 30 --output /dev/null --write-out "%{http_code}" \
+            -X POST "$SUPABASE_URL/rest/v1/rpc/keep_alive" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+          echo "HTTP status: $status"
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            echo "La consulta falló"
+            exit 1
+          fi
